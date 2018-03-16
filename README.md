@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/scala/scala-collection-compat.svg?branch=master)](https://travis-ci.org/scala/scala-collection-compat)
+
 Scala 2.13 Collection Compatibility Library
 ===========================================
 
