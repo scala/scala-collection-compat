@@ -1,0 +1,15 @@
+/.settings/
+/.idea/
+target/
+*.log
+*.iml
+/\.target/
+/\.cache
+/\.project
+/\.classpath
+.history
+.DS_Store
+/tmp/
+/bin/
+/.cache-main
+/.cache-tests
