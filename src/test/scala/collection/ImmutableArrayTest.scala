@@ -1,5 +1,6 @@
-import org.junit.Assert
-import org.junit.Test
+package collection
+
+import org.junit.{Assert, Test}
 
 import scala.collection.immutable.ImmutableArray
 
