@@ -94,9 +94,9 @@ object ImmutableArray {
   final class ofRef[T <: AnyRef](val unsafeArray: Array[T]) extends ImmutableArray[T] with Serializable {
     lazy val elemTag = ClassTag[T](unsafeArray.getClass.getComponentType)
     def length: Int = unsafeArray.length
-    def apply(index: Int): T = unsafeArray(index).asInstanceOf[T]
+    def apply(index: Int): T = unsafeArray(index)
     def update(index: Int, elem: T) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofRef[_] => Arrays.equals(unsafeArray.asInstanceOf[Array[AnyRef]], that.unsafeArray.asInstanceOf[Array[AnyRef]])
       case _ => super.equals(that)
@@ -108,7 +108,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Byte = unsafeArray(index)
     def update(index: Int, elem: Byte) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedBytesHash(unsafeArray)
+    override def hashCode = MurmurHash3.bytesHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofByte => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -120,7 +120,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Short = unsafeArray(index)
     def update(index: Int, elem: Short) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofShort => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -132,7 +132,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Char = unsafeArray(index)
     def update(index: Int, elem: Char) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofChar => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -144,7 +144,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Int = unsafeArray(index)
     def update(index: Int, elem: Int) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofInt => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -156,7 +156,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Long = unsafeArray(index)
     def update(index: Int, elem: Long) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofLong => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -168,7 +168,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Float = unsafeArray(index)
     def update(index: Int, elem: Float) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofFloat => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -180,7 +180,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Double = unsafeArray(index)
     def update(index: Int, elem: Double) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofDouble => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -192,7 +192,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Boolean = unsafeArray(index)
     def update(index: Int, elem: Boolean) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofBoolean => Arrays.equals(unsafeArray, that.unsafeArray)
       case _ => super.equals(that)
@@ -204,7 +204,7 @@ object ImmutableArray {
     def length: Int = unsafeArray.length
     def apply(index: Int): Unit = unsafeArray(index)
     def update(index: Int, elem: Unit) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.wrappedArrayHash(unsafeArray)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofUnit => unsafeArray.length == that.unsafeArray.length
       case _ => super.equals(that)
