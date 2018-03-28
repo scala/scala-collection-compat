@@ -23,6 +23,9 @@ package object compat {
   implicit def sortedMapFactoryToCBF[K : Ordering, V, CC[A, B] <: SortedMap[A, B] with SortedMapLike[A, B, CC[A, B]]](fact: SortedMapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] =
     simpleCBF(fact.newBuilder[K, V])
 
+  implicit def bitSetFactoryToCBF(fact: BitSetFactory[BitSet]): CanBuildFrom[Any, Int, BitSet] =
+    simpleCBF(fact.newBuilder)
+
   implicit def immutableBitSetFactoryToCBF(fact: BitSetFactory[immutable.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] =
     simpleCBF(fact.newBuilder)
 
