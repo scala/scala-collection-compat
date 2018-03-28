@@ -96,10 +96,21 @@ case class Collectionstrawman_v0(index: SemanticdbIndex)
         ctx.replaceTree(t, q"$buffer ++= $collection".syntax)
     }.asPatch
 
+  val streamAppend = SymbolMatcher.normalized(
+    Symbol("_root_.scala.collection.immutable.Stream.append.")
+  )
+
+  def replaceStreamAppend(ctx: RuleCtx): Patch =
+    ctx.tree.collect {
+      case streamAppend(t: Name) =>
+        ctx.replaceTree(t, "lazyAppendAll")
+    }.asPatch
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
-      replaceCopyToBuffer(ctx)
+      replaceCopyToBuffer(ctx) +
+      replaceStreamAppend(ctx)
   }
 }

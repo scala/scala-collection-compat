@@ -58,8 +58,8 @@ lazy val `input-2_13` = project.in(file("2.13") / "input")
 
 lazy val `output-2_13` = project.in(file("2.13") / "output")
   .settings(
-    resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/",
-    scalaVersion := "2.13.0-pre-47ffa9c-SNAPSHOT"
+    resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+    scalaVersion := "2.13.0-pre-c577876"
   )
 
 lazy val `tests-2_13` = project.in(file("2.13") / "tests")
