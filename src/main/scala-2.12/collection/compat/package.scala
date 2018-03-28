@@ -8,19 +8,25 @@ import scala.reflect.ClassTag
 package object compat {
   import scala.collection.compat_impl._
 
-  implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](fact: GenericCompanion[CC]): CanBuildFrom[Nothing, A, CC[A]] =
+  implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
     simpleCBF(fact.newBuilder[A])
 
-  implicit def arrayCompanionToCBF[A : ClassTag](fact: Array.type): CanBuildFrom[Nothing, A, Array[A]] =
+  implicit def sortedSetCompanionToCBF[A : Ordering, CC[X] <: SortedSet[X] with SortedSetLike[X, CC[X]]](fact: SortedSetFactory[CC]): CanBuildFrom[Any, A, CC[A]] =
+    simpleCBF(fact.newBuilder[A])
+
+  implicit def arrayCompanionToCBF[A : ClassTag](fact: Array.type): CanBuildFrom[Any, A, Array[A]] =
     simpleCBF(Array.newBuilder[A])
 
-  implicit def mapFactoryToCBF[K, V, CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](fact: MapFactory[CC]): CanBuildFrom[Nothing, (K, V), CC[K, V]] =
+  implicit def mapFactoryToCBF[K, V, CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](fact: MapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] =
     simpleCBF(fact.newBuilder[K, V])
 
-  implicit def immutableBitSetFactoryToCBF(fact: BitSetFactory[immutable.BitSet]): CanBuildFrom[Nothing, Int, ImmutableBitSetCC[Int]] =
+  implicit def sortedMapFactoryToCBF[K : Ordering, V, CC[A, B] <: SortedMap[A, B] with SortedMapLike[A, B, CC[A, B]]](fact: SortedMapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] =
+    simpleCBF(fact.newBuilder[K, V])
+
+  implicit def immutableBitSetFactoryToCBF(fact: BitSetFactory[immutable.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] =
     simpleCBF(fact.newBuilder)
 
-  implicit def mutableBitSetFactoryToCBF(fact: BitSetFactory[mutable.BitSet]): CanBuildFrom[Nothing, Int, MutableBitSetCC[Int]] =
+  implicit def mutableBitSetFactoryToCBF(fact: BitSetFactory[mutable.BitSet]): CanBuildFrom[Any, Int, MutableBitSetCC[Int]] =
     simpleCBF(fact.newBuilder)
 
   implicit class IterableFactoryExtensionMethods[CC[X] <: GenTraversable[X]](private val fact: GenericCompanion[CC]) {

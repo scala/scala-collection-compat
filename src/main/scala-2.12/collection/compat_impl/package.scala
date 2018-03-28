@@ -5,8 +5,8 @@ import scala.collection.mutable.Builder
 import scala.reflect.ClassTag
 
 package object compat_impl {
-  def simpleCBF[A, C](f: => Builder[A, C]): CanBuildFrom[Nothing, A, C] = new CanBuildFrom[Nothing, A, C] {
-    def apply(from: Nothing): Builder[A, C] = apply()
+  def simpleCBF[A, C](f: => Builder[A, C]): CanBuildFrom[Any, A, C] = new CanBuildFrom[Any, A, C] {
+    def apply(from: Any): Builder[A, C] = apply()
     def apply(): Builder[A, C] = f
   }
 
