@@ -41,6 +41,10 @@ package object compat {
     def fromSpecific(source: TraversableOnce[Int]): C = fact.apply(source.toSeq: _*)
   }
 
+  implicit class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
+    def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
+  }
+
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
 }
