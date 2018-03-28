@@ -48,6 +48,11 @@ package object compat {
     def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
   }
 
+  implicit class WithParens[A](private val as: IterableLike[A, _]) extends AnyVal {
+    def iterator(): Iterator[A] = as.iterator
+
+  }
+
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
 }
