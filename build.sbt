@@ -8,10 +8,10 @@ resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-inte
 
 unmanagedSourceDirectories in Compile += (
   if(scalaVersion.value.startsWith("2.13.")) (sourceDirectory in Compile).value / "scala-2.13"
-  else (sourceDirectory in Compile).value / "scala-2.11_2.12"
+  else (sourceDirectory in Compile).value / "scala-2.10_2.12"
 )
 
-crossScalaVersions := Seq("2.12.5", "2.11.12", "2.13.0-M4-pre-20d3c21")
+crossScalaVersions := Seq("2.10.7", "2.12.5", "2.11.12", "2.13.0-M4-pre-20d3c21")
 
 scalaVersion := crossScalaVersions.value.head
 
