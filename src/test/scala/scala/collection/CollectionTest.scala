@@ -1,12 +1,10 @@
-package collection
+package scala.collection
 
-import java.util
-
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
-import scala.collection.immutable.BitSet
 import scala.collection.compat._
+import scala.collection.immutable.{BitSet => BS} // importing BitSet doesn't work, scala.collection.BitSet shadows it
 
 class CollectionTest {
   @Test
@@ -20,9 +18,9 @@ class CollectionTest {
     val aT: Array[Int] = a
     assertEquals(Vector(1,2,3), a.toVector)
 
-    val b = xs.to(BitSet) // we can fake a type constructor for the 2 standard BitSet types
+    val b = xs.to(BS) // we can fake a type constructor for the 2 standard BitSet types
     val bT: BitSet = b
-    assertEquals(BitSet(1,2,3), b)
+    assertEquals(BS(1,2,3), b)
 
     val ys = List(1 -> "a", 2 -> "b")
     val m = ys.to(Map)
@@ -39,9 +37,9 @@ class CollectionTest {
     val vT: Vector[Int] = v
     assertEquals(Vector(1,2,3), v)
 
-    val b = BitSet.fromSpecific(xs)
-    val bT: BitSet = b
-    assertEquals(BitSet(1,2,3), b)
+    val b = BS.fromSpecific(xs)
+    val bT: BS = b
+    assertEquals(BS(1,2,3), b)
 
     val ys = List(1 -> "a", 2 -> "b")
     val m = Map.from(ys)

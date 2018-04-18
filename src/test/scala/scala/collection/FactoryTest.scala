@@ -1,8 +1,7 @@
-package collection
+package scala.collection
 
 import org.junit.{Assert, Test}
 
-import scala.collection.{BitSet, Factory, Iterable, immutable, mutable}
 import scala.collection.compat._
 
 class FactoryTest {

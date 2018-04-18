@@ -2,9 +2,9 @@ package scala.collection
 
 import org.junit.Test
 
-import scala.collection.mutable.{ArrayBuffer, Builder, ListBuffer}
-import scala.collection.immutable.{HashMap, List, TreeMap, TreeSet}
 import scala.collection.compat._
+import scala.collection.immutable.{HashMap, List, TreeMap, TreeSet}
+import scala.collection.mutable.{ArrayBuffer, Builder, ListBuffer}
 
 // Tests copied from the 2.13 scala-library
 class BuildFromTest {
