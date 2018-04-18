@@ -1,7 +1,7 @@
-package scala.collection.generic
+package test.scala.collection.generic
 
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
 import scala.collection.compat._
 import scala.collection.{immutable => i, mutable => m}

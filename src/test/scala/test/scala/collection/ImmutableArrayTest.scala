@@ -1,4 +1,4 @@
-package scala.collection
+package test.scala.collection
 
 import org.junit.{Assert, Test}
 
