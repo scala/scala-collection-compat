@@ -40,6 +40,7 @@ class SortedTest {
       val s3 = st.rangeUntil(x)
       assertEquals(s3: m.SortedSet[Int], st.until(x))
     }
+    /* 2.11 doesn't have a mutable.SortedMap
     val mp = m.SortedMap("" -> 0, "ds" -> -3, "-??" -> 13, "Df" -> 33, "d!" -> -32)
     for (x <- List("", "-", "@", "aa", "D", "d")) {
       val m1 = mp.rangeFrom(x)
@@ -49,5 +50,6 @@ class SortedTest {
       val m3 = mp.rangeUntil(x)
       assertEquals(m3: m.SortedMap[String, Int], mp.until(x))
     }
+    */
   }
 }
