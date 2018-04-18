@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 /** The collection compatibility API */
 package object compat {
-  import scala.collection.compat_impl._
+  import CompatImpl._
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
     simpleCBF(fact.newBuilder[A])
