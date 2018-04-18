@@ -11,7 +11,7 @@ unmanagedSourceDirectories in Compile += (
   else (sourceDirectory in Compile).value / "scala-2.11_2.12"
 )
 
-crossScalaVersions := Seq("2.12.5", "2.13.0-M4-pre-20d3c21", "2.11.12")
+crossScalaVersions := Seq("2.12.5", "2.13.0-pre-b11db01", "2.11.12")
 
 scalaVersion := crossScalaVersions.value.head
 
