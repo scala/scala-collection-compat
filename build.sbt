@@ -4,10 +4,14 @@ name := "scala-collection-compat"
 
 version := "0.1-SNAPSHOT"
 
-unmanagedSourceDirectories in Compile ++=
-  (if(scalaVersion.value.startsWith("2.13.")) Seq((sourceDirectory in Compile).value / "scala-2.13") else Seq())
+resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/"
 
-crossScalaVersions := Seq("2.12.4", "2.13.0-M4-pre-20d3c21")
+unmanagedSourceDirectories in Compile += (
+  if(scalaVersion.value.startsWith("2.13.")) (sourceDirectory in Compile).value / "scala-2.13"
+  else (sourceDirectory in Compile).value / "scala-2.11_2.12"
+)
+
+crossScalaVersions := Seq("2.12.5", "2.13.0-M4-pre-20d3c21", "2.11.12")
 
 scalaVersion := crossScalaVersions.value.head
 
