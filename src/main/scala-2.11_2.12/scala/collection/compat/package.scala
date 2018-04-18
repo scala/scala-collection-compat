@@ -48,6 +48,12 @@ package object compat {
     def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
   }
 
+  implicit class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T]) {
+    def rangeFrom(from: K): T = fact.from(from)
+    def rangeTo(to: K): T = fact.to(to)
+    def rangeUntil(until: K): T = fact.until(until)
+  }
+
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
 }
