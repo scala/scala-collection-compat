@@ -28,4 +28,12 @@ class FactoryTest {
     Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
   }
 
+  @Test
+  def streamFromPreservesLaziness(): Unit = {
+    var counter = 0
+    val source = Stream.continually { counter += 1; 1 }
+    val result = Stream.from(source)
+    Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
+  }
+
 }

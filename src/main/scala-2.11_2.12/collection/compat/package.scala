@@ -33,19 +33,35 @@ package object compat {
     simpleCBF(fact.newBuilder)
 
   implicit class IterableFactoryExtensionMethods[CC[X] <: GenTraversable[X]](private val fact: GenericCompanion[CC]) {
-    def from[A](source: TraversableOnce[A]): CC[A] = fact.apply(source.toSeq: _*)
+    def from[A](source: TraversableOnce[A]): CC[A] = (fact.newBuilder[A] ++= source).result()
   }
 
   implicit class MapFactoryExtensionMethods[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](private val fact: MapFactory[CC]) {
-    def from[K, V](source: TraversableOnce[(K, V)]): CC[K, V] = fact.apply(source.toSeq: _*)
+    def from[K, V](source: TraversableOnce[(K, V)]): CC[K, V] = (fact.newBuilder[K, V] ++= source).result()
+  }
+
+  implicit class SortedMapFactoryExtensionMethods[CC[A, B] <: SortedMap[A, B] with SortedMapLike[A, B, CC[A, B]]](private val fact: SortedMapFactory[CC]) extends AnyVal {
+    def from[K : Ordering, V](source: TraversableOnce[(K, V)]): CC[K, V] = (fact.newBuilder[K, V] ++= source).result()
   }
 
   implicit class BitSetFactoryExtensionMethods[C <: scala.collection.BitSet with scala.collection.BitSetLike[C]](private val fact: BitSetFactory[C]) {
-    def fromSpecific(source: TraversableOnce[Int]): C = fact.apply(source.toSeq: _*)
+    def fromSpecific(source: TraversableOnce[Int]): C = (fact.newBuilder ++= source).result()
+  }
+
+  implicit class SortedSetFactoryExtensionMethods[CC[X] <: SortedSet[X] with SortedSetLike[X, CC[X]]](private val fact: SortedSetFactory[CC]) extends AnyVal {
+    def from[A : Ordering](source: TraversableOnce[A]): CC[A] = (fact.newBuilder[A] ++= source).result()
   }
 
   implicit class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
     def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
+  }
+
+  implicit class IterableExtensionMethods[A](private val as: IterableLike[A, _]) extends AnyVal {
+    def iterator(): Iterator[A] = as.iterator
+  }
+
+  implicit class BuilderExtensionMethods[Elem, To](val builder: Builder[Elem, To]) extends AnyVal {
+    def apply(): builder.type = builder
   }
 
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it

@@ -5,7 +5,7 @@ import java.util
 import org.junit.Test
 import org.junit.Assert._
 
-import scala.collection.immutable.BitSet
+import scala.collection.immutable.{BitSet, TreeMap, TreeSet}
 import scala.collection.compat._
 
 class CollectionTest {
@@ -47,5 +47,25 @@ class CollectionTest {
     val m = Map.from(ys)
     val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
+
+    val ts = TreeSet.from(xs)
+    val tsT: TreeSet[Int] = ts
+    assertEquals(TreeSet(1, 2, 3), ts)
+
+    val tm = TreeMap.from(ys)
+    val tmT: TreeMap[Int, String] = tm
+    assertEquals(TreeMap(1 -> "a", 2 -> "b"), tm)
+  }
+
+  @Test
+  def testNewBuilder(): Unit = {
+    List.newBuilder[Int]()
+    Vector.newBuilder[String]()
+    Map.newBuilder[Int, String]()
+    BitSet.newBuilder()
+    // The following cases don’t work because the `newBuilder` method takes implicit parameters
+    // Array.newBuilder[Int]()
+    // TreeSet.newBuilder[Int]()
+    // TreeMap.newBuilder[Int, String]()
   }
 }
