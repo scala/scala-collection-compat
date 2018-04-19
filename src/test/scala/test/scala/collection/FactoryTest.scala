@@ -1,15 +1,15 @@
-package collection
+package test.scala.collection
 
 import org.junit.{Assert, Test}
 
-import scala.collection.{BitSet, Factory, Iterable, immutable, mutable}
 import scala.collection.compat._
+import scala.collection.{BitSet, Factory, immutable, mutable}
 
 class FactoryTest {
 
   implicitly[Factory[Char, String]]
   implicitly[Factory[Char, Array[Char]]]
-  implicitly[Factory[Int, BitSet]]
+  implicitly[Factory[Int, collection.BitSet]]
   implicitly[Factory[Int, mutable.BitSet]]
   implicitly[Factory[Int, immutable.BitSet]]
 

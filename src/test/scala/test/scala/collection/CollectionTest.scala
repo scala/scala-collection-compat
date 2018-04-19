@@ -1,12 +1,10 @@
-package collection
+package test.scala.collection
 
-import java.util
-
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
-import scala.collection.immutable.BitSet
 import scala.collection.compat._
+import scala.collection.immutable.BitSet
 
 class CollectionTest {
   @Test

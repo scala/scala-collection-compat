@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 /** The collection compatibility API */
 package object compat {
-  import scala.collection.compat_impl._
+  import CompatImpl._
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
     simpleCBF(fact.newBuilder[A])
@@ -46,6 +46,12 @@ package object compat {
 
   implicit class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
     def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
+  }
+
+  implicit class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T]) {
+    def rangeFrom(from: K): T = fact.from(from)
+    def rangeTo(to: K): T = fact.to(to)
+    def rangeUntil(until: K): T = fact.until(until)
   }
 
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
