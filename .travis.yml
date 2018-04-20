@@ -5,6 +5,8 @@
 #      - oracle-java8-installer
 language: scala
 jdk:
-- oraclejdk8
+  - oraclejdk8
+before_script:
+  - ./checkCLA.sh
 script:
-- sbt +test
+  - sbt +test
