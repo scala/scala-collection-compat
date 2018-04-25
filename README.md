@@ -46,5 +46,5 @@ report it as described in the
 Run the following sbt task on your project:
 
 ~~~
-> scalafix github:scala/scala-collection-compat/v0
+> scalafix github:scala/scala-collection-compat/NewCollections
 ~~~
