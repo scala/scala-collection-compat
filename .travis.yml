@@ -10,3 +10,4 @@ before_script:
   - ./checkCLA.sh
 script:
   - sbt +test
+  - cd scalafix && sbt input/compile output/compile tests/test

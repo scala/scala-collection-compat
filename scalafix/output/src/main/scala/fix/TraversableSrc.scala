@@ -1,6 +1,6 @@
 package fix
 
-object Collectionstrawman_v0_Traversable {
+object TraversableSrc {
   def foo(xs: Iterable[(Int, String)], ys: List[Int]): Unit = {
     xs.to(List)
     xs.to(Set)

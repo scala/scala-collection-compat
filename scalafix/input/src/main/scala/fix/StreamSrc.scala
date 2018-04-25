@@ -1,9 +1,9 @@
 /*
-rule = "scala:fix.Collectionstrawman_v0"
+rule = "scala:fix.Scalacollectioncompat_NewCollections"
  */
 package fix
 
-object Collectionstrawman_v0_Stream {
+object StreamSrc {
   val s = Stream(1, 2, 3)
   s.append(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: Stream.Empty
