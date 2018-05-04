@@ -4,10 +4,33 @@
 #    packages:
 #      - oracle-java8-installer
 language: scala
+scala:
+  - 2.11.12
+  - 2.12.5
+  - 2.13.0-pre-b11db01
 jdk:
   - oraclejdk8
+env:
+  - SCALAJS_VERSION=
+  - SCALAJS_VERSION=0.6.22
+  - SCALAJS_VERSION=1.0.0-M3
+matrix:
+  exclude:
+    - scala: 2.13.0-pre-b11db01
+      env: SCALAJS_VERSION=0.6.22
+    - scala: 2.13.0-pre-b11db01
+      env: SCALAJS_VERSION=1.0.0-M3
+  include:
+    - scala: 2.12.5
+      env: TEST_SCALAFIX=true
 before_script:
   - ./checkCLA.sh
 script:
-  - sbt +test
-  - cd scalafix && sbt input/compile output/compile tests/test
+  - |
+    if [[ $TEST_SCALAFIX == "true" ]]; then
+      cd scalafix && sbt input/compile output/compile tests/test
+    elif [[ $SCALAJS_VERSION == "" ]]; then
+      sbt ++$TRAVIS_SCALA_VERSION scala-collection-compat/test
+    else
+      sbt ++$TRAVIS_SCALA_VERSION scala-collection-compatJS/test
+    fi
