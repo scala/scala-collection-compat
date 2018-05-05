@@ -7,9 +7,9 @@ import scala.collection.compat._
 class StreamTest {
 
   @Test
-  def lazyAppendAll(): Unit = {
+  def lazyAppendedAll(): Unit = {
     val s = 1 #:: 2 #:: 3 #:: Stream.Empty
-    s.lazyAppendAll(List(4, 5, 6))
+    s.lazyAppendedAll(List(4, 5, 6))
   }
 
 }

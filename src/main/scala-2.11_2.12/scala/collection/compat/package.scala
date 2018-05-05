@@ -45,7 +45,7 @@ package object compat {
   }
 
   implicit class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
-    def lazyAppendAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
+    def lazyAppendedAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
   }
 
   implicit class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T]) {

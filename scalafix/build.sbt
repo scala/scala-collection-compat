@@ -23,7 +23,7 @@ lazy val input = project
 lazy val output = project
   .settings(
     resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-    scalaVersion := "2.13.0-M4-pre-20d3c21"
+    scalaVersion := "2.13.0-pre-abf21b9"
   )
 
 lazy val tests = project
