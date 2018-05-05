@@ -4,8 +4,9 @@ inThisBuild(Def.settings(
   organization := "org.scala-lang",
   version := "0.1-SNAPSHOT",
   resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  crossScalaVersions := Seq("2.12.5", "2.13.0-pre-b11db01", "2.11.12"),
-  scalaVersion := crossScalaVersions.value.head
+  crossScalaVersions := Seq("2.12.6", "2.13.0-pre-abf21b9", "2.11.12"),
+  scalaVersion := crossScalaVersions.value.head,
+  scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions")
 ))
 
 lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)

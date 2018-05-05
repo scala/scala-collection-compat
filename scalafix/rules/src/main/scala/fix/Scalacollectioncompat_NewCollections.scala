@@ -103,7 +103,7 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
   def replaceStreamAppend(ctx: RuleCtx): Patch =
     ctx.tree.collect {
       case streamAppend(t: Name) =>
-        ctx.replaceTree(t, "lazyAppendAll")
+        ctx.replaceTree(t, "lazyAppendedAll")
     }.asPatch
 
   override def fix(ctx: RuleCtx): Patch = {
