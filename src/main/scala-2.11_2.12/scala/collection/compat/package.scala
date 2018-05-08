@@ -54,6 +54,15 @@ package object compat {
     def rangeUntil(until: K): T = fact.until(until)
   }
 
+  implicit class TraversableOnceExtensionMethods[C <: TraversableOnce[_]](private val t: C) {
+    def knownSize: Int =
+      if(t.hasDefiniteSize) t.size else -1
+  }
+
+  implicit class TraversableExtensionMethods[C <: Traversable[_]](private val t: C) {
+    def iterableFactory: GenericCompanion[Traversable] = t.companion
+  }
+
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
 }
