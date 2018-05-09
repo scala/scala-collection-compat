@@ -1,20 +1,21 @@
 import sbtcrossproject.{crossProject, CrossType}
+import ScalaModulePlugin._
 
-inThisBuild(Def.settings(
-  organization := "org.scala-lang",
-  version := "0.1-SNAPSHOT",
+inThisBuild(Seq(
   resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  crossScalaVersions := Seq("2.12.6", "2.13.0-pre-abf21b9", "2.11.12"),
-  scalaVersion := crossScalaVersions.value.head,
-  scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions")
+  crossScalaVersions := Seq("2.12.6", "2.13.0-pre-abf21b9", "2.11.12")
 ))
 
 lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
   .withoutSuffixFor(JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("."))
+  .settings(scalaModuleSettings)
+  .jvmSettings(scalaModuleSettingsJVM)
   .settings(
     name := "scala-collection-compat",
+    version := "0.1-SNAPSHOT",
+    scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
     unmanagedSourceDirectories in Compile += {
       val sharedSourceDir = baseDirectory.value.getParentFile / "src/main"
       if (scalaVersion.value.startsWith("2.13.")) sharedSourceDir / "scala-2.13"
@@ -22,7 +23,12 @@ lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
     }
   )
   .jvmSettings(
+    // TODO: should we add this?
+    // OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+  )
+  .jsSettings(
+    fork in Test := false // Scala.js cannot run forked tests
   )
   .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
 
