@@ -3,3 +3,4 @@ val scalaJSVersion =
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalaJSVersion)
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.4.0")
+addSbtPlugin("org.scala-lang.modules" % "sbt-scala-module" % "1.0.14")
