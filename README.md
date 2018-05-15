@@ -1,7 +1,12 @@
 [![Build Status](https://travis-ci.org/scala/scala-collection-compat.svg?branch=master)](https://travis-ci.org/scala/scala-collection-compat)
 
-Scala 2.13 Collection Compatibility Library And Migration Tool
-==============================================================
+# Scala 2.13 Collection Compatibility Library And Migration Tool
+
+To use this library, add the following to your build.sbt:
+
+```
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.1.0"
+```
 
 ## Compatibility Library
 
