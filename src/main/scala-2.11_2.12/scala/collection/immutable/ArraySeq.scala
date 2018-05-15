@@ -16,19 +16,19 @@ import java.util.Arrays
   *
   * Supports efficient indexed access and has a small memory footprint.
   *
-  *  @define Coll `ImmutableArray`
+  *  @define Coll `ArraySeq`
   *  @define coll wrapped array
   *  @define orderDependent
   *  @define orderDependentFold
   *  @define mayNotTerminateInf
   *  @define willNotTerminateInf
   */
-abstract class ImmutableArray[+T]
+abstract class ArraySeq[+T]
   extends AbstractSeq[T]
     with IndexedSeq[T]
 {
 
-  override protected[this] def thisCollection: ImmutableArray[T] = this
+  override protected[this] def thisCollection: ArraySeq[T] = this
 
   /** The tag of the element type */
   protected[this] def elemTag: ClassTag[T]
@@ -45,31 +45,31 @@ abstract class ImmutableArray[+T]
   private def elementClass: Class[_] =
     unsafeArray.getClass.getComponentType
 
-  override def stringPrefix = "ImmutableArray"
+  override def stringPrefix = "ArraySeq"
 
   /** Clones this object, including the underlying Array. */
-  override def clone(): ImmutableArray[T] = ImmutableArray unsafeWrapArray unsafeArray.clone()
+  override def clone(): ArraySeq[T] = ArraySeq unsafeWrapArray unsafeArray.clone()
 
   /** Creates new builder for this collection ==> move to subclasses
     */
-  override protected[this] def newBuilder: Builder[T, ImmutableArray[T]] =
-    new WrappedArrayBuilder[T](elemTag).mapResult(w => ImmutableArray.unsafeWrapArray(w.array))
+  override protected[this] def newBuilder: Builder[T, ArraySeq[T]] =
+    new WrappedArrayBuilder[T](elemTag).mapResult(w => ArraySeq.unsafeWrapArray(w.array))
 
 }
 
-/** A companion object used to create instances of `ImmutableArray`.
+/** A companion object used to create instances of `ArraySeq`.
   */
-object ImmutableArray {
+object ArraySeq {
   // This is reused for all calls to empty.
-  private val EmptyImmutableArray  = new ofRef[AnyRef](new Array[AnyRef](0))
-  def empty[T <: AnyRef]: ImmutableArray[T] = EmptyImmutableArray.asInstanceOf[ImmutableArray[T]]
+  private val EmptyArraySeq  = new ofRef[AnyRef](new Array[AnyRef](0))
+  def empty[T <: AnyRef]: ArraySeq[T] = EmptyArraySeq.asInstanceOf[ArraySeq[T]]
 
   // If make is called explicitly we use whatever we're given, even if it's
-  // empty.  This may be unnecessary (if ImmutableArray is to honor the collections
+  // empty.  This may be unnecessary (if ArraySeq is to honor the collections
   // contract all empty ones must be equal, so discriminating based on the reference
   // equality of an empty array should not come up) but we may as well be
   // conservative since wrapRefArray contributes most of the unnecessary allocations.
-  def unsafeWrapArray[T](x: AnyRef): ImmutableArray[T] = (x match {
+  def unsafeWrapArray[T](x: AnyRef): ArraySeq[T] = (x match {
     case null              => null
     case x: Array[AnyRef]  => new ofRef[AnyRef](x)
     case x: Array[Int]     => new ofInt(x)
@@ -81,17 +81,17 @@ object ImmutableArray {
     case x: Array[Short]   => new ofShort(x)
     case x: Array[Boolean] => new ofBoolean(x)
     case x: Array[Unit]    => new ofUnit(x)
-  }).asInstanceOf[ImmutableArray[T]]
+  }).asInstanceOf[ArraySeq[T]]
 
-  implicit def canBuildFrom[T](implicit m: ClassTag[T]): CanBuildFrom[ImmutableArray[_], T, ImmutableArray[T]] =
-    new CanBuildFrom[ImmutableArray[_], T, ImmutableArray[T]] {
-      def apply(from: ImmutableArray[_]): Builder[T, ImmutableArray[T]] =
-        ArrayBuilder.make[T]()(m) mapResult ImmutableArray.unsafeWrapArray[T]
-      def apply: Builder[T, ImmutableArray[T]] =
-        ArrayBuilder.make[T]()(m) mapResult ImmutableArray.unsafeWrapArray[T]
+  implicit def canBuildFrom[T](implicit m: ClassTag[T]): CanBuildFrom[ArraySeq[_], T, ArraySeq[T]] =
+    new CanBuildFrom[ArraySeq[_], T, ArraySeq[T]] {
+      def apply(from: ArraySeq[_]): Builder[T, ArraySeq[T]] =
+        ArrayBuilder.make[T]()(m) mapResult ArraySeq.unsafeWrapArray[T]
+      def apply: Builder[T, ArraySeq[T]] =
+        ArrayBuilder.make[T]()(m) mapResult ArraySeq.unsafeWrapArray[T]
     }
 
-  final class ofRef[T <: AnyRef](val unsafeArray: Array[T]) extends ImmutableArray[T] with Serializable {
+  final class ofRef[T <: AnyRef](val unsafeArray: Array[T]) extends ArraySeq[T] with Serializable {
     lazy val elemTag = ClassTag[T](unsafeArray.getClass.getComponentType)
     def length: Int = unsafeArray.length
     def apply(index: Int): T = unsafeArray(index)
@@ -103,7 +103,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofByte(val unsafeArray: Array[Byte]) extends ImmutableArray[Byte] with Serializable {
+  final class ofByte(val unsafeArray: Array[Byte]) extends ArraySeq[Byte] with Serializable {
     def elemTag = ClassTag.Byte
     def length: Int = unsafeArray.length
     def apply(index: Int): Byte = unsafeArray(index)
@@ -115,7 +115,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofShort(val unsafeArray: Array[Short]) extends ImmutableArray[Short] with Serializable {
+  final class ofShort(val unsafeArray: Array[Short]) extends ArraySeq[Short] with Serializable {
     def elemTag = ClassTag.Short
     def length: Int = unsafeArray.length
     def apply(index: Int): Short = unsafeArray(index)
@@ -127,7 +127,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofChar(val unsafeArray: Array[Char]) extends ImmutableArray[Char] with Serializable {
+  final class ofChar(val unsafeArray: Array[Char]) extends ArraySeq[Char] with Serializable {
     def elemTag = ClassTag.Char
     def length: Int = unsafeArray.length
     def apply(index: Int): Char = unsafeArray(index)
@@ -139,7 +139,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofInt(val unsafeArray: Array[Int]) extends ImmutableArray[Int] with Serializable {
+  final class ofInt(val unsafeArray: Array[Int]) extends ArraySeq[Int] with Serializable {
     def elemTag = ClassTag.Int
     def length: Int = unsafeArray.length
     def apply(index: Int): Int = unsafeArray(index)
@@ -151,7 +151,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofLong(val unsafeArray: Array[Long]) extends ImmutableArray[Long] with Serializable {
+  final class ofLong(val unsafeArray: Array[Long]) extends ArraySeq[Long] with Serializable {
     def elemTag = ClassTag.Long
     def length: Int = unsafeArray.length
     def apply(index: Int): Long = unsafeArray(index)
@@ -163,7 +163,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofFloat(val unsafeArray: Array[Float]) extends ImmutableArray[Float] with Serializable {
+  final class ofFloat(val unsafeArray: Array[Float]) extends ArraySeq[Float] with Serializable {
     def elemTag = ClassTag.Float
     def length: Int = unsafeArray.length
     def apply(index: Int): Float = unsafeArray(index)
@@ -175,7 +175,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofDouble(val unsafeArray: Array[Double]) extends ImmutableArray[Double] with Serializable {
+  final class ofDouble(val unsafeArray: Array[Double]) extends ArraySeq[Double] with Serializable {
     def elemTag = ClassTag.Double
     def length: Int = unsafeArray.length
     def apply(index: Int): Double = unsafeArray(index)
@@ -187,7 +187,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofBoolean(val unsafeArray: Array[Boolean]) extends ImmutableArray[Boolean] with Serializable {
+  final class ofBoolean(val unsafeArray: Array[Boolean]) extends ArraySeq[Boolean] with Serializable {
     def elemTag = ClassTag.Boolean
     def length: Int = unsafeArray.length
     def apply(index: Int): Boolean = unsafeArray(index)
@@ -199,7 +199,7 @@ object ImmutableArray {
     }
   }
 
-  final class ofUnit(val unsafeArray: Array[Unit]) extends ImmutableArray[Unit] with Serializable {
+  final class ofUnit(val unsafeArray: Array[Unit]) extends ArraySeq[Unit] with Serializable {
     def elemTag = ClassTag.Unit
     def length: Int = unsafeArray.length
     def apply(index: Int): Unit = unsafeArray(index)
