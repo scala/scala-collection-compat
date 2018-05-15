@@ -64,12 +64,19 @@ object ArraySeq {
   private val EmptyArraySeq  = new ofRef[AnyRef](new Array[AnyRef](0))
   def empty[T <: AnyRef]: ArraySeq[T] = EmptyArraySeq.asInstanceOf[ArraySeq[T]]
 
-  // If make is called explicitly we use whatever we're given, even if it's
-  // empty.  This may be unnecessary (if ArraySeq is to honor the collections
-  // contract all empty ones must be equal, so discriminating based on the reference
-  // equality of an empty array should not come up) but we may as well be
-  // conservative since wrapRefArray contributes most of the unnecessary allocations.
-  def unsafeWrapArray[T](x: AnyRef): ArraySeq[T] = (x match {
+  /**
+   * Wrap an existing `Array` into an `ArraySeq` of the proper primitive specialization type
+   * without copying.
+   *
+   * Note that an array containing boxed primitives can be wrapped in an `ArraySeq` without
+   * copying. For example, `val a: Array[Any] = Array(1)` is an array of `Object` at runtime,
+   * containing `Integer`s. An `ArraySeq[Int]` can be obtained with a cast:
+   * `ArraySeq.unsafeWrapArray(a).asInstanceOf[ArraySeq[Int]]`. The values are still
+   * boxed, the resulting instance is an [[ArraySeq.ofRef]]. Writing
+   * `ArraySeq.unsafeWrapArray(a.asInstanceOf[Array[Int]])` does not work, it throws a
+   * `ClassCastException` at runtime.
+   */
+  def unsafeWrapArray[T](x: Array[T]): ArraySeq[T] = (x.asInstanceOf[Array[_]] match {
     case null              => null
     case x: Array[AnyRef]  => new ofRef[AnyRef](x)
     case x: Array[Int]     => new ofInt(x)
@@ -91,6 +98,7 @@ object ArraySeq {
         ArrayBuilder.make[T]()(m) mapResult ArraySeq.unsafeWrapArray[T]
     }
 
+  @SerialVersionUID(3L)
   final class ofRef[T <: AnyRef](val unsafeArray: Array[T]) extends ArraySeq[T] with Serializable {
     lazy val elemTag = ClassTag[T](unsafeArray.getClass.getComponentType)
     def length: Int = unsafeArray.length
@@ -103,6 +111,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofByte(val unsafeArray: Array[Byte]) extends ArraySeq[Byte] with Serializable {
     def elemTag = ClassTag.Byte
     def length: Int = unsafeArray.length
@@ -115,6 +124,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofShort(val unsafeArray: Array[Short]) extends ArraySeq[Short] with Serializable {
     def elemTag = ClassTag.Short
     def length: Int = unsafeArray.length
@@ -127,6 +137,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofChar(val unsafeArray: Array[Char]) extends ArraySeq[Char] with Serializable {
     def elemTag = ClassTag.Char
     def length: Int = unsafeArray.length
@@ -139,6 +150,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofInt(val unsafeArray: Array[Int]) extends ArraySeq[Int] with Serializable {
     def elemTag = ClassTag.Int
     def length: Int = unsafeArray.length
@@ -151,6 +163,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofLong(val unsafeArray: Array[Long]) extends ArraySeq[Long] with Serializable {
     def elemTag = ClassTag.Long
     def length: Int = unsafeArray.length
@@ -163,6 +176,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofFloat(val unsafeArray: Array[Float]) extends ArraySeq[Float] with Serializable {
     def elemTag = ClassTag.Float
     def length: Int = unsafeArray.length
@@ -175,6 +189,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofDouble(val unsafeArray: Array[Double]) extends ArraySeq[Double] with Serializable {
     def elemTag = ClassTag.Double
     def length: Int = unsafeArray.length
@@ -187,6 +202,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofBoolean(val unsafeArray: Array[Boolean]) extends ArraySeq[Boolean] with Serializable {
     def elemTag = ClassTag.Boolean
     def length: Int = unsafeArray.length
@@ -199,6 +215,7 @@ object ArraySeq {
     }
   }
 
+  @SerialVersionUID(3L)
   final class ofUnit(val unsafeArray: Array[Unit]) extends ArraySeq[Unit] with Serializable {
     def elemTag = ClassTag.Unit
     def length: Int = unsafeArray.length

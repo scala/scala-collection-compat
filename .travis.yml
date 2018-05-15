@@ -3,7 +3,7 @@ language: scala
 scala:
   - 2.11.12
   - 2.12.6
-  - 2.13.0-pre-a002630
+  - 2.13.0-M4
 jdk:
   - oraclejdk8
 env:
@@ -21,9 +21,9 @@ env:
 
 matrix:
   exclude:
-    - scala: 2.13.0-pre-a002630
+    - scala: 2.13.0-M4
       env: SCALAJS_VERSION=0.6.22
-    - scala: 2.13.0-pre-a002630
+    - scala: 2.13.0-M4
       env: SCALAJS_VERSION=1.0.0-M3
   include:
     - scala: 2.12.6
