@@ -2,8 +2,7 @@ import sbtcrossproject.{crossProject, CrossType}
 import ScalaModulePlugin._
 
 inThisBuild(Seq(
-  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  crossScalaVersions := Seq("2.12.6", "2.13.0-pre-a002630", "2.11.12")
+  crossScalaVersions := Seq("2.12.6", "2.13.0-M4", "2.11.12")
 ))
 
 lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
