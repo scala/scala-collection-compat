@@ -2,15 +2,14 @@
 
 # Scala 2.13 Collection Compatibility Library And Migration Tool
 
+## Compatibility Library
+
+This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.12. It can be used to cross-build projects.
 To use this library, add the following to your build.sbt:
 
 ```
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.1.0"
 ```
-
-## Compatibility Library
-
-This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.12. It can be used to cross-build projects.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
