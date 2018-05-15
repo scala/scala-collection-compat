@@ -20,7 +20,7 @@ the strawman:
 
 ~~~ diff
 - xs.toIterator
-+ xs.iterator()
++ xs.iterator
 ~~~
 
 ### Add a missing test case
@@ -45,7 +45,7 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 import strawman.collection.Iterable
 
 class toIteratorVsIterator(xs: Iterable[Int]) {
-  xs.iterator()
+  xs.iterator
 }
 ~~~
 

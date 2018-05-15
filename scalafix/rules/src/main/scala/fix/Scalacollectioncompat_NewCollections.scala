@@ -23,7 +23,6 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
     Symbol("_root_.scala.collection.TraversableLike.to.")
   )
   val iterator = SymbolMatcher.normalized(
-    Symbol("_root_.scala.collection.LinearSeqLike.iterator."),
     Symbol("_root_.scala.collection.TraversableLike.toIterator.")
   )
   val tupleZipped = SymbolMatcher.normalized(
@@ -34,7 +33,7 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
   def replaceToList(ctx: RuleCtx) =
     ctx.tree.collect {
       case iterator(t: Name) =>
-        ctx.replaceTree(t, "iterator()")
+        ctx.replaceTree(t, "iterator")
       case toTpe(n: Name) =>
         (for {
           name <- n.tokens.lastOption
