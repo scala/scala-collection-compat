@@ -22,8 +22,10 @@ lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
     }
   )
   .jvmSettings(
-    // TODO: should we add this?
-    // OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
+    // NOTE: if this setting is not defined, the published jar doesn't contain any classfiles.
+    // Related to https://github.com/scala/scala-parser-combinators/issues/119.
+    // TODO: what should the setting be? This library also adds classes to other (existing) packages.
+    OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
   )
   .jsSettings(
