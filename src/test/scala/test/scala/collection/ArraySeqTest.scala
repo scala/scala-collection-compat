@@ -2,7 +2,7 @@ package test.scala.collection
 
 import org.junit.{Assert, Test}
 
-import scala.collection.compat.imm.ArraySeq
+import scala.collection.compat.immutable.ArraySeq
 
 // The unmodified ArraySeqTest from collection-strawman
 class ArraySeqTest {

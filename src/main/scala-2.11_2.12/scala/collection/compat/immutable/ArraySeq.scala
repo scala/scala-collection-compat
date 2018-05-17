@@ -1,4 +1,4 @@
-package scala.collection.compat.imm
+package scala.collection.compat.immutable
 
 import java.util.Arrays
 
