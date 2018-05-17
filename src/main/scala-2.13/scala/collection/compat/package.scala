@@ -1,5 +1,11 @@
 package scala.collection
 
-// Empty dummy package to allow cross-building with Scala 2.12
 package object compat {
+  type Factory[-A, +C] = scala.collection.Factory[A, C]
+  val Factory          = scala.collection.Factory
+
+  type BuildFrom[-From, -A, +C] = scala.collection.BuildFrom[From, A, C]
+  val BuildFrom                 = scala.collection.BuildFrom
+
+  type IterableOnce[+X] = scala.collection.IterableOnce[X]
 }

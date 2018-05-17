@@ -1,15 +1,14 @@
-package scala
-package collection
-package immutable
-
-import scala.reflect.ClassTag
-import scala.runtime.BoxedUnit
-import scala.collection.generic._
-import scala.collection.mutable.{Builder, ArrayBuilder, ArrayBuffer, WrappedArrayBuilder}
-import scala.util.hashing.MurmurHash3
-import scala.annotation.unchecked.uncheckedVariance
+package scala.collection.compat.imm
 
 import java.util.Arrays
+
+import scala.annotation.unchecked.uncheckedVariance
+import scala.collection.AbstractSeq
+import scala.collection.generic._
+import scala.collection.immutable.IndexedSeq
+import scala.collection.mutable.{ArrayBuilder, Builder, WrappedArrayBuilder}
+import scala.reflect.ClassTag
+import scala.util.hashing.MurmurHash3
 
 /**
   * An immutable array.
@@ -41,9 +40,6 @@ abstract class ArraySeq[+T]
 
   /** The underlying array */
   def unsafeArray: Array[T @uncheckedVariance]
-
-  private def elementClass: Class[_] =
-    unsafeArray.getClass.getComponentType
 
   override def stringPrefix = "ArraySeq"
 

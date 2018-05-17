@@ -1,7 +1,6 @@
 package scala.collection
 
 import scala.collection.generic._
-import scala.collection.mutable.Builder
 import scala.reflect.ClassTag
 
 /** The collection compatibility API */

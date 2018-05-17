@@ -1,8 +1,8 @@
-package scala.collection.compat
+package scala.collection
+package compat
 
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Builder
-import scala.collection.{immutable, mutable}
 
 private[compat] object CompatImpl {
   def simpleCBF[A, C](f: => Builder[A, C]): CanBuildFrom[Any, A, C] = new CanBuildFrom[Any, A, C] {
