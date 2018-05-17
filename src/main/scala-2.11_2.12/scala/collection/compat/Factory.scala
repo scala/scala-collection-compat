@@ -1,6 +1,7 @@
-package scala.collection
+package scala.collection.compat
 
 import scala.collection.generic.CanBuildFrom
+import scala.collection.{TraversableOnce, mutable}
 
 /**
   * A factory that builds a collection of type `C` with elements of type `A`.

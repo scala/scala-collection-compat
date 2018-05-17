@@ -5,7 +5,7 @@ import org.junit.Test
 import scala.collection.compat._
 import scala.collection.immutable.{HashMap, TreeMap, TreeSet}
 import scala.collection.mutable.{ArrayBuffer, Builder, ListBuffer}
-import scala.collection.{BitSet, BuildFrom, SortedMap, SortedSet, immutable, mutable}
+import scala.collection.{BitSet, SortedMap, SortedSet, immutable, mutable}
 
 // Tests copied from the 2.13 scala-library
 class BuildFromTest {

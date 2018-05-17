@@ -1,6 +1,7 @@
-package scala.collection
+package scala.collection.compat
 
 import scala.collection.generic.CanBuildFrom
+import scala.collection.{Iterable, mutable}
 
 /** Builds a collection of type `C` from elements of type `A` when a source collection of type `From` is available.
   * Implicit instances of `BuildFrom` are available for all collection types.

@@ -1,8 +1,8 @@
 package scala.collection
 
 import scala.collection.generic._
-import scala.collection.mutable.Builder
 import scala.reflect.ClassTag
+import scala.collection.{immutable => i, mutable => m}
 
 /** The collection compatibility API */
 package object compat {
@@ -26,10 +26,10 @@ package object compat {
   implicit def bitSetFactoryToCBF(fact: BitSetFactory[BitSet]): CanBuildFrom[Any, Int, BitSet] =
     simpleCBF(fact.newBuilder)
 
-  implicit def immutableBitSetFactoryToCBF(fact: BitSetFactory[immutable.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] =
+  implicit def immutableBitSetFactoryToCBF(fact: BitSetFactory[i.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] =
     simpleCBF(fact.newBuilder)
 
-  implicit def mutableBitSetFactoryToCBF(fact: BitSetFactory[mutable.BitSet]): CanBuildFrom[Any, Int, MutableBitSetCC[Int]] =
+  implicit def mutableBitSetFactoryToCBF(fact: BitSetFactory[m.BitSet]): CanBuildFrom[Any, Int, MutableBitSetCC[Int]] =
     simpleCBF(fact.newBuilder)
 
   implicit class IterableFactoryExtensionMethods[CC[X] <: GenTraversable[X]](private val fact: GenericCompanion[CC]) {
@@ -56,4 +56,5 @@ package object compat {
 
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
+  val  IterableOnce     = TraversableOnce
 }

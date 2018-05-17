@@ -3,7 +3,7 @@ package test.scala.collection
 import org.junit.{Assert, Test}
 
 import scala.collection.compat._
-import scala.collection.{BitSet, Factory, immutable, mutable}
+import scala.collection.{BitSet, immutable, mutable}
 
 class FactoryTest {
 
