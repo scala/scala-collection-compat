@@ -8,7 +8,7 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.1.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.1.1"
 ```
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
@@ -31,7 +31,9 @@ With this compatibility library you can also use the 2.13 syntax which uses a co
 
 The 2.13 version consists only of an empty `scala.collection.compat` package object that allows you to write `import scala.collection.compat._` in 2.13.
 The 2.11/2.12 version has the compatibility extensions in this package.
-It also adds backported version of some new collection types to other `scala.collection` subpackages.
+
+
+The library also adds backported versions of new collection types, currently `scala.collection.compat.immutable.ArraySeq`. In 2.11/2.12, this type is a new collection implementation. In 2.13, it is an alias for `scala.collection.immutable.ArraySeq`.
 
 ## Migration Tool
 
