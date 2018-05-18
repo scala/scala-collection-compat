@@ -14,7 +14,6 @@ To configure tag driven releases from Travis CI.
      Ensure that `RELEASE_COMBO` is `true` for build matrix combinations
      that should be released to sonatype (when building a tag).
 
-
 It is important to add comments in `.travis.yml` to identify the name
 of each environment variable encoded in a `secure` section.
 
@@ -41,7 +40,7 @@ env:
     - secure: "XXXXXX"
 
 script:
-  - if [[ "$TRAVIS_JDK_VERSION" == "openjdk6" && "$TRAVIS_SCALA_VERSION" =~ "2\.11.*" || "$TRAVIS_JDK_VERSION" == "openjdk6" && "$TRAVIS_SCALA_VERSION" =~ "2\.12.*" ]]; then export RELEASE_COMBO=true; fi
+  - if [[ "$TRAVIS_JDK_VERSION" == "openjdk6" && "$TRAVIS_SCALA_VERSION" =~ 2\.11\..* || "$TRAVIS_JDK_VERSION" == "oraclejdk8" && "$TRAVIS_SCALA_VERSION" =~ 2\.1[23]\..* ]]; then export RELEASE_COMBO=true; fi
   - admin/build.sh
 
 notifications:
