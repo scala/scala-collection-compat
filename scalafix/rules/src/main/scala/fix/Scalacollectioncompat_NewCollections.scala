@@ -30,6 +30,28 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
     Symbol("_root_.scala.runtime.Tuple3Zipped.Ops.zipped.")
   )
 
+  val retain = 
+    SymbolMatcher.normalized(
+      Symbol("_root_.scala.collection.mutable.MapLike.retain.")
+    )
+
+  def replaceMutableMap(ctx: RuleCtx) =
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(_, retain(n: Name)), List(_: Term.PartialFunction)) =>
+        ctx.replaceTree(n, "filterInPlace")
+
+      case Term.Apply(Term.Select(_, retain(n: Name)), List(_: Term.Function)) =>
+        (for {
+          name <- n.tokens.lastOption
+          open <- ctx.tokenList.find(name)(t => t.is[Token.LeftParen])
+          close <- ctx.matchingParens.close(open.asInstanceOf[Token.LeftParen])
+        } yield
+          ctx.replaceToken(open, "{case ") +
+          ctx.replaceToken(close, "}") +
+          ctx.replaceTree(n, "filterInPlace")  
+        ).asPatch   
+    }.asPatch
+
   def replaceToList(ctx: RuleCtx) =
     ctx.tree.collect {
       case iterator(t: Name) =>
@@ -110,6 +132,7 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceCopyToBuffer(ctx) +
-      replaceStreamAppend(ctx)
+      replaceStreamAppend(ctx) +
+      replaceMutableMap(ctx)
   }
 }

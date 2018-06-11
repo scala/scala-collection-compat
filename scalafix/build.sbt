@@ -37,7 +37,8 @@ lazy val tests = project
         sourceDirectory.in(output, Compile).value,
       "inputClassdirectory" ->
         classDirectory.in(input, Compile).value
-    )
+    ),
+    test in Test := (test in Test).dependsOn(compile in (output, Compile)).value
   )
   .dependsOn(input, rules)
   .enablePlugins(BuildInfoPlugin)
