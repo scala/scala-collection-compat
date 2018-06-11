@@ -20,7 +20,7 @@ trait Factory[-A, +C] extends Any {
 
   /** Get a Builder for the collection. For non-strict collection types this will use an intermediate buffer.
     * Building collections with `fromSpecific` is preferred because it can be lazy for lazy collections. */
-  def newBuilder(): mutable.Builder[A, C]
+  def newBuilder: mutable.Builder[A, C]
 }
 
 object Factory {
@@ -28,7 +28,7 @@ object Factory {
   implicit def fromCanBuildFrom[A, C](implicit cbf: CanBuildFrom[Nothing, A, C]): Factory[A, C] =
     new Factory[A, C] {
       def fromSpecific(it: TraversableOnce[A]): C = (cbf() ++= it).result()
-      def newBuilder(): mutable.Builder[A, C] = cbf()
+      def newBuilder: mutable.Builder[A, C] = cbf()
     }
 
   implicit def fromCanBuildFromConversion[X, A, C](x: X)(implicit toCanBuildFrom: X => CanBuildFrom[Nothing, A, C]): Factory[A, C] =

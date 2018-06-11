@@ -18,7 +18,7 @@ trait BuildFrom[-From, -A, +C] extends Any {
     * Building collections with `fromSpecificIterable` is preferred because it can be lazy for lazy collections. */
   def newBuilder(from: From): mutable.Builder[A, C]
 
-  @deprecated("Use newBuilder() instead of apply()", "2.13.0")
+  @deprecated("Use newBuilder instead of apply()", "2.13.0")
   @`inline` def apply(from: From): mutable.Builder[A, C] = newBuilder(from)
 
 }
