@@ -35,6 +35,33 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.MapLike.retain.")
     )
 
+  object CompanionMatcher {
+    val companionSymbol = 
+      SymbolMatcher.normalized(
+        Symbol("_root_.scala.collection.generic.GenericCompanion.")
+      )
+
+    def isCompanion(denot: Denotation): Boolean = 
+      denot.name == "companion" && 
+        denot.names.exists(name =>
+          companionSymbol.matches(name.symbol)
+        )
+
+    def unapply(tree: Tree): Option[Tree] = {
+      for {
+        sym <- index.symbol(tree)
+        denot <- sym.denotation
+        if (isCompanion(denot))
+      } yield tree
+    }
+  }
+
+  def replaceCompanion(ctx: RuleCtx) =
+    ctx.tree.collect {
+      case CompanionMatcher(t: Name) =>
+        ctx.replaceTree(t, "iterableFactory")
+    }.asPatch
+
   def replaceMutableMap(ctx: RuleCtx) =
     ctx.tree.collect {
       case Term.Apply(Term.Select(_, retain(n: Name)), List(_: Term.PartialFunction)) =>
@@ -133,6 +160,7 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
       replaceTupleZipped(ctx) +
       replaceCopyToBuffer(ctx) +
       replaceStreamAppend(ctx) +
-      replaceMutableMap(ctx)
+      replaceMutableMap(ctx) +
+      replaceCompanion(ctx)
   }
 }
