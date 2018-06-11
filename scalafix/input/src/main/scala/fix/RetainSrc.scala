@@ -5,6 +5,7 @@ package fix
 
 import scala.collection.mutable.Map
 
-object MethodRenames {
-  Map(1 -> 1).retain{ case (x, y) => true }
+class MethodRenames(xs: Map[Int, Int]) {
+  xs.retain((_, _) => true)
+  xs.retain{case (x, y) => true}
 }
