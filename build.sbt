@@ -26,6 +26,11 @@ lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
   )
   .jsSettings(
+    scalacOptions += {
+      val x = (baseDirectory in LocalRootProject).value.toURI.toString
+      val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process.Process("git rev-parse HEAD").lines_!.head
+      s"-P:scalajs:mapSourceURI:$x->$y/"
+    },
     fork in Test := false // Scala.js cannot run forked tests
   )
   .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
