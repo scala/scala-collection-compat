@@ -29,6 +29,15 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
     Symbol("_root_.scala.runtime.Tuple2Zipped.Ops.zipped."),
     Symbol("_root_.scala.runtime.Tuple3Zipped.Ops.zipped.")
   )
+  def foldSymbol(isLeft: Boolean): SymbolMatcher = {
+    val op = 
+      if (isLeft) "/:"
+      else ":\\"
+
+    SymbolMatcher.normalized(Symbol(s"_root_.scala.collection.TraversableOnce.`$op`."))
+  }
+  val foldLeftSymbol = foldSymbol(isLeft = true)
+  val foldRightSymbol = foldSymbol(isLeft = false)
 
   val retainMap = 
     SymbolMatcher.normalized(
@@ -60,7 +69,16 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
           ctx.replaceToken(open, "{case ") +
           ctx.replaceToken(close, "}") +
           ctx.replaceTree(n, "filterInPlace")  
-        ).asPatch   
+        ).asPatch
+    }.asPatch
+
+  def replaceSymbolicFold(ctx: RuleCtx) = 
+    ctx.tree.collect {
+      case Term.Apply(ap @ Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), _) => 
+        ctx.replaceTree(ap, s"$rhs.foldRight($lhs)")
+
+      case Term.Apply(ap @ Term.ApplyInfix(lhs, foldLeftSymbol(_), _, List(rhs)), _) =>
+        ctx.replaceTree(ap, s"$rhs.foldLeft($lhs)")
     }.asPatch
 
   def replaceToList(ctx: RuleCtx) =
@@ -147,6 +165,7 @@ case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
       replaceCopyToBuffer(ctx) +
       replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
-      replaceMutableSet(ctx)
+      replaceMutableSet(ctx) +
+      replaceSymbolicFold(ctx)
   }
 }
