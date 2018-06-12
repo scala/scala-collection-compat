@@ -5,8 +5,8 @@ import scalafix.syntax._
 import scalafix.util._
 import scala.meta._
 
-case class Scalacollectioncompat_NewCollections(index: SemanticdbIndex)
-  extends SemanticRule(index, "Scalacollectioncompat_NewCollections") {
+case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
+  extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
