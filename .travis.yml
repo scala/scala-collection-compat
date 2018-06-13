@@ -47,7 +47,6 @@ script:
   # work around https://github.com/travis-ci/travis-ci/issues/9713
   - if [[ $JAVA_HOME = *java-6* ]]; then jdk_switcher use openjdk6; fi
   - java -version
-  - export RELEASE_COMBO=true
   - admin/build.sh
 
 before_cache:
