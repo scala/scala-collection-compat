@@ -16,6 +16,8 @@ set -e
 # of the existing tag. Then a new tag can be created for that commit, e.g., `v1.2.3#2.13.0-M5`.
 # Everything after the `#` in the tag name is ignored.
 
+RELEASE_COMBO=true
+
 if [[ "$TEST_SCALAFIX" == "true" ]]; then
   cd scalafix && sbt input/compile output/compile tests/test
   exit 0
