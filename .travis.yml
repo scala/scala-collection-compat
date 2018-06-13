@@ -1,10 +1,15 @@
 language: scala
 
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
 scala:
   - 2.11.12
   - 2.12.6
   - 2.13.0-M4
 jdk:
+  - openjdk6
   - oraclejdk8
 env:
   global:
@@ -21,10 +26,17 @@ env:
 
 matrix:
   exclude:
+    - jdk: openjdk6
+      scala: 2.12.6
+    - jdk: openjdk6
+      scala: 2.13.0-M4
+    - jdk: oraclejdk8
+      scala: 2.11.12
     - scala: 2.13.0-M4
       env: SCALAJS_VERSION=1.0.0-M3
   include:
     - scala: 2.12.6
+      jdk: oraclejdk8
       env: TEST_SCALAFIX=true
 
 before_script: ./checkCLA.sh
