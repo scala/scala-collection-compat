@@ -54,6 +54,10 @@ package object compat {
     def rangeUntil(until: K): T = fact.until(until)
   }
 
+  implicit class TraversableOnceExtensionMethods[A](private val self: TraversableOnce[A]) extends AnyVal {
+    def iterator: Iterator[A] = self.toIterator
+  }
+
   // This really belongs into scala.collection but there's already a package object in scala-library so we can't add to it
   type IterableOnce[+X] = TraversableOnce[X]
   val  IterableOnce     = TraversableOnce

@@ -46,4 +46,10 @@ class CollectionTest {
     val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
   }
+
+  @Test
+  def testIterator: Unit = {
+    val xs = Iterator(1, 2, 3).iterator.toList
+    assertEquals(List(1, 2, 3), xs)
+  }
 }
