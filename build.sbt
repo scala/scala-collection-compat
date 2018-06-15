@@ -5,6 +5,8 @@ inThisBuild(Seq(
   crossScalaVersions := Seq("2.12.6", "2.13.0-M4", "2.11.12")
 ))
 
+disablePlugins(JvmPlugin)
+
 lazy val `scala-collection-compat` = crossProject(JSPlatform, JVMPlatform)
   .withoutSuffixFor(JVMPlatform)
   .crossType(CrossType.Pure)
