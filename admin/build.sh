@@ -23,11 +23,24 @@ if [[ "$TEST_SCALAFIX" == "true" ]]; then
   exit 0
 fi
 
-if [ "$SCALAJS_VERSION" = "" ]; then
-  projectPrefix="scala-collection-compat"
-else
-  projectPrefix="scala-collection-compatJS"
-fi
+case "$SCALA_TARGET" in
+  jvm)
+      targetSuffix=""
+      ;;
+   
+  js)
+      targetSuffix="JS"
+      ;;
+   
+  native)
+      targetSuffix="Native"
+      ;;
+  *)
+      echo $"SCALA_TARGET: $SCALA_TARGET {jvm|js|native}"
+      exit 1
+esac
+
+projectPrefix="scala-collection-compat$targetSuffix"
 
 verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
 tagPat="^v$verPat(#.*)?$"
@@ -52,4 +65,4 @@ if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   fi
 fi
 
-sbt "++$TRAVIS_SCALA_VERSION" "$publishVersion" "$projectPrefix/clean" "$projectPrefix/test" "$projectPrefix/publishLocal" "$publishTask"
+sbt -Dhttps.protocols=TLSv1.2 "++$TRAVIS_SCALA_VERSION" "$publishVersion" "$projectPrefix/clean" "$projectPrefix/test" "$projectPrefix/publishLocal" "$publishTask"

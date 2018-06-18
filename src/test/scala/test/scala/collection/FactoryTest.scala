@@ -1,11 +1,11 @@
 package test.scala.collection
 
-import org.junit.{Assert, Test}
+import utest._
 
 import scala.collection.compat._
 import scala.collection.{BitSet, immutable, mutable}
 
-class FactoryTest {
+object FactoryTest extends TestSuite{
 
   implicitly[Factory[Char, String]]
   implicitly[Factory[Char, Array[Char]]]
@@ -19,13 +19,13 @@ class FactoryTest {
   Map: Factory[(Int, String), Map[Int, String]]
   immutable.TreeMap: Factory[(Int, String), immutable.TreeMap[Int, String]]
 
-  @Test
-  def streamFactoryPreservesLaziness(): Unit = {
-    val factory = implicitly[Factory[Int, Stream[Int]]]
-    var counter = 0
-    val source = Stream.continually { counter += 1; 1 }
-    val result = factory.fromSpecific(source)
-    Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
+  val tests = Tests{
+    'streamFactoryPreservesLaziness - {
+      val factory = implicitly[Factory[Int, Stream[Int]]]
+      var counter = 0
+      val source = Stream.continually { counter += 1; 1 }
+      val result = factory.fromSpecific(source)
+      assert(1 == counter) // One element has been evaluated because Stream is not lazy in its head
+    }
   }
-
 }
