@@ -29,7 +29,8 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       "scala.Traversable" -> "scala.Iterable",
       "scala.collection.Traversable" -> "scala.collection.Iterable",
       "scala.TraversableOnce" -> "scala.IterableOnce",
-      "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
+      "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce",
+      "scala.BufferedIterator" -> "scala.collection.BufferedIterator"
     )
   }
 
