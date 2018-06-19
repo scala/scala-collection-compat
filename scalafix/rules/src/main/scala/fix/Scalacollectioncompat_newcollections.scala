@@ -8,6 +8,10 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  val valueTypes = List("Byte", "Char", "Int", "Short", "Double", "Float", "Long")
+  val valuePlusStringSymbols = valueTypes.map(vt => Symbol(s"scala.$vt#`+`(String)."))
+  val valuePlusString = SymbolMatcher.exact(valuePlusStringSymbols: _*)  
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.Stream" -> "scala.LazyList",
@@ -156,6 +160,12 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, "lazyAppendedAll")
     }.asPatch
 
+  def replaceValueTypePlusString(ctx: RuleCtx): Patch = 
+    ctx.tree.collect {
+      case Term.ApplyInfix(lhs, valuePlusString(_), Nil, List(_)) => ctx.addRight(lhs, ".toString")
+    }.asPatch
+
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceToList(ctx) +
       replaceSymbols(ctx) +
@@ -164,6 +174,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
-      replaceSymbolicFold(ctx)
+      replaceSymbolicFold(ctx) +
+      replaceValueTypePlusString(ctx)
   }
 }
