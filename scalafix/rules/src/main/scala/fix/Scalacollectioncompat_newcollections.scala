@@ -8,6 +8,16 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  val naturalNumberTypes = List("Byte", "Char", "Int", "Short")
+  val shiffingOperators = List("<<", ">>>", ">>")
+  val naturalNumberShiftingSymbols = 
+    for {
+      tpe <- naturalNumberTypes
+      op <- shiffingOperators
+    } yield Symbol(s"scala.$tpe#`$op`(Long).")
+
+  val naturalShiffting = SymbolMatcher.exact(naturalNumberShiftingSymbols: _*)  
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.Stream" -> "scala.LazyList",
@@ -156,6 +166,12 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, "lazyAppendedAll")
     }.asPatch
 
+  def replaceNaturalShiffting(ctx: RuleCtx): Patch =
+    ctx.tree.collect {
+      case Term.ApplyInfix(lhs, naturalShiffting(_), Nil, List(_)) => 
+        ctx.addRight(lhs, ".toLong")
+    }.asPatch
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceToList(ctx) +
       replaceSymbols(ctx) +
@@ -164,6 +180,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
-      replaceSymbolicFold(ctx)
+      replaceSymbolicFold(ctx) + 
+      replaceNaturalShiffting(ctx)
   }
 }
