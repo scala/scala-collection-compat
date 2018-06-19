@@ -1,23 +1,31 @@
 def scalafixVersion = _root_.scalafix.Versions.version
-inScope(Global)(
-  List(
-    scalaVersion := _root_.scalafix.Versions.scala212
-  )
+
+lazy val baseSettings = Seq(
+  scalaVersion := _root_.scalafix.Versions.scala212
 )
 
 lazy val root = project
   .in(file("."))
-  .aggregate(
-    rules, input, output, tests
+  .settings(baseSettings)
+  .aggregate(rules, input, output, tests)
+
+lazy val rules = project
+  .settings(baseSettings)
+  .settings(
+    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
   )
 
-lazy val rules = project.settings(
-  libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
-)
-
 lazy val input = project
+.settings(baseSettings)
   .settings(
-    scalafixSourceroot := sourceDirectory.in(Compile).value
+    addCompilerPlugin(scalafixSemanticdb),
+    scalacOptions ++= {
+      val sourceroot = sourceDirectory.in(Compile).value / "scala"
+      Seq(
+        "-Yrangepos",
+        s"-P:semanticdb:sourceroot:$sourceroot"
+      )
+    }
   )
 
 lazy val output = project
@@ -27,18 +35,15 @@ lazy val output = project
   )
 
 lazy val tests = project
+  .settings(baseSettings)
   .settings(
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    buildInfoPackage := "fix",
-    buildInfoKeys := Seq[BuildInfoKey](
-      "inputSourceroot" ->
-        sourceDirectory.in(input, Compile).value,
-      "outputSourceroot" ->
-        sourceDirectory.in(output, Compile).value,
-      "inputClassdirectory" ->
-        classDirectory.in(input, Compile).value
-    ),
-    test in Test := (test in Test).dependsOn(compile in (output, Compile)).value
+    scalafixTestkitOutputSourceDirectories :=
+      sourceDirectories.in(output, Compile).value,
+    scalafixTestkitInputSourceDirectories :=
+      sourceDirectories.in(input, Compile).value,
+    scalafixTestkitInputClasspath :=
+      fullClasspath.in(input, Compile).value
   )
   .dependsOn(input, rules)
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(ScalafixTestkitPlugin)
