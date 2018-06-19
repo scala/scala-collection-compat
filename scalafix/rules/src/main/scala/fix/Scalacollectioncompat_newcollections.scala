@@ -8,6 +8,20 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  val tupledSymbols = (2 to 5).map(i => Symbol(s"scala.Function.tupled(Function$i)."))
+  val tupledMatcher = SymbolMatcher.exact(tupledSymbols: _*)
+  val scalaFunction = SymbolMatcher.exact(Symbol("scala.Function."))
+
+  val naturalNumberTypes = List("Byte", "Char", "Int", "Short")
+  val shiffingOperators = List("<<", ">>>", ">>")
+  val naturalNumberShiftingSymbols = 
+    for {
+      tpe <- naturalNumberTypes
+      op <- shiffingOperators
+    } yield Symbol(s"scala.$tpe#`$op`(Long).")
+
+  val naturalShiffting = SymbolMatcher.exact(naturalNumberShiftingSymbols: _*)  
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.Stream" -> "scala.LazyList",
@@ -15,7 +29,8 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       "scala.Traversable" -> "scala.Iterable",
       "scala.collection.Traversable" -> "scala.collection.Iterable",
       "scala.TraversableOnce" -> "scala.IterableOnce",
-      "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
+      "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce",
+      "scala.BufferedIterator" -> "scala.collection.BufferedIterator"
     )
   }
 
@@ -49,13 +64,13 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
-  def replaceMutableSet(ctx: RuleCtx) =
+  def replaceMutableSet(ctx: RuleCtx): Patch = 
     ctx.tree.collect {
       case retainSet(n: Name) =>
         ctx.replaceTree(n, "filterInPlace")
     }.asPatch
 
-  def replaceMutableMap(ctx: RuleCtx) =
+  def replaceMutableMap(ctx: RuleCtx): Patch = 
     ctx.tree.collect {
       case Term.Apply(Term.Select(_, retainMap(n: Name)), List(_: Term.PartialFunction)) =>
         ctx.replaceTree(n, "filterInPlace")
@@ -72,7 +87,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ).asPatch
     }.asPatch
 
-  def replaceSymbolicFold(ctx: RuleCtx) = 
+  def replaceSymbolicFold(ctx: RuleCtx): Patch = 
     ctx.tree.collect {
       case Term.Apply(ap @ Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), _) => 
         ctx.replaceTree(ap, s"$rhs.foldRight($lhs)")
@@ -81,7 +96,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(ap, s"$rhs.foldLeft($lhs)")
     }.asPatch
 
-  def replaceToList(ctx: RuleCtx) =
+  def replaceToList(ctx: RuleCtx): Patch = 
     ctx.tree.collect {
       case iterator(t: Name) =>
         ctx.replaceTree(t, "iterator")
@@ -96,7 +111,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ).asPatch
     }.asPatch
 
-  def replaceTupleZipped(ctx: RuleCtx) =
+  def replaceTupleZipped(ctx: RuleCtx): Patch = 
     ctx.tree.collect {
       case tupleZipped(Term.Select(Term.Tuple(args), name)) =>
         val removeTokensPatch =
@@ -156,9 +171,61 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, "lazyAppendedAll")
     }.asPatch
 
-  override def fix(ctx: RuleCtx): Patch = {
-    // println(ctx.index.database)
+  def replaceNaturalShiffting(ctx: RuleCtx): Patch =
+    ctx.tree.collect {
+      case Term.ApplyInfix(lhs, naturalShiffting(_), Nil, List(_)) => 
+        ctx.addRight(lhs, ".toLong")
+    }.asPatch
 
+  def replaceFunctionTupled(ctx: RuleCtx): Patch = {
+    def toTupled(n: Term, f: Term): Patch = {
+      val needsParens =
+        f match {
+          case _: Term.Eta => true
+          case _ => false
+        }
+
+      (for {
+        name <- n.tokens.lastOption
+        open <- ctx.tokenList.find(name)(_.is[Token.LeftParen])
+        close <- ctx.matchingParens.close(open.asInstanceOf[Token.LeftParen])
+      } yield {
+
+        val parens =
+          if (needsParens) {
+            ctx.addLeft(f, "(") +
+            ctx.addRight(f, ")")
+          }
+          else Patch.empty
+
+        ctx.removeToken(open) +
+        ctx.removeToken(close) +
+        ctx.removeToken(name) +
+        parens +
+        ctx.addRight(f, ".tupled")
+      }).asPatch
+    }
+
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(f @ scalaFunction(_), n @ tupledMatcher(_)), List(f1)) =>
+        (for {
+          fun <- f.tokens.lastOption
+          dot <- ctx.tokenList.find(fun)(_.is[Token.Dot])
+        } yield
+          ctx.removeTokens(f.tokens) + 
+          ctx.removeToken(dot) +
+          toTupled(n, f1)
+        ).asPatch
+
+
+      case Term.Apply(n @ tupledMatcher(_), List(f)) =>
+        toTupled(n, f)
+        
+    }.asPatch
+  }
+
+
+  override def fix(ctx: RuleCtx): Patch = {
     replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
@@ -166,6 +233,8 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
-      replaceSymbolicFold(ctx)
+      replaceSymbolicFold(ctx) + 
+      replaceNaturalShiffting(ctx) +
+      replaceFunctionTupled(ctx)
   }
 }
