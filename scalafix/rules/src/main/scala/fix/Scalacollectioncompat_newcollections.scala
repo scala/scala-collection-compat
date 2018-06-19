@@ -8,6 +8,10 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  val tupledSymbols = (2 to 5).map(i => Symbol(s"scala.Function.tupled(Function$i)."))
+  val tupledMatcher = SymbolMatcher.exact(tupledSymbols: _*)
+  val scalaFunction = SymbolMatcher.exact(Symbol("scala.Function."))
+
   val naturalNumberTypes = List("Byte", "Char", "Int", "Short")
   val shiffingOperators = List("<<", ">>>", ">>")
   val naturalNumberShiftingSymbols = 
@@ -172,6 +176,54 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.addRight(lhs, ".toLong")
     }.asPatch
 
+  def replaceFunctionTupled(ctx: RuleCtx): Patch = {
+    def toTupled(n: Term, f: Term): Patch = {
+      val needsParens =
+        f match {
+          case _: Term.Eta => true
+          case _ => false
+        }
+
+      (for {
+        name <- n.tokens.lastOption
+        open <- ctx.tokenList.find(name)(_.is[Token.LeftParen])
+        close <- ctx.matchingParens.close(open.asInstanceOf[Token.LeftParen])
+      } yield {
+
+        val parens =
+          if (needsParens) {
+            ctx.addLeft(f, "(") +
+            ctx.addRight(f, ")")
+          }
+          else Patch.empty
+
+        ctx.removeToken(open) +
+        ctx.removeToken(close) +
+        ctx.removeToken(name) +
+        parens +
+        ctx.addRight(f, ".tupled")
+      }).asPatch
+    }
+
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(f @ scalaFunction(_), n @ tupledMatcher(_)), List(f1)) =>
+        (for {
+          fun <- f.tokens.lastOption
+          dot <- ctx.tokenList.find(fun)(_.is[Token.Dot])
+        } yield
+          ctx.removeTokens(f.tokens) + 
+          ctx.removeToken(dot) +
+          toTupled(n, f1)
+        ).asPatch
+
+
+      case Term.Apply(n @ tupledMatcher(_), List(f)) =>
+        toTupled(n, f)
+        
+    }.asPatch
+  }
+
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceToList(ctx) +
       replaceSymbols(ctx) +
@@ -181,6 +233,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) + 
-      replaceNaturalShiffting(ctx)
+      replaceNaturalShiffting(ctx) +
+      replaceFunctionTupled(ctx)
   }
 }
