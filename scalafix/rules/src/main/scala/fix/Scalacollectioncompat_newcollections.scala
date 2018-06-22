@@ -29,6 +29,13 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     Symbol("_root_.scala.runtime.Tuple2Zipped.Ops.zipped."),
     Symbol("_root_.scala.runtime.Tuple3Zipped.Ops.zipped.")
   )
+  val setPlus2 = SymbolMatcher.exact(
+    Symbol("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
+  )
+  val mapPlus2 = SymbolMatcher.exact(
+    Symbol("_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
+  )
+
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
     val op = 
       if (isLeft) "/:"
@@ -156,6 +163,36 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, "lazyAppendedAll")
     }.asPatch
 
+  def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
+    def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
+
+      val tokensToReplace =
+        if(ap.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)) {
+          // don't drop surrounding parens
+          ap.tokens.slice(1, ap.tokens.size - 1)
+        } else ap.tokens
+
+      val newTree = 
+        Term.ApplyInfix(
+          Term.ApplyInfix(lhs, op, Nil, List(rhs1)),
+          op,
+          Nil,
+          List(rhs2)
+        ).syntax
+
+      ctx.removeTokens(tokensToReplace) +
+      tokensToReplace.headOption.map(x => ctx.addRight(x, newTree))
+    }
+
+    ctx.tree.collect {
+      case ap @ Term.ApplyInfix(lhs, op @ mapPlus2(_), _, List(a, b)) =>
+        rewritePlus(ap, lhs, op, a, b)
+
+      case ap @ Term.ApplyInfix(lhs, op @ setPlus2(_), _, List(a, b)) =>
+        rewritePlus(ap, lhs, op, a, b)
+    }.asPatch
+  }
+
   override def fix(ctx: RuleCtx): Patch = {
     // println(ctx.index.database)
 
@@ -166,6 +203,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
-      replaceSymbolicFold(ctx)
+      replaceSymbolicFold(ctx) +
+      replaceSetMapPlus2(ctx)
   }
 }
