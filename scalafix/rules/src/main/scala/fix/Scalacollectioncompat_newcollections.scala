@@ -41,6 +41,10 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   val mutMapPlus = SymbolMatcher.exact(
     Symbol("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
   )
+  val mutMapUpdate = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
+    )
 
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
     val op = 
@@ -212,6 +216,16 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     }.asPatch
   }
 
+  def replaceMutMapUpdated(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(a, up @ mutMapUpdate(_)), List(k, v)) => {
+        ctx.addRight(up, "clone() += (") +
+        ctx.removeTokens(up.tokens) +
+        ctx.addRight(v, ")")
+      }
+    }.asPatch
+  }
+
   override def fix(ctx: RuleCtx): Patch = {
     // println(ctx.index.database)
 
@@ -224,6 +238,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
-      replaceMutSetMapPlus(ctx)
+      replaceMutSetMapPlus(ctx) +
+      replaceMutMapUpdated(ctx)
   }
 }
