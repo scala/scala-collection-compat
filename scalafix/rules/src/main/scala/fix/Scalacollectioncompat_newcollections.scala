@@ -165,15 +165,23 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
 
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
     def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
-      ctx.replaceTree(
-        ap,
+
+      val tokensToReplace =
+        if(ap.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)) {
+          // don't drop surrounding parens
+          ap.tokens.slice(1, ap.tokens.size - 1)
+        } else ap.tokens
+
+      val newTree = 
         Term.ApplyInfix(
           Term.ApplyInfix(lhs, op, Nil, List(rhs1)),
           op,
           Nil,
           List(rhs2)
-        ).toString
-      )
+        ).syntax
+
+      ctx.removeTokens(tokensToReplace) +
+      tokensToReplace.headOption.map(x => ctx.addRight(x, newTree))
     }
 
     ctx.tree.collect {
