@@ -35,6 +35,12 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   val mapPlus2 = SymbolMatcher.exact(
     Symbol("_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
   )
+  val mutSetPlus = SymbolMatcher.exact(
+    Symbol("_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
+  )
+  val mutMapPlus = SymbolMatcher.exact(
+    Symbol("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
+  )
 
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
     val op = 
@@ -165,7 +171,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
 
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
     def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
-
       val tokensToReplace =
         if(ap.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)) {
           // don't drop surrounding parens
@@ -183,13 +188,27 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       ctx.removeTokens(tokensToReplace) +
       tokensToReplace.headOption.map(x => ctx.addRight(x, newTree))
     }
-
     ctx.tree.collect {
       case ap @ Term.ApplyInfix(lhs, op @ mapPlus2(_), _, List(a, b)) =>
         rewritePlus(ap, lhs, op, a, b)
 
       case ap @ Term.ApplyInfix(lhs, op @ setPlus2(_), _, List(a, b)) =>
         rewritePlus(ap, lhs, op, a, b)
+    }.asPatch
+  }
+
+  def replaceMutSetMapPlus(ctx: RuleCtx): Patch = {
+    def rewriteMutPlus(lhs: Term, op: Term.Name): Patch = {
+      ctx.addRight(lhs, ".clone()") +
+      ctx.addRight(op, "=")
+    }
+
+    ctx.tree.collect {
+      case Term.ApplyInfix(lhs, op @ mutSetPlus(_), _, List(_)) =>
+        rewriteMutPlus(lhs, op)
+
+      case Term.ApplyInfix(lhs, op @ mutMapPlus(_), _, List(_)) =>
+        rewriteMutPlus(lhs, op)
     }.asPatch
   }
 
@@ -204,6 +223,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) +
-      replaceSetMapPlus2(ctx)
+      replaceSetMapPlus2(ctx) +
+      replaceMutSetMapPlus(ctx)
   }
 }
