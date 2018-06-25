@@ -1,15 +1,15 @@
 package test.scala.collection
 
-import org.junit.Test
+import utest._
 
 import scala.collection.compat._
 
-class StreamTest {
+object StreamTest extends TestSuite{
 
-  @Test
-  def lazyAppendedAll(): Unit = {
-    val s = 1 #:: 2 #:: 3 #:: Stream.Empty
-    s.lazyAppendedAll(List(4, 5, 6))
+  val tests = Tests{
+    'lazyAppendedAll - {
+      val s = 1 #:: 2 #:: 3 #:: Stream.Empty
+      s.lazyAppendedAll(List(4, 5, 6))
+    }
   }
-
 }
