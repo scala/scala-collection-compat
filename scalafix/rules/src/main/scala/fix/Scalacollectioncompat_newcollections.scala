@@ -8,6 +8,22 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  val handledTo = scala.collection.mutable.Set[Tree]()
+
+  def trailingParens(tree: Tree, ctx: RuleCtx): Option[(Token.LeftParen, Token.RightParen)] =
+    for {
+      end <- tree.tokens.lastOption
+      open <- ctx.tokenList.find(end)(_.is[Token.LeftParen]).map(_.asInstanceOf[Token.LeftParen])
+      close <- ctx.matchingParens.close(open)
+    } yield (open, close)
+
+  def trailingBrackets(tree: Tree, ctx: RuleCtx): Option[(Token.LeftBracket, Token.RightBracket)] =
+    for {
+      end <- tree.tokens.lastOption
+      open <- ctx.tokenList.find(end)(_.is[Token.LeftBracket]).map(_.asInstanceOf[Token.LeftBracket])
+      close <- ctx.matchingParens.close(open)
+    } yield (open, close)
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
@@ -19,6 +35,21 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
     )
   }
+
+  val collectionCanBuildFrom = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.generic.CanBuildFrom#")
+    )
+
+  val collectionCanBuildFromImport = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
+    )
+  
+  val nothing = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.Nothing#")
+    )
 
   val toTpe = SymbolMatcher.normalized(
     Symbol("_root_.scala.collection.TraversableLike.to.")
@@ -94,15 +125,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(n, "filterInPlace")
 
       case Term.Apply(Term.Select(_, retainMap(n: Name)), List(_: Term.Function)) =>
-        (for {
-          name <- n.tokens.lastOption
-          open <- ctx.tokenList.find(name)(t => t.is[Token.LeftParen])
-          close <- ctx.matchingParens.close(open.asInstanceOf[Token.LeftParen])
-        } yield
+        trailingParens(n, ctx).map { case (open, close) =>
           ctx.replaceToken(open, "{case ") +
           ctx.replaceToken(close, "}") +
-          ctx.replaceTree(n, "filterInPlace")  
-        ).asPatch
+          ctx.replaceTree(n, "filterInPlace")
+        }.asPatch
     }.asPatch
 
   def replaceSymbolicFold(ctx: RuleCtx) = 
@@ -118,15 +145,10 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     ctx.tree.collect {
       case iterator(t: Name) =>
         ctx.replaceTree(t, "iterator")
-      case toTpe(n: Name) =>
-        (for {
-          name <- n.tokens.lastOption
-          open <- ctx.tokenList.find(name)(t => t.is[Token.LeftBracket])
-          close <- ctx.matchingParens.close(open.asInstanceOf[Token.LeftBracket])
-        } yield
-          ctx.replaceToken(open, "(") +
-            ctx.replaceToken(close, ")")
-        ).asPatch
+      case t @ toTpe(n: Name) if !handledTo.contains(n) =>
+        trailingBrackets(n, ctx).map { case (open, close) =>
+          ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
+        }.asPatch
     }.asPatch
 
   def replaceTupleZipped(ctx: RuleCtx) =
@@ -265,9 +287,183 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.addRight(ap, ".toMap")
     }.asPatch
   }
+
+  object CanBuildFromNothing {
+    def apply(paramss: List[List[Term.Param]], body: Term, ctx: RuleCtx): Patch = {
+      paramss.flatten.collect{
+        case
+          Term.Param(
+            List(Mod.Implicit()),
+            param, 
+            Some(
+              tpe @ Type.Apply(
+                collectionCanBuildFrom(_), 
+                List(
+                  nothing(_), 
+                  t,
+                  cct @ Type.Apply(
+                    cc,
+                    _
+                  )
+                )
+              )
+            ),
+            _
+          ) => new CanBuildFromNothing(param, tpe, t, cct, cc)
+      }.map(_.toFactory(body, ctx)).asPatch
+    }
+  }
+
+  // example:
+  // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]]
+  //
+  // param: cbf
+  // tpe  : collection.generic.CanBuildFrom[Nothing, Int, CC[Int]]
+  // cbf  : CanBuildFrom
+  //   v  : Int
+  // cct  : CC[Int]
+  //  cc  : CC
+
+  case class CanBuildFromNothing(param: Name, tpe: Type.Apply, t: Type, cct: Type.Apply, cc: Type) {
+    def toFactory(body: Term, ctx: RuleCtx): Patch = {
+        val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
+
+        // cbf() / cbf.apply => cbf.newBuilder
+        def replaceNewBuilder(tree: Tree, cbf2: Term): Patch =
+          ctx.replaceTree(tree, Term.Select(cbf2, Term.Name("newBuilder")).syntax)
+
+        // don't patch cbf.apply twice (cbf.apply and cbf.apply())
+        val visitedCbfCalls = scala.collection.mutable.Set[Tree]()
+
+        val cbfCalls = 
+          body.collect {
+            // cbf.apply()
+            case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), Nil) =>
+              visitedCbfCalls += sel
+              replaceNewBuilder(ap, cbf2)
+              
+            // cbf.apply
+            case sel @ Term.Select(cbf2 @ matchCbf(_), ap) if (!visitedCbfCalls.contains(sel)) =>
+              replaceNewBuilder(sel, cbf2)
+
+            // cbf()
+            case ap @ Term.Apply(cbf2 @ matchCbf(_), Nil) =>
+              replaceNewBuilder(ap, cbf2)
+          }.asPatch
+
+
+        val matchCC = SymbolMatcher.exact(ctx.index.symbol(cc).get)
+
+        // e.to[CC] => e.to(cbf)
+        val toCalls =
+          body.collect {
+            case ap @ Term.ApplyType(Term.Select(_, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
+              handledTo += to
+
+              // e.to[CC](*cbf*) extract implicit parameter
+              val synth = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
+              val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
+
+              // This is a bit unsafe
+              // https://github.com/scalameta/scalameta/issues/1636
+              if (implicitCbf.syntax == param.syntax) {
+                trailingBrackets(to, ctx).map { case (open, close) =>
+                  ctx.replaceTree(cc2, implicitCbf.syntax) +
+                  ctx.replaceToken(open, "(") +
+                  ctx.replaceToken(close, ")")
+                }.asPatch
+              } else Patch.empty
+
+          }.asPatch
+
+        // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
+        // implicit cbf: collection.Factory[Int, CC[Int]]
+        val parameterType = 
+          ctx.replaceTree(
+            tpe,
+            Type.Apply(Type.Name("collection.Factory"), List(t, cct)).syntax
+          ) 
+
+        parameterType + cbfCalls + toCalls
+    }
+  }
+
+  object CanBuildFrom {
+    def apply(paramss: List[List[Term.Param]], body: Term, ctx: RuleCtx): Patch = {
+      // CanBuildFrom has def apply() but not CanBuild
+      def emptyApply(param: Name): Boolean = {
+        import scala.meta.contrib._
+        val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
+        body.exists{
+          case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
+          case Term.Apply(matchCbf(_), Nil) => true
+          case _ => false
+        }
+      }
+
+      paramss.flatten.collect{
+        case Term.Param(
+            List(Mod.Implicit()),
+            param,
+            Some(
+              Type.Apply(
+                cbf @ collectionCanBuildFrom(_), 
+                List(p1, _, _)
+              )
+            ),
+            _
+          ) if !nothing.matches(p1) && !emptyApply(param) => new CanBuildFrom(param, cbf)
+      }.map(_.toBuildFrom(body, ctx)).asPatch
+    }
+  }
+
+  // example:
+  // implicit cbf: collection.generic.CanBuildFrom[C0, Int, CC[Int]]
+  // param: cbf
+  // cbf  : collection.generic.CanBuildFrom
+  case class CanBuildFrom(param: Name, cbf: Type) {
+    def toBuildFrom(body: Term, ctx: RuleCtx): Patch = {
+
+      val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
+
+      // cbf(x) / cbf.apply(x) => cbf.newBuilder(x)
+      def replaceNewBuilder(tree: Tree, cbf2: Term, x: Term): Patch =
+        ctx.replaceTree(
+          tree,
+          Term.Apply(Term.Select(cbf2, Term.Name("newBuilder")), List(x)).syntax
+        )
+
+      val cbfCalls = 
+        body.collect {
+          // cbf.apply(x)
+          case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), List(x)) =>
+            replaceNewBuilder(ap, cbf2, x)
+
+          // cbf(x)
+          case ap @ Term.Apply(cbf2 @ matchCbf(_), List(x)) =>
+            replaceNewBuilder(ap, cbf2, x)
+        }.asPatch
+
+      val parameterType = 
+        ctx.replaceTree(cbf, "collection.BuildFrom")
+
+      parameterType + cbfCalls
+    }
+  }
+
+  def replaceCanBuildFrom(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case i: Importee if collectionCanBuildFromImport.matches(i) =>
+        ctx.removeImportee(i)
+      case Defn.Def(_, _, _, paramss, _, body) =>
+        CanBuildFromNothing(paramss, body, ctx) +
+        CanBuildFrom(paramss, body, ctx)
+    }.asPatch
+  }
   
   override def fix(ctx: RuleCtx): Patch = {
-    replaceToList(ctx) +
+    replaceCanBuildFrom(ctx) +
+      replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceCopyToBuffer(ctx) +
@@ -278,9 +474,8 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceSetMapPlus2(ctx) +
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
-      replaceIterableSameElements(ctx) +
       replaceArrayBuilderMake(ctx) +
-      replaceMapMapValues(ctx)
-
+      replaceMapMapValues(ctx) +
+      replaceIterableSameElements(ctx)
   }
 }
