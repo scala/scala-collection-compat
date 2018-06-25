@@ -77,9 +77,15 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
+
   val arrayBuilderMake = 
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
+    )
+
+  val mapZip = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
     )
 
   def replaceMutableSet(ctx: RuleCtx) =
@@ -254,8 +260,14 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       case ap @ Term.Apply(at @ Term.ApplyType(Term.Select(lhs, arrayBuilderMake(_)), args), Nil) =>
         val extraParens =
           ap.tokens.slice(at.tokens.size, ap.tokens.size)
-
         ctx.removeTokens(extraParens)
+    }.asPatch
+  }
+  
+  def replaceMapZip(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case ap @ Term.Apply(Term.Select(_, mapZip(_)), List(_)) =>
+        ctx.addRight(ap, ".toMap")
     }.asPatch
   }
 
@@ -280,7 +292,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutMapUpdated(ctx) +
       replaceIterableSameElements(ctx) +
       replaceArrayBuilderMake(ctx) +
+      replaceMapZip(ctx) +
       replaceMapMapValues(ctx)
-
   }
 }
