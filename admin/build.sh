@@ -52,4 +52,4 @@ if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   fi
 fi
 
-sbt "++$TRAVIS_SCALA_VERSION" "$publishVersion" "$projectPrefix/clean" "$projectPrefix/test" "$projectPrefix/publishLocal" "$publishTask"
+sbt -Dhttps.protocols=TLSv1.2 "++$TRAVIS_SCALA_VERSION" "$publishVersion" "$projectPrefix/clean" "$projectPrefix/test" "$projectPrefix/publishLocal" "$publishTask"

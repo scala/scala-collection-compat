@@ -1,18 +1,11 @@
-# slower instance startup, but needed to work around https://github.com/travis-ci/travis-ci/issues/9713
-sudo: true
-
 language: scala
 
-addons:
-  apt:
-    packages:
-      - openjdk-6-jdk
 scala:
   - 2.11.12
   - 2.12.6
   - 2.13.0-M4
 jdk:
-  - openjdk6
+  - openjdk7
   - oraclejdk8
 env:
   global:
@@ -29,23 +22,41 @@ env:
 
 matrix:
   exclude:
-    - jdk: openjdk6
+    # > 2.12 requires jdk8
+    - jdk: openjdk7
       scala: 2.12.6
-    - jdk: openjdk6
+
+    - jdk: openjdk7
       scala: 2.13.0-M4
+
+    # ?
     - jdk: oraclejdk8
       scala: 2.11.12
+
+    # 2.13.0-M4 is not available in Scala.js 1.0.0-M3
     - scala: 2.13.0-M4
       env: SCALAJS_VERSION=1.0.0-M3
+
+  # run migration test
   include:
     - scala: 2.12.6
       jdk: oraclejdk8
       env: TEST_SCALAFIX=true
 
+# | jdk         |   scala   | scala target | scala target version | scalafix test |
+# | ----------- | --------- | ------------ | -------------------- |---------------|
+# |    openjdk7 | 2.11.12   | jvm          |                      |               |
+# |    openjdk7 | 2.11.12   | js           | 0.6.23               |               |
+# |    openjdk7 | 2.11.12   | js           | 1.0.0-M3             |               |
+# |  oraclejdk8 | 2.12.6    | jvm          |                      |               |
+# |  oraclejdk8 | 2.12.6    | js           | 0.6.23               |               |
+# |  oraclejdk8 | 2.12.6    | js           | 1.0.0-M3             |               |
+# |  oraclejdk8 | 2.13.0-M4 | jvm          |                      |               |
+# |  oraclejdk8 | 2.13.0-M4 | js           | 0.6.23               |               |
+# |  oraclejdk8 | 2.12.6    | jvm          |                      |   true        |
+ 
 before_script: ./checkCLA.sh
 script:
-  # work around https://github.com/travis-ci/travis-ci/issues/9713
-  - if [[ $JAVA_HOME = *java-6* ]]; then jdk_switcher use openjdk6; fi
   - java -version
   - admin/build.sh
 
