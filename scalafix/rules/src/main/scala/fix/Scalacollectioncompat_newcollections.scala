@@ -10,6 +10,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
 
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
+      "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
       "scala.Stream" -> "scala.LazyList",
       "scala.collection.immutable.Stream" -> "scala.collection.immutable.LazyList",
       "scala.Traversable" -> "scala.Iterable",
