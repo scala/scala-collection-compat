@@ -26,6 +26,28 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
+  // terms dont give us terms https://github.com/scalameta/scalameta/issues/1212
+  // if we have a simple identifier, we can look at his definition at query it's type
+  // this should be improved in future version of scalameta
+  object TypeMatcher {
+    def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
+      new TypeMatcher(symbols: _*)(index)
+  }
+
+  final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
+    def unapply(tree: Tree): Boolean = {
+      index.denotation(tree)
+           .map(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
+           .getOrElse(false)
+    }
+  }
+
+  val CollectionMap: TypeMatcher = TypeMatcher(
+    Symbol("_root_.scala.collection.immutable.Map#"),
+    Symbol("_root_.scala.collection.mutable.Map#"),
+    Symbol("_root_.scala.Predef.Map#")
+  )
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
@@ -290,7 +312,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   
   def replaceMapZip(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
-      case ap @ Term.Apply(Term.Select(_, mapZip(_)), List(_)) =>
+      case ap @ Term.Apply(Term.Select(CollectionMap(), mapZip(_)), List(_)) =>
         ctx.addRight(ap, ".toMap")
     }.asPatch
   }
