@@ -46,6 +46,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
     )
 
+  val iterableSameElement = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
+    )
+
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
     val op = 
       if (isLeft) "/:"
@@ -226,6 +231,14 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     }.asPatch
   }
 
+  def replaceIterableSameElements(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
+        ctx.addRight(lhs, ".iterator")
+    }.asPatch
+  }
+  
+
   override def fix(ctx: RuleCtx): Patch = {
     // println(ctx.index.database)
 
@@ -239,6 +252,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
       replaceMutSetMapPlus(ctx) +
-      replaceMutMapUpdated(ctx)
+      replaceMutMapUpdated(ctx) +
+      replaceIterableSameElements(ctx)
   }
 }
