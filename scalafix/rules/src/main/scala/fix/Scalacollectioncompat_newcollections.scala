@@ -67,6 +67,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.MapLike.retain.")
     )
 
+  val mapMapValues = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;.")
+    )
+
   val retainSet = 
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
@@ -253,11 +258,15 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.removeTokens(extraParens)
     }.asPatch
   }
+
+  def replaceMapMapValues(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case ap @ Term.Apply(Term.Select(_, mapMapValues(_)), List(_)) =>
+        ctx.addRight(ap, ".toMap")
+    }.asPatch
+  }
   
-
   override def fix(ctx: RuleCtx): Patch = {
-    // println(ctx.index.database)
-
     replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
@@ -270,6 +279,8 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
       replaceIterableSameElements(ctx) +
-      replaceArrayBuilderMake(ctx)
+      replaceArrayBuilderMake(ctx) +
+      replaceMapMapValues(ctx)
+
   }
 }
