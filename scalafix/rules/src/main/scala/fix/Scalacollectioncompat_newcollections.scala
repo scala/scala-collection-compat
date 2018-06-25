@@ -72,6 +72,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
+  val arrayBuilderMake = 
+    SymbolMatcher.normalized(
+      Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
+    )
+
   def replaceMutableSet(ctx: RuleCtx) =
     ctx.tree.collect {
       case retainSet(n: Name) =>
@@ -238,6 +243,16 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.addRight(lhs, ".iterator")
     }.asPatch
   }
+
+  def replaceArrayBuilderMake(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case ap @ Term.Apply(at @ Term.ApplyType(Term.Select(lhs, arrayBuilderMake(_)), args), Nil) =>
+        val extraParens =
+          ap.tokens.slice(at.tokens.size, ap.tokens.size)
+
+        ctx.removeTokens(extraParens)
+    }.asPatch
+  }
   
 
   override def fix(ctx: RuleCtx): Patch = {
@@ -254,6 +269,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceSetMapPlus2(ctx) +
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
-      replaceIterableSameElements(ctx)
+      replaceIterableSameElements(ctx) +
+      replaceArrayBuilderMake(ctx)
   }
 }
