@@ -9,4 +9,6 @@ class SetMapSrc(set: Set[Int], map: Map[Int, Int]) {
   (set + (2, 3)).map(x => x)
   set + (2, 3) - 4
   map.mapValues(_ + 1)
+  map.zip(List())
+  List().zip(List())
 }

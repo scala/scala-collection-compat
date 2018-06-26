@@ -8,6 +8,28 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  // WARNING: TOTAL HACK
+  // this is only to unblock us until Term.tpe is available: https://github.com/scalameta/scalameta/issues/1212
+  // if we have a simple identifier, we can look at his definition at query it's type
+  // this should be improved in future version of scalameta
+  object TypeMatcher {
+    def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
+      new TypeMatcher(symbols: _*)(index)
+  }
+
+  final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
+    def unapply(tree: Tree): Boolean = {
+      index.denotation(tree)
+           .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
+    }
+  }
+
+  val CollectionMap: TypeMatcher = TypeMatcher(
+    Symbol("_root_.scala.collection.immutable.Map#"),
+    Symbol("_root_.scala.collection.mutable.Map#"),
+    Symbol("_root_.scala.Predef.Map#")
+  )
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
@@ -77,9 +99,15 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
+
   val arrayBuilderMake = 
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
+    )
+
+  val mapZip = 
+    SymbolMatcher.exact(
+      Symbol("_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
     )
 
   def replaceMutableSet(ctx: RuleCtx) =
@@ -254,8 +282,14 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       case ap @ Term.Apply(at @ Term.ApplyType(Term.Select(lhs, arrayBuilderMake(_)), args), Nil) =>
         val extraParens =
           ap.tokens.slice(at.tokens.size, ap.tokens.size)
-
         ctx.removeTokens(extraParens)
+    }.asPatch
+  }
+  
+  def replaceMapZip(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case ap @ Term.Apply(Term.Select(CollectionMap(), mapZip(_)), List(_)) =>
+        ctx.addRight(ap, ".toMap")
     }.asPatch
   }
 
@@ -280,7 +314,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutMapUpdated(ctx) +
       replaceIterableSameElements(ctx) +
       replaceArrayBuilderMake(ctx) +
+      replaceMapZip(ctx) +
       replaceMapMapValues(ctx)
-
   }
 }
