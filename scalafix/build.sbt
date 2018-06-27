@@ -26,6 +26,12 @@ lazy val output = project
     scalaVersion := "2.13.0-M4"
   )
 
+lazy val outputFailure = project.in(file("output-failure"))
+  .settings(
+    resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+    scalaVersion := "2.13.0-M4"
+  )
+
 lazy val tests = project
   .settings(
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
@@ -35,6 +41,8 @@ lazy val tests = project
         sourceDirectory.in(input, Compile).value,
       "outputSourceroot" ->
         sourceDirectory.in(output, Compile).value,
+      "outputFailureSourceroot" ->
+        sourceDirectory.in(outputFailure, Compile).value,
       "inputClassdirectory" ->
         classDirectory.in(input, Compile).value
     ),

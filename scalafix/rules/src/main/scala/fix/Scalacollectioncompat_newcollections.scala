@@ -8,6 +8,8 @@ import scala.meta._
 case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
 
+  // Two rules triggers the same rewrite TraversableLike.to and CanBuildFrom
+  // we keep track of what is handled in CanBuildFrom and guard against TraversableLike.to
   val handledTo = scala.collection.mutable.Set[Tree]()
 
   def trailingParens(tree: Tree, ctx: RuleCtx): Option[(Token.LeftParen, Token.RightParen)] =
@@ -452,13 +454,21 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   }
 
   def replaceCanBuildFrom(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case i: Importee if collectionCanBuildFromImport.matches(i) =>
-        ctx.removeImportee(i)
-      case Defn.Def(_, _, _, paramss, _, body) =>
-        CanBuildFromNothing(paramss, body, ctx) +
-        CanBuildFrom(paramss, body, ctx)
-    }.asPatch
+    val useSites =
+      ctx.tree.collect {
+        case Defn.Def(_, _, _, paramss, _, body) =>
+          CanBuildFromNothing(paramss, body, ctx) +
+          CanBuildFrom(paramss, body, ctx)
+      }.asPatch
+
+    val imports =
+      ctx.tree.collect {
+        case i: Importee if collectionCanBuildFromImport.matches(i) =>
+            ctx.removeImportee(i)
+      }.asPatch
+
+    if (useSites.nonEmpty) useSites + imports
+    else Patch.empty
   }
   
   override def fix(ctx: RuleCtx): Patch = {

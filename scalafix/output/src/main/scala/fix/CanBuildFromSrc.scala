@@ -25,8 +25,11 @@ class CanBuildFromSrc() {
     b.result()
   }
 
-  // negative test
-  // def g[C0, A, C1[_]](c0: C0)(implicit cbf3: CanBuildFrom[C0, A, C1[A]]): C1[A] = {
-  //   cbf3().result()
-  // }
+  def kind(implicit cbf: collection.BuildFrom[String, Char, String],
+                    cbf2: collection.BuildFrom[String, (Int, Boolean), Map[Int, Boolean]]): Unit = {
+
+    cbf.newBuilder("")
+    cbf2.newBuilder("")
+    ()
+  }
 }
