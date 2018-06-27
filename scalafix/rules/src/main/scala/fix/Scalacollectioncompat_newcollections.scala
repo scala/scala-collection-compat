@@ -26,6 +26,31 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
+  // terms dont give us terms https://github.com/scalameta/scalameta/issues/1212
+  // WARNING: TOTAL HACK
+  // this is only to unblock us until Term.tpe is available: https://github.com/scalameta/scalameta/issues/1212
+  // if we have a simple identifier, we can look at his definition at query it's type
+  // this should be improved in future version of scalameta
+  object TypeMatcher {
+    def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
+      new TypeMatcher(symbols: _*)(index)
+  }
+
+  final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
+    def unapply(tree: Tree): Boolean = {
+      index.denotation(tree)
+           .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
+    }
+  }
+
+  val CollectionMap: TypeMatcher = TypeMatcher(
+    Symbol("_root_.scala.collection.immutable.Map#"),
+    Symbol("_root_.scala.collection.mutable.Map#"),
+    Symbol("_root_.scala.Predef.Map#")
+  )
+
+  val CollectionSet: TypeMatcher = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
@@ -110,10 +135,14 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
+
   val arrayBuilderMake = 
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
     )
+
+  def startsWithParens(tree: Tree): Boolean = 
+    tree.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)
 
   def replaceMutableSet(ctx: RuleCtx) =
     ctx.tree.collect {
@@ -216,7 +245,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
     def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
       val tokensToReplace =
-        if(ap.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)) {
+        if(startsWithParens(ap)) {
           // don't drop surrounding parens
           ap.tokens.slice(1, ap.tokens.size - 1)
         } else ap.tokens
@@ -278,10 +307,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       case ap @ Term.Apply(at @ Term.ApplyType(Term.Select(lhs, arrayBuilderMake(_)), args), Nil) =>
         val extraParens =
           ap.tokens.slice(at.tokens.size, ap.tokens.size)
-
         ctx.removeTokens(extraParens)
     }.asPatch
   }
+  
+  
 
   def replaceMapMapValues(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
@@ -485,7 +515,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
       replaceArrayBuilderMake(ctx) +
-      replaceMapMapValues(ctx) +
-      replaceIterableSameElements(ctx)
+      replaceIterableSameElements(ctx) +
+      replaceMapMapValues(ctx)
   }
 }
