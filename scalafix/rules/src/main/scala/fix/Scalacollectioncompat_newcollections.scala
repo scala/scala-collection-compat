@@ -88,18 +88,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     Symbol("_root_.scala.runtime.Tuple2Zipped.Ops.zipped."),
     Symbol("_root_.scala.runtime.Tuple3Zipped.Ops.zipped.")
   )
-  val setPlus = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/Set;.")
-    )
-  val setMinus = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.SetLike#`-`(Ljava/lang/Object;)Lscala/collection/Set;.")
-    )
-  val mapPlus = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/Map;.")
-    )
   val setPlus2 = SymbolMatcher.exact(
     Symbol("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
   )
@@ -151,11 +139,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   val arrayBuilderMake = 
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
-    )
-
-  val mapZip = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
     )
 
   def startsWithParens(tree: Tree): Boolean = 
@@ -287,34 +270,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     }.asPatch
   }
 
-  def replaceSetMapPlusMinus(ctx: RuleCtx): Patch = {
-    def rewriteOp(op: Tree, rhs: Tree, doubleOp: String, col0: String): Patch = {
-      val col = "_root_.scala.collection." + col0
-      val callSite =
-        if (startsWithParens(rhs)) {
-          ctx.addLeft(rhs, col)          
-        }
-        else {
-          ctx.addLeft(rhs, col + "(") +
-          ctx.addRight(rhs, ")")
-        }
-
-      ctx.addRight(op, doubleOp) + callSite
-    }
-
-    ctx.tree.collect {
-      case Term.ApplyInfix(CollectionSet(), op @ setPlus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "+", "Set")
-        
-      case Term.ApplyInfix(CollectionSet(), op @ setMinus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "-", "Set")
-
-      case Term.ApplyInfix(_, op @ mapPlus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "+", "Map")
-    }.asPatch
-  }
-
-
   def replaceMutSetMapPlus(ctx: RuleCtx): Patch = {
     def rewriteMutPlus(lhs: Term, op: Term.Name): Patch = {
       ctx.addRight(lhs, ".clone()") +
@@ -356,12 +311,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     }.asPatch
   }
   
-  def replaceMapZip(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case ap @ Term.Apply(Term.Select(CollectionMap(), mapZip(_)), List(_)) =>
-        ctx.addRight(ap, ".toMap")
-    }.asPatch
-  }
+  
 
   def replaceMapMapValues(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
@@ -562,12 +512,10 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
-      replaceSetMapPlusMinus(ctx) +
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
       replaceArrayBuilderMake(ctx) +
       replaceIterableSameElements(ctx) +
-      replaceMapZip(ctx) +
       replaceMapMapValues(ctx)
   }
 }
