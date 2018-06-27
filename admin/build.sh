@@ -19,14 +19,14 @@ set -e
 RELEASE_COMBO=true
 
 if [[ "$TEST_SCALAFIX" == "true" ]]; then
-  cd scalafix && sbt input/compile output/compile tests/test
+  sbt tests/test
   exit 0
 fi
 
 if [ "$SCALAJS_VERSION" = "" ]; then
-  projectPrefix="scala-collection-compat"
+  projectPrefix="compat"
 else
-  projectPrefix="scala-collection-compatJS"
+  projectPrefix="compatJS"
 fi
 
 verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
