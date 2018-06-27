@@ -8,7 +8,10 @@ class Collectionstrawman_Tests
   extends SemanticRuleSuite(
     SemanticdbIndex.load(Classpath(AbsolutePath(BuildInfo.inputClassdirectory))),
     AbsolutePath(BuildInfo.inputSourceroot),
-    Seq(AbsolutePath(BuildInfo.outputSourceroot))
+    Seq(
+      AbsolutePath(BuildInfo.outputSourceroot), 
+      AbsolutePath(BuildInfo.outputFailureSourceroot)
+    )
   ) {
   runAllTests()
 }
