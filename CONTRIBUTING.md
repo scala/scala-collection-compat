@@ -4,8 +4,8 @@
 
 ### Sbt Projects
 
-- `scala-collection-compat` project (in the root directory): implementation of the compatibility library ;
-- In directory `scalafix/` there is an independent build containing the implementation of the migration tool.
+- `compat` project: implementation of the compatibility library ;
+- `scalafix*`: implementation of the migration tool.
 
 ## Migration tool
 
@@ -29,7 +29,7 @@ Even better, instead of providing a diff, you can directly add it as a test case
 
 1. Fork this repository and create a separate branch;
 
-2. Add a file in the `scalafix/input/src/main/scala/fix/` directory with code
+2. Add a file in the `scalafix-input/src/main/scala/fix/` directory with code
    that uses the standard collections:
 
 ~~~ scala
@@ -38,7 +38,7 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 }
 ~~~
 
-3. Add a corresponding file in the `scalafix/output213/src/main/scala/fix/` directory
+3. Add a corresponding file in the `scalafix-output213/src/main/scala/fix/` directory
    with the same code but using the strawman:
 
 ~~~ scala
@@ -50,7 +50,7 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 ~~~
 
 4. Check that your code example compiles
-    - run sbt from the `scalafix/` directory
+    - run sbt
       and then run the following task `compile`;
 
 5. Commit your changes, push your branch to your fork and create a pull request.
@@ -68,7 +68,7 @@ migration tool on the input files and check whether the result matches the
 expected output files:
 
 ~~~
-> tests/test
+> scalafixTests/test
 ~~~
 
 Fix the implementation of the rule (in the
