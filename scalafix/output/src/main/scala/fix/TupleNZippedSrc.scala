@@ -1,3 +1,6 @@
+
+
+
 package fix
 
 import scala.language.postfixOps
@@ -11,7 +14,7 @@ object Collectionstrawman_v0_Tuple2Zipped {
       ys)
     /* a *//* b */ xs /* c */.lazyZip(/* d */ ys /* e */)/* f *//* g *//* h */
     coll(1).lazyZip(coll(2))
-    List(1, 2, 3).lazyZip(LazyList.from(1))
+    List(1, 2, 3).lazyZip(Array(1))
   }
   def coll(x: Int): List[Int] = ???
 }
@@ -27,7 +30,7 @@ object Collectionstrawman_v0_Tuple3Zipped {
       zs)
     /* a *//* b */ xs /* c */.lazyZip(/* d */ ys /* e */).lazyZip(/* f */ zs /* g */)/* h *//* i *//* j */
     coll(1).lazyZip(coll(2)).lazyZip(coll(3))
-    List(1, 2, 3).lazyZip(Set(1, 2, 3)).lazyZip(LazyList.from(1))
+    List(1, 2, 3).lazyZip(Set(1, 2, 3)).lazyZip(Array(1))
   }
   def coll(x: Int): List[Int] = ???
 }
