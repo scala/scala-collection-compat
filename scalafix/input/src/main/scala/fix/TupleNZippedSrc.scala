@@ -1,5 +1,5 @@
 /*
-rule = "scala:fix.Scalacollectioncompat_newcollections"
+rule = "scala:fix.Stable"
  */
 package fix
 
@@ -14,7 +14,7 @@ object Collectionstrawman_v0_Tuple2Zipped {
       ys).zipped
     /* a */(/* b */ xs /* c */, /* d */ ys /* e */)/* f */./* g */zipped/* h */
     (coll(1), coll(2)).zipped
-    (List(1, 2, 3), Stream.from(1)).zipped
+    (List(1, 2, 3), Array(1)).zipped
   }
   def coll(x: Int): List[Int] = ???
 }
@@ -30,7 +30,7 @@ object Collectionstrawman_v0_Tuple3Zipped {
       zs).zipped
     /* a */(/* b */ xs /* c */, /* d */ ys /* e */, /* f */ zs /* g */)/* h */./* i */zipped/* j */
     (coll(1), coll(2), coll(3)).zipped
-    (List(1, 2, 3), Set(1, 2, 3), Stream.from(1)).zipped
+    (List(1, 2, 3), Set(1, 2, 3), Array(1)).zipped
   }
   def coll(x: Int): List[Int] = ???
 }

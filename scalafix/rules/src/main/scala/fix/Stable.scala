@@ -5,8 +5,7 @@ import scalafix.syntax._
 import scalafix.util._
 import scala.meta._
 
-case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
-  extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
+case class Stable(index: SemanticdbIndex) extends SemanticRule(index, "Stable") {
 
   // Two rules triggers the same rewrite TraversableLike.to and CanBuildFrom
   // we keep track of what is handled in CanBuildFrom and guard against TraversableLike.to
@@ -26,36 +25,9 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
-  // terms dont give us terms https://github.com/scalameta/scalameta/issues/1212
-  // WARNING: TOTAL HACK
-  // this is only to unblock us until Term.tpe is available: https://github.com/scalameta/scalameta/issues/1212
-  // if we have a simple identifier, we can look at his definition at query it's type
-  // this should be improved in future version of scalameta
-  object TypeMatcher {
-    def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
-      new TypeMatcher(symbols: _*)(index)
-  }
-
-  final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
-    def unapply(tree: Tree): Boolean = {
-      index.denotation(tree)
-           .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
-    }
-  }
-
-  val CollectionMap: TypeMatcher = TypeMatcher(
-    Symbol("_root_.scala.collection.immutable.Map#"),
-    Symbol("_root_.scala.collection.mutable.Map#"),
-    Symbol("_root_.scala.Predef.Map#")
-  )
-
-  val CollectionSet: TypeMatcher = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
-
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
-      "scala.Stream" -> "scala.LazyList",
-      "scala.collection.immutable.Stream" -> "scala.collection.immutable.LazyList",
       "scala.Traversable" -> "scala.Iterable",
       "scala.collection.Traversable" -> "scala.collection.Iterable",
       "scala.TraversableOnce" -> "scala.IterableOnce",
@@ -125,10 +97,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       Symbol("_root_.scala.collection.mutable.MapLike.retain.")
     )
 
-  val mapMapValues = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;.")
-    )
+  
 
   val retainSet = 
     SymbolMatcher.normalized(
@@ -232,16 +201,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, q"$buffer ++= $collection".syntax)
     }.asPatch
 
-  val streamAppend = SymbolMatcher.normalized(
-    Symbol("_root_.scala.collection.immutable.Stream.append.")
-  )
-
-  def replaceStreamAppend(ctx: RuleCtx): Patch =
-    ctx.tree.collect {
-      case streamAppend(t: Name) =>
-        ctx.replaceTree(t, "lazyAppendedAll")
-    }.asPatch
-
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
     def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
       val tokensToReplace =
@@ -311,15 +270,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     }.asPatch
   }
   
-  
-
-  def replaceMapMapValues(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case ap @ Term.Apply(Term.Select(_, mapMapValues(_)), List(_)) =>
-        ctx.addRight(ap, ".toMap")
-    }.asPatch
-  }
-
   object CanBuildFromNothing {
     def apply(paramss: List[List[Term.Param]], body: Term, ctx: RuleCtx): Patch = {
       paramss.flatten.collect{
@@ -507,7 +457,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceCopyToBuffer(ctx) +
-      replaceStreamAppend(ctx) +
       replaceMutableMap(ctx) + 
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) +
@@ -515,7 +464,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
       replaceArrayBuilderMake(ctx) +
-      replaceIterableSameElements(ctx) +
-      replaceMapMapValues(ctx)
+      replaceIterableSameElements(ctx)
   }
 }
