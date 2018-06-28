@@ -4,7 +4,7 @@ import scala.meta._
 import scalafix.testkit._
 import scalafix._
 
-class Collectionstrawman_Tests
+class ScalafixTests
   extends SemanticRuleSuite(
     SemanticdbIndex.load(Classpath(AbsolutePath(BuildInfo.inputClassdirectory))),
     AbsolutePath(BuildInfo.inputSourceroot),
