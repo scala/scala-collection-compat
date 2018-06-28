@@ -54,5 +54,5 @@ report it as described in the
 Run the following sbt task on your project:
 
 ~~~
-> scalafix github:scala/scala-collection-compat/NewCollections
+> scalafix github:scala/scala-collection-compat/Stable
 ~~~

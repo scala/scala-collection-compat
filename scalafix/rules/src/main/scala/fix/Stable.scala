@@ -5,8 +5,7 @@ import scalafix.syntax._
 import scalafix.util._
 import scala.meta._
 
-case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
-  extends SemanticRule(index, "Scalacollectioncompat_newcollections") {
+case class Stable(index: SemanticdbIndex) extends SemanticRule(index, "Stable") {
 
   // Two rules triggers the same rewrite TraversableLike.to and CanBuildFrom
   // we keep track of what is handled in CanBuildFrom and guard against TraversableLike.to
@@ -29,8 +28,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
-      "scala.Stream" -> "scala.LazyList",
-      "scala.collection.immutable.Stream" -> "scala.collection.immutable.LazyList",
       "scala.Traversable" -> "scala.Iterable",
       "scala.collection.Traversable" -> "scala.collection.Iterable",
       "scala.TraversableOnce" -> "scala.IterableOnce",
@@ -38,17 +35,17 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     )
   }
 
-  val collectionCanBuildFrom = 
+  val collectionCanBuildFrom =
     SymbolMatcher.exact(
       Symbol("_root_.scala.collection.generic.CanBuildFrom#")
     )
 
-  val collectionCanBuildFromImport = 
+  val collectionCanBuildFromImport =
     SymbolMatcher.exact(
       Symbol("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
     )
-  
-  val nothing = 
+
+  val nothing =
     SymbolMatcher.exact(
       Symbol("_root_.scala.Nothing#")
     )
@@ -75,18 +72,18 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   val mutMapPlus = SymbolMatcher.exact(
     Symbol("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
   )
-  val mutMapUpdate = 
+  val mutMapUpdate =
     SymbolMatcher.exact(
       Symbol("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
     )
 
-  val iterableSameElement = 
+  val iterableSameElement =
     SymbolMatcher.exact(
       Symbol("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
     )
 
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
-    val op = 
+    val op =
       if (isLeft) "/:"
       else ":\\"
 
@@ -95,23 +92,20 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
   val foldLeftSymbol = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
 
-  val retainMap = 
+  val retainMap =
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.MapLike.retain.")
     )
 
-  val mapMapValues = 
-    SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;.")
-    )
 
-  val retainSet = 
+
+  val retainSet =
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.SetLike.retain.")
     )
 
 
-  val arrayBuilderMake = 
+  val arrayBuilderMake =
     SymbolMatcher.normalized(
       Symbol("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
     )
@@ -153,24 +147,24 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
     val functionsReverseIteratorSymbols = List(`SeqLike.reverseMap`)
     val functionsSymbols                = functionsIteratorSymbols ++ functionsViewSymbols ++ functionsReverseIteratorSymbols
 
-    val functionsIterator        = SymbolMatcher.exact(functionsIteratorSymbols: _*) 
-    val functionsReverseIterator = SymbolMatcher.exact(functionsReverseIteratorSymbols: _*) 
-    val functionsView            = SymbolMatcher.exact(functionsViewSymbols: _*) 
-    val functions                = SymbolMatcher.exact(functionsSymbols: _*) 
+    val functionsIterator        = SymbolMatcher.exact(functionsIteratorSymbols: _*)
+    val functionsReverseIterator = SymbolMatcher.exact(functionsReverseIteratorSymbols: _*)
+    val functionsView            = SymbolMatcher.exact(functionsViewSymbols: _*)
+    val functions                = SymbolMatcher.exact(functionsSymbols: _*)
 
     // special select
 
     // iterator
     val `TraversableLike.scanLeft` = SymbolMatcher.exact(Symbol("_root_.scala.collection.TraversableLike#scanLeft(Ljava/lang/Object;Lscala/Function2;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;."))
 
-    def isLeftAssociative(tree: Tree): Boolean = 
+    def isLeftAssociative(tree: Tree): Boolean =
       tree match {
         case Term.Name(value) => value.last != ':'
         case _ => false
       }
   }
 
-  def startsWithParens(tree: Tree): Boolean = 
+  def startsWithParens(tree: Tree): Boolean =
     tree.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)
 
   def replaceMutableSet(ctx: RuleCtx) =
@@ -192,9 +186,9 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         }.asPatch
     }.asPatch
 
-  def replaceSymbolicFold(ctx: RuleCtx) = 
+  def replaceSymbolicFold(ctx: RuleCtx) =
     ctx.tree.collect {
-      case Term.Apply(ap @ Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), _) => 
+      case Term.Apply(ap @ Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), _) =>
         ctx.replaceTree(ap, s"$rhs.foldRight($lhs)")
 
       case Term.Apply(ap @ Term.ApplyInfix(lhs, foldLeftSymbol(_), _, List(rhs)), _) =>
@@ -261,16 +255,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.replaceTree(t, q"$buffer ++= $collection".syntax)
     }.asPatch
 
-  val streamAppend = SymbolMatcher.normalized(
-    Symbol("_root_.scala.collection.immutable.Stream.append.")
-  )
-
-  def replaceStreamAppend(ctx: RuleCtx): Patch =
-    ctx.tree.collect {
-      case streamAppend(t: Name) =>
-        ctx.replaceTree(t, "lazyAppendedAll")
-    }.asPatch
-
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
     def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
       val tokensToReplace =
@@ -279,7 +263,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
           ap.tokens.slice(1, ap.tokens.size - 1)
         } else ap.tokens
 
-      val newTree = 
+      val newTree =
         Term.ApplyInfix(
           Term.ApplyInfix(lhs, op, Nil, List(rhs1)),
           op,
@@ -339,15 +323,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         ctx.removeTokens(extraParens)
     }.asPatch
   }
-  
-  
-
-  def replaceMapMapValues(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case ap @ Term.Apply(Term.Select(_, mapMapValues(_)), List(_)) =>
-        ctx.addRight(ap, ".toMap")
-    }.asPatch
-  }
 
   object CanBuildFromNothing {
     def apply(paramss: List[List[Term.Param]], body: Term, ctx: RuleCtx): Patch = {
@@ -355,12 +330,12 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         case
           Term.Param(
             List(Mod.Implicit()),
-            param, 
+            param,
             Some(
               tpe @ Type.Apply(
-                collectionCanBuildFrom(_), 
+                collectionCanBuildFrom(_),
                 List(
-                  nothing(_), 
+                  nothing(_),
                   t,
                   cct @ Type.Apply(
                     cc,
@@ -396,13 +371,13 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
         // don't patch cbf.apply twice (cbf.apply and cbf.apply())
         val visitedCbfCalls = scala.collection.mutable.Set[Tree]()
 
-        val cbfCalls = 
+        val cbfCalls =
           body.collect {
             // cbf.apply()
             case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), Nil) =>
               visitedCbfCalls += sel
               replaceNewBuilder(ap, cbf2)
-              
+
             // cbf.apply
             case sel @ Term.Select(cbf2 @ matchCbf(_), ap) if (!visitedCbfCalls.contains(sel)) =>
               replaceNewBuilder(sel, cbf2)
@@ -439,11 +414,11 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
 
         // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
         // implicit cbf: collection.Factory[Int, CC[Int]]
-        val parameterType = 
+        val parameterType =
           ctx.replaceTree(
             tpe,
             Type.Apply(Type.Name("collection.Factory"), List(t, cct)).syntax
-          ) 
+          )
 
         parameterType + cbfCalls + toCalls
     }
@@ -468,7 +443,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
             param,
             Some(
               Type.Apply(
-                cbf @ collectionCanBuildFrom(_), 
+                cbf @ collectionCanBuildFrom(_),
                 List(p1, _, _)
               )
             ),
@@ -494,7 +469,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
           Term.Apply(Term.Select(cbf2, Term.Name("newBuilder")), List(x)).syntax
         )
 
-      val cbfCalls = 
+      val cbfCalls =
         body.collect {
           // cbf.apply(x)
           case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), List(x)) =>
@@ -505,7 +480,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
             replaceNewBuilder(ap, cbf2, x)
         }.asPatch
 
-      val parameterType = 
+      val parameterType =
         ctx.replaceTree(cbf, "collection.BuildFrom")
 
       parameterType + cbfCalls
@@ -532,7 +507,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
 
   def replaceBreakout(ctx: RuleCtx): Patch = {
     import Breakout._
-    
+
     def fixIt(intermediate: String, lhs: Term, ap: Term, breakout: Tree): Patch = {
       ctx.addRight(lhs, "." + intermediate) +
       ctx.addRight(ap, ".to") +
@@ -548,18 +523,18 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
           if(isLeftAssociative(op)) lhs
           else rhs
 
-        val intermediate = 
+        val intermediate =
           op match {
             case operatorsIterator(_) => "iterator"
             case operatorsView(_)     => "view"
             // since operators(op) matches iterator and view
             case _                    => throw new Exception("impossible")
           }
-          
+
         fixIt(intermediate, subject, ap, bo)
 
       case Term.Apply(ap @ Term.Apply(Term.Select(lhs, functions(op)), _), List(breakOut(bo))) =>
-        val intermediate = 
+        val intermediate =
           op match {
             case functionsIterator(_)        => "iterator"
             case functionsView(_)            => "view"
@@ -573,33 +548,31 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
           else Patch.empty
 
         val isReversed = `SeqLike.reverseMap`.exact(op)
-        val replaceReverseMap = 
+        val replaceReverseMap =
           if (isReversed) ctx.replaceTree(op, "map")
           else Patch.empty
-          
+
         fixIt(intermediate, lhs, ap, bo) + replaceUnion + replaceReverseMap
 
-      case Term.Apply(ap @ Term.Apply(Term.Apply(Term.Select(lhs, `TraversableLike.scanLeft`(op)), _), _), List(breakOut(bo))) => 
+      case Term.Apply(ap @ Term.Apply(Term.Apply(Term.Select(lhs, `TraversableLike.scanLeft`(op)), _), _), List(breakOut(bo))) =>
         fixIt("iterator", lhs, ap, bo)
     }.asPatch
   }
-  
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceCanBuildFrom(ctx) +
       replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceCopyToBuffer(ctx) +
-      replaceStreamAppend(ctx) +
-      replaceMutableMap(ctx) + 
+      replaceMutableMap(ctx) +
       replaceMutableSet(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
       replaceArrayBuilderMake(ctx) +
-      replaceIterableSameElements(ctx) +
-      replaceMapMapValues(ctx) +
-      replaceBreakout(ctx)
+      replaceBreakout(ctx) +
+      replaceIterableSameElements(ctx)
   }
 }

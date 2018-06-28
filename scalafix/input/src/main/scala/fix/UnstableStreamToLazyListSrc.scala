@@ -1,9 +1,9 @@
 /*
-rule = "scala:fix.Scalacollectioncompat_newcollections"
+rule = "scala:fix.UnstableStreamToLazyList"
  */
 package fix
 
-object StreamSrc {
+class UnstableStreamToLazyListSrc() {
   val s = Stream(1, 2, 3)
   s.append(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: Stream.Empty
