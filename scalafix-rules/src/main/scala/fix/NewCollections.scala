@@ -7,21 +7,15 @@ import scala.meta._
 
 // Not 2.12 Cross-Compatible
 case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "NewCollections") with Stable212Base {
-  // Two rules triggers the same rewrite TraversableLike.to and CanBuildFrom
-  // we keep track of what is handled in CanBuildFrom and guard against TraversableLike.to
-  val handledTo = scala.collection.mutable.Set[Tree]()
-
   //  == Symbols ==
-  val collectionCanBuildFrom       = exact("_root_.scala.collection.generic.CanBuildFrom#")
-  val collectionCanBuildFromImport = exact("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
-  val nothing                      = exact("_root_.scala.Nothing#")
-  val iterableSameElement          = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
-  val toTpe                        = normalized("_root_.scala.collection.TraversableLike.to.")
-  val iterator                     = normalized("_root_.scala.collection.TraversableLike.toIterator.")
-  val tupleZipped                  = normalized("_root_.scala.runtime.Tuple2Zipped.Ops.zipped.",
-                                                "_root_.scala.runtime.Tuple3Zipped.Ops.zipped.")
-  val retainMap                    = normalized("_root_.scala.collection.mutable.MapLike.retain.")
-  val retainSet                    = normalized("_root_.scala.collection.mutable.SetLike.retain.")
+  val iterableSameElement = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
+  val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
+  val tupleZipped = normalized(
+    "_root_.scala.runtime.Tuple2Zipped.Ops.zipped.",
+    "_root_.scala.runtime.Tuple3Zipped.Ops.zipped."
+  )
+  val retainMap = normalized("_root_.scala.collection.mutable.MapLike.retain.")
+  val retainSet = normalized("_root_.scala.collection.mutable.SetLike.retain.")
 
   object Breakout {
     implicit class RichSymbol(val symbol: Symbol) {
@@ -112,7 +106,7 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
       case iterator(t: Name) =>
         ctx.replaceTree(t, "iterator")
 
-      case t @ toTpe(n: Name) if !handledTo.contains(n) =>
+      case t @ toTpe(n: Name) =>
         trailingBrackets(n, ctx).map { case (open, close) =>
           ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
         }.asPatch
@@ -165,27 +159,6 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
       case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
         ctx.addRight(lhs, ".iterator")
     }.asPatch
-  }
-
-  def replaceCanBuildFrom(ctx: RuleCtx): Patch = {
-    val useSites =
-      ctx.tree.collect {
-        case Defn.Def(_, _, _, paramss, _, body) =>
-          val (ps1, ht) = CanBuildFromNothing(paramss, body, ctx, collectionCanBuildFrom, nothing, toTpe)
-          val ps2       = CanBuildFrom       (paramss, body, ctx, collectionCanBuildFrom, nothing)
-          handledTo ++= ht
-
-          ps1 + ps2
-      }.asPatch
-
-    val imports =
-      ctx.tree.collect {
-        case i: Importee if collectionCanBuildFromImport.matches(i) =>
-            ctx.removeImportee(i)
-      }.asPatch
-
-    if (useSites.nonEmpty) useSites + imports
-    else Patch.empty
   }
 
   def replaceBreakout(ctx: RuleCtx): Patch = {
@@ -244,7 +217,6 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
 
   override def fix(ctx: RuleCtx): Patch = {
     super.fix(ctx) +
-      replaceCanBuildFrom(ctx) +
       replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +

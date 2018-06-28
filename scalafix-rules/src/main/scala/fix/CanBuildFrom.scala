@@ -66,7 +66,7 @@ case class CanBuildFrom(param: Name, cbf: Type) {
       }.asPatch
 
     val parameterType =
-      ctx.replaceTree(cbf, "collection.BuildFrom")
+      ctx.replaceTree(cbf, "BuildFrom")
 
     parameterType + cbfCalls
   }
@@ -78,37 +78,28 @@ object CanBuildFromNothing {
             ctx: RuleCtx,
             collectionCanBuildFrom: SymbolMatcher,
             nothing: SymbolMatcher,
-            toTpe: SymbolMatcher)(implicit index: SemanticdbIndex): (Patch, Set[Tree]) = {
-    val handledTo = Set.newBuilder[Tree]
-
-    val patches =
-      paramss.flatten.collect{
-        case
-          Term.Param(
-            List(Mod.Implicit()),
-            param,
-            Some(
-              tpe @ Type.Apply(
-                collectionCanBuildFrom(_),
-                List(
-                  nothing(_),
-                  t,
-                  cct @ Type.Apply(
-                    cc,
-                    _
-                  )
+            toTpe: SymbolMatcher)(implicit index: SemanticdbIndex): Patch = {
+    paramss.flatten.collect{
+      case
+        Term.Param(
+          List(Mod.Implicit()),
+          param,
+          Some(
+            tpe @ Type.Apply(
+              collectionCanBuildFrom(_),
+              List(
+                nothing(_),
+                t,
+                cct @ Type.Apply(
+                  cc,
+                  _
                 )
               )
-            ),
-            _
-          ) => new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe)
-      }.map{cbf =>
-        val (ps, ht) = cbf.toFactory
-        handledTo ++= ht
-        ps
-      }.asPatch
-
-    (patches, handledTo.result())
+            )
+          ),
+          _
+        ) => new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe)
+    }.map(_.toFactory).asPatch
   }
 }
 
@@ -129,9 +120,7 @@ case class CanBuildFromNothing(param: Name,
                                body: Term,
                                ctx: RuleCtx,
                                toTpe: SymbolMatcher) {
-  def toFactory(implicit index: SemanticdbIndex): (Patch, Set[Tree]) = {
-    val handledTo = Set.newBuilder[Tree]
-
+  def toFactory(implicit index: SemanticdbIndex): Patch = {
     val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
 
     // cbf() / cbf.apply => cbf.newBuilder
@@ -160,11 +149,10 @@ case class CanBuildFromNothing(param: Name,
 
     val matchCC = SymbolMatcher.exact(ctx.index.symbol(cc).get)
 
-    // e.to[CC] => e.to(cbf)
+    // e.to[CC] => cbf.fromSpecific(e)
     val toCalls =
       body.collect {
-        case ap @ Term.ApplyType(Term.Select(_, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
-          handledTo += to
+        case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
 
           // e.to[CC](*cbf*) extract implicit parameter
           val synth = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
@@ -173,23 +161,25 @@ case class CanBuildFromNothing(param: Name,
           // This is a bit unsafe
           // https://github.com/scalameta/scalameta/issues/1636
           if (implicitCbf.syntax == param.syntax) {
-            trailingBrackets(to, ctx).map { case (open, close) =>
-              ctx.replaceTree(cc2, implicitCbf.syntax) +
-              ctx.replaceToken(open, "(") +
-              ctx.replaceToken(close, ")")
-            }.asPatch
+
+            // .to[CC]
+            val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
+
+            ctx.removeTokens(apToRemove) +
+            ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
+            ctx.addRight(e, ")")
           } else Patch.empty
 
       }.asPatch
 
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
-    // implicit cbf: collection.Factory[Int, CC[Int]]
+    // implicit cbf: Factory[Int, CC[Int]]
     val parameterType =
       ctx.replaceTree(
         tpe,
-        Type.Apply(Type.Name("collection.Factory"), List(t, cct)).syntax
+        Type.Apply(Type.Name("Factory"), List(t, cct)).syntax
       )
 
-    (parameterType + cbfCalls + toCalls, handledTo.result())
+    parameterType + cbfCalls + toCalls
   }
 }

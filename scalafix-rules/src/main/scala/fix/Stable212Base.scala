@@ -17,15 +17,19 @@ trait Stable212Base { self: SemanticRule =>
     normalized(s"_root_.scala.collection.TraversableOnce.`$op`.")
   }
 
-  val copyToBuffer     = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
+  val toTpe = normalized("_root_.scala.collection.TraversableLike.to.")
+  val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
   val arrayBuilderMake = normalized("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
-  val setPlus2         = exact("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
-  val mapPlus2         = exact("_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
-  val mutSetPlus       = exact("_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
-  val mutMapPlus       = exact("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
-  val mutMapUpdate     = exact("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
-  val foldLeftSymbol   = foldSymbol(isLeft = true)
-  val foldRightSymbol  = foldSymbol(isLeft = false)
+  val collectionCanBuildFrom = exact("_root_.scala.collection.generic.CanBuildFrom#")
+  val collectionCanBuildFromImport = exact("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
+  val nothing = exact("_root_.scala.Nothing#")
+  val setPlus2 = exact("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
+  val mapPlus2 = exact("_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
+  val mutSetPlus = exact("_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
+  val mutMapPlus = exact("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
+  val mutMapUpdate = exact("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
+  val foldLeftSymbol = foldSymbol(isLeft = true)
+  val foldRightSymbol = foldSymbol(isLeft = false)
 
   // == Rules ==
 
@@ -116,8 +120,30 @@ trait Stable212Base { self: SemanticRule =>
     }.asPatch
   }
 
+  def replaceCanBuildFrom(ctx: RuleCtx): Patch = {
+    val useSites =
+      ctx.tree.collect {
+        case Defn.Def(_, _, _, paramss, _, body) =>
+          CanBuildFromNothing(paramss, body, ctx, collectionCanBuildFrom, nothing, toTpe) +
+            CanBuildFrom(paramss, body, ctx, collectionCanBuildFrom, nothing)
+      }.asPatch
+
+    val imports =
+      ctx.tree.collect {
+        case i: Importee if collectionCanBuildFromImport.matches(i) =>
+            ctx.removeImportee(i)
+      }.asPatch
+
+    val compatImport =
+      ctx.addGlobalImport(importer"scala.collection.compat._")
+
+    if (useSites.nonEmpty) useSites + imports + compatImport
+    else Patch.empty
+  }
+
   override def fix(ctx: RuleCtx): Patch = {
     replaceSymbols0(ctx) +
+      replaceCanBuildFrom(ctx) +
       replaceCopyToBuffer(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
