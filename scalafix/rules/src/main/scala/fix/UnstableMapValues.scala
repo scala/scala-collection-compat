@@ -6,11 +6,12 @@ import scalafix.util._
 import scala.meta._
 
 
-/*
+/* 2.12 Cross-Compatible
+ *
  * This rules is marked unstable since Map.mapValues was lazy
  */
 case class UnstableMapValues(index: SemanticdbIndex) extends SemanticRule(index, "UnstableMapValues") {
-  val mapMapValues = 
+  val mapMapValues =
     SymbolMatcher.exact(
       Symbol("_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;.")
     )

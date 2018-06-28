@@ -5,7 +5,8 @@ import scalafix.syntax._
 import scalafix.util._
 import scala.meta._
 
-/*
+/* Not 2.12 Cross-Compatible
+ *
  * This rules is marked unstable since Stream is not strictly equivalent to LazyList.
  * LazyList has a lazy head but not Stream
  */
@@ -31,5 +32,5 @@ case class UnstableStreamToLazyList(index: SemanticdbIndex) extends SemanticRule
 
   override def fix(ctx: RuleCtx): Patch = {
     replaceStreamAppend(ctx) + replaceSymbols(ctx)
-  }  
+  }
 }

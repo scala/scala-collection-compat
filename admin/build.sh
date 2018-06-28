@@ -19,7 +19,7 @@ set -e
 RELEASE_COMBO=true
 
 if [[ "$TEST_SCALAFIX" == "true" ]]; then
-  cd scalafix && sbt input/compile output/compile tests/test
+  cd scalafix && sbt tests/test
   exit 0
 fi
 

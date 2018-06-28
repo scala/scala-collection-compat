@@ -8,7 +8,7 @@ inScope(Global)(
 lazy val root = project
   .in(file("."))
   .aggregate(
-    rules, input, output, tests
+    rules, input, output212, output213, output213Failure, tests
   )
 
 lazy val rules = project.settings(
@@ -20,13 +20,15 @@ lazy val input = project
     scalafixSourceroot := sourceDirectory.in(Compile).value
   )
 
-lazy val output = project
+lazy val output212 = project
+
+lazy val output213 = project
   .settings(
     resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
     scalaVersion := "2.13.0-M4"
   )
 
-lazy val outputFailure = project.in(file("output-failure"))
+lazy val output213Failure = project.in(file("output213-failure"))
   .settings(
     resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
     scalaVersion := "2.13.0-M4"
@@ -39,14 +41,19 @@ lazy val tests = project
     buildInfoKeys := Seq[BuildInfoKey](
       "inputSourceroot" ->
         sourceDirectory.in(input, Compile).value,
-      "outputSourceroot" ->
-        sourceDirectory.in(output, Compile).value,
-      "outputFailureSourceroot" ->
-        sourceDirectory.in(outputFailure, Compile).value,
+      "output212Sourceroot" ->
+        sourceDirectory.in(output212, Compile).value,
+      "output213Sourceroot" ->
+        sourceDirectory.in(output213, Compile).value,
+      "output213FailureSourceroot" ->
+        sourceDirectory.in(output213Failure, Compile).value,
       "inputClassdirectory" ->
         classDirectory.in(input, Compile).value
     ),
-    test in Test := (test in Test).dependsOn(compile in (output, Compile)).value
+    test in Test := (test in Test).dependsOn(
+      compile in (output212, Compile),
+      compile in (output213, Compile)
+    ).value
   )
   .dependsOn(input, rules)
   .enablePlugins(BuildInfoPlugin)
