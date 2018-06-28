@@ -26,31 +26,6 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
-  // terms dont give us terms https://github.com/scalameta/scalameta/issues/1212
-  // WARNING: TOTAL HACK
-  // this is only to unblock us until Term.tpe is available: https://github.com/scalameta/scalameta/issues/1212
-  // if we have a simple identifier, we can look at his definition at query it's type
-  // this should be improved in future version of scalameta
-  object TypeMatcher {
-    def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
-      new TypeMatcher(symbols: _*)(index)
-  }
-
-  final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
-    def unapply(tree: Tree): Boolean = {
-      index.denotation(tree)
-           .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
-    }
-  }
-
-  val CollectionMap: TypeMatcher = TypeMatcher(
-    Symbol("_root_.scala.collection.immutable.Map#"),
-    Symbol("_root_.scala.collection.mutable.Map#"),
-    Symbol("_root_.scala.Predef.Map#")
-  )
-
-  val CollectionSet: TypeMatcher = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
-
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
       "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
@@ -577,6 +552,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
           op match {
             case operatorsIterator(_) => "iterator"
             case operatorsView(_)     => "view"
+            // since operators(op) matches iterator and view
             case _                    => throw new Exception("impossible")
           }
           
@@ -588,6 +564,7 @@ case class Scalacollectioncompat_newcollections(index: SemanticdbIndex)
             case functionsIterator(_)        => "iterator"
             case functionsView(_)            => "view"
             case functionsReverseIterator(_) => "reverseIterator"
+            // since functions(op) matches iterator, view and reverseIterator
             case _                           => throw new Exception("impossible")
           }
 
