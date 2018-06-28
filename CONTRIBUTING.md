@@ -31,16 +31,16 @@ Even better, instead of providing a diff, you can directly add it as a test case
 
 2. Add a file in the `scalafix/input/src/main/scala/fix/` directory with code
    that uses the standard collections:
-   
+
 ~~~ scala
 class toIteratorVsIterator(xs: Iterable[Int]) {
   xs.toIterator
 }
 ~~~
 
-3. Add a corresponding file in the `scalafix/output/src/main/scala/fix/` directory
+3. Add a corresponding file in the `scalafix/output213/src/main/scala/fix/` directory
    with the same code but using the strawman:
-   
+
 ~~~ scala
 import strawman.collection.Iterable
 
@@ -51,7 +51,7 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 
 4. Check that your code example compiles
     - run sbt from the `scalafix/` directory
-      and then run the following tasks `; input/compile ; output/compile`;
+      and then run the following task `compile`;
 
 5. Commit your changes, push your branch to your fork and create a pull request.
 
@@ -72,6 +72,6 @@ expected output files:
 ~~~
 
 Fix the implementation of the rule (in the
-`rules/src/main/scala/fix/Scalacollectioncompat_v0.scala` file) until the
+`rules/src/main/scala/fix/NewCollections.scala` file) until the
 tests are green. You can find more help about the scalafix API in its
 [documentation](https://scalacenter.github.io/scalafix/docs/rule-authors/setup).
