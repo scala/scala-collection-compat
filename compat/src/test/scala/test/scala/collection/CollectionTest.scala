@@ -52,4 +52,15 @@ class CollectionTest {
     val xs = Iterator(1, 2, 3).iterator.toList
     assertEquals(List(1, 2, 3), xs)
   }
+
+  @Test
+  def testSameElements: Unit = {
+    val it1: Iterable[Int] = List(1)
+    val it2: Iterable[Int] = List(1, 2, 3)
+    val it3: Iterable[Int] = List(1, 2, 3)
+
+    assertTrue(it1.iterator.sameElements(it1))
+    assertFalse(it1.iterator.sameElements(it2))
+    assertTrue(it2.iterator.sameElements(it3))
+  }
 }

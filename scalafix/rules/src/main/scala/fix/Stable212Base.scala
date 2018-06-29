@@ -4,10 +4,20 @@ import scalafix._
 import scalafix.util._
 import scala.meta._
 
-// 2.12 Cross-Compatible
-trait Stable212Base { self: SemanticRule =>
+import scala.collection.mutable
 
-    //  == Symbols ==
+trait CrossCompatibility {
+  def isCrossCompatible: Boolean
+}
+
+// 2.12 Cross-Compatible
+trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
+
+  // Two rules triggers the same rewrite TraversableLike.to and CanBuildFrom
+  // we keep track of what is handled in CanBuildFrom and guard against TraversableLike.to
+  val handledTo = mutable.Set[Tree]()
+
+  //  == Symbols ==
   def foldSymbol(isLeft: Boolean): SymbolMatcher = {
     val op =
       if (isLeft) "/:"
@@ -16,9 +26,11 @@ trait Stable212Base { self: SemanticRule =>
     normalized(s"_root_.scala.collection.TraversableOnce.`$op`.")
   }
 
+  val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
   val toTpe = normalized("_root_.scala.collection.TraversableLike.to.")
   val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
   val arrayBuilderMake = normalized("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
+  val iterableSameElement = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
   val collectionCanBuildFrom = exact("_root_.scala.collection.generic.CanBuildFrom#")
   val collectionCanBuildFromImport = exact("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
   val nothing = exact("_root_.scala.Nothing#")
@@ -30,14 +42,48 @@ trait Stable212Base { self: SemanticRule =>
   val foldLeftSymbol = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
 
+  val traversable = exact(
+    "_root_.scala.package.Traversable#",
+    "_root_.scala.collection.Traversable#",
+    "_root_.scala.package.Iterable#",
+    "_root_.scala.collection.Iterable#"
+  )
+
   // == Rules ==
 
+  def replaceIterableSameElements(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
+        ctx.addRight(lhs, ".iterator")
+    }.asPatch
+  }
+
+
   def replaceSymbols0(ctx: RuleCtx): Patch = {
-    ctx.replaceSymbols(
-      "scala.collection.LinearSeq"   -> "scala.collection.immutable.List",
-      "scala.Traversable"            -> "scala.Iterable",
-      "scala.collection.Traversable" -> "scala.collection.Iterable"
-    )
+    val traversableToIterable =
+      ctx.replaceSymbols(
+        "scala.Traversable"            -> "scala.Iterable",
+        "scala.collection.Traversable" -> "scala.collection.Iterable"
+      )
+
+    val linearSeqToList =
+      ctx.replaceSymbols(
+        "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
+      )
+
+    import scala.meta.contrib._
+    val hasTraversable =
+        ctx.tree.exists {
+          case traversable(_) => true
+          case _ => false
+
+        }
+
+    val compatImport =
+      if (hasTraversable) addCompatImport(ctx)
+      else Patch.empty
+
+    traversableToIterable + linearSeqToList + compatImport
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {
@@ -123,7 +169,7 @@ trait Stable212Base { self: SemanticRule =>
     val useSites =
       ctx.tree.collect {
         case Defn.Def(_, _, _, paramss, _, body) =>
-          CanBuildFromNothing(paramss, body, ctx, collectionCanBuildFrom, nothing, toTpe) +
+          CanBuildFromNothing(paramss, body, ctx, collectionCanBuildFrom, nothing, toTpe, handledTo) +
             CanBuildFrom(paramss, body, ctx, collectionCanBuildFrom, nothing)
       }.asPatch
 
@@ -133,22 +179,41 @@ trait Stable212Base { self: SemanticRule =>
             ctx.removeImportee(i)
       }.asPatch
 
-    val compatImport =
-      ctx.addGlobalImport(importer"scala.collection.compat._")
+    val compatImport = addCompatImport(ctx)
 
     if (useSites.nonEmpty) useSites + imports + compatImport
+    else Patch.empty
+  }
+
+  def replaceToList(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case iterator(t: Name) =>
+        ctx.replaceTree(t, "iterator")
+
+      case t @ toTpe(n: Name) if !handledTo.contains(n) =>
+        trailingBrackets(n, ctx).map { case (open, close) =>
+          ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
+        }.asPatch
+    }.asPatch
+  }
+
+
+  def addCompatImport(ctx: RuleCtx): Patch = {
+    if (isCrossCompatible) ctx.addGlobalImport(importer"scala.collection.compat._")
     else Patch.empty
   }
 
   override def fix(ctx: RuleCtx): Patch = {
     replaceSymbols0(ctx) +
       replaceCanBuildFrom(ctx) +
+      replaceToList(ctx) +
       replaceCopyToBuffer(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +
       replaceMutSetMapPlus(ctx) +
       replaceMutMapUpdated(ctx) +
-      replaceArrayBuilderMake(ctx)
+      replaceArrayBuilderMake(ctx) +
+      replaceIterableSameElements(ctx)
   }
 
 }

@@ -14,5 +14,8 @@ class ScalafixTests
       AbsolutePath(BuildInfo.output213FailureSourceroot)
     )
   ) {
+
   runAllTests()
+  // to run only one test:
+  // testsToRun.filter(_.filename.toNIO.getFileName.toString == "IterableSrc.scala" ).foreach(runOn)
 }

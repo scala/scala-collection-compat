@@ -4,6 +4,8 @@ import scalafix._
 import scalafix.util._
 import scala.meta._
 
+import scala.collection.mutable
+
 object CanBuildFrom {
   def apply(paramss: List[List[Term.Param]],
             body: Term,
@@ -77,7 +79,8 @@ object CanBuildFromNothing {
             ctx: RuleCtx,
             collectionCanBuildFrom: SymbolMatcher,
             nothing: SymbolMatcher,
-            toTpe: SymbolMatcher)(implicit index: SemanticdbIndex): Patch = {
+            toTpe: SymbolMatcher,
+            handledTo: mutable.Set[Tree])(implicit index: SemanticdbIndex): Patch = {
     paramss.flatten.collect{
       case
         Term.Param(
@@ -97,7 +100,7 @@ object CanBuildFromNothing {
             )
           ),
           _
-        ) => new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe)
+        ) => new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe, handledTo)
     }.map(_.toFactory).asPatch
   }
 }
@@ -118,7 +121,8 @@ case class CanBuildFromNothing(param: Name,
                                cc: Type,
                                body: Term,
                                ctx: RuleCtx,
-                               toTpe: SymbolMatcher) {
+                               toTpe: SymbolMatcher,
+                               handledTo: mutable.Set[Tree]) {
   def toFactory(implicit index: SemanticdbIndex): Patch = {
     val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
 
@@ -127,7 +131,7 @@ case class CanBuildFromNothing(param: Name,
       ctx.replaceTree(tree, Term.Select(cbf2, Term.Name("newBuilder")).syntax)
 
     // don't patch cbf.apply twice (cbf.apply and cbf.apply())
-    val visitedCbfCalls = scala.collection.mutable.Set[Tree]()
+    val visitedCbfCalls = mutable.Set[Tree]()
 
     val cbfCalls =
       body.collect {
@@ -152,6 +156,8 @@ case class CanBuildFromNothing(param: Name,
     val toCalls =
       body.collect {
         case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
+
+          handledTo += to
 
           // e.to[CC](*cbf*) extract implicit parameter
           val synth = ctx.index.synthetics.find(_.position.end == ap.pos.end).get

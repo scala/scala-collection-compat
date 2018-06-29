@@ -5,10 +5,15 @@ import scalafix.util._
 import scala.meta._
 
 // Not 2.12 Cross-Compatible
-case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "NewCollections") with Stable212Base {
+case class NewCollections(index: SemanticdbIndex)
+  extends SemanticRule(index, "NewCollections")
+  with Stable212Base {
+
+
+  def isCrossCompatible: Boolean = false
+
   //  == Symbols ==
-  val iterableSameElement = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
-  val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
+
   val tupleZipped = normalized(
     "_root_.scala.runtime.Tuple2Zipped.Ops.zipped.",
     "_root_.scala.runtime.Tuple3Zipped.Ops.zipped."
@@ -100,18 +105,6 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
     }.asPatch
   }
 
-  def replaceToList(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case iterator(t: Name) =>
-        ctx.replaceTree(t, "iterator")
-
-      case t @ toTpe(n: Name) =>
-        trailingBrackets(n, ctx).map { case (open, close) =>
-          ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
-        }.asPatch
-    }.asPatch
-  }
-
   def replaceTupleZipped(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
       case tupleZipped(Term.Select(Term.Tuple(args), name)) =>
@@ -150,13 +143,6 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
         }
 
         removeTokensPatch + replaceCommasPatch
-    }.asPatch
-  }
-
-  def replaceIterableSameElements(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
-        ctx.addRight(lhs, ".iterator")
     }.asPatch
   }
 
@@ -216,12 +202,10 @@ case class NewCollections(index: SemanticdbIndex) extends SemanticRule(index, "N
 
   override def fix(ctx: RuleCtx): Patch = {
     super.fix(ctx) +
-      replaceToList(ctx) +
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceMutableMap(ctx) +
       replaceMutableSet(ctx) +
-      replaceBreakout(ctx) +
-      replaceIterableSameElements(ctx)
+      replaceBreakout(ctx)
   }
 }
