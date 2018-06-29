@@ -1,9 +1,9 @@
 /*
-rule = "scala:fix.UnstableStreamToLazyList"
+rule = "scala:fix.RoughlyStreamToLazyList"
  */
 package fix
 
-class UnstableStreamToLazyListSrc() {
+class RoughlyStreamToLazyListSrc() {
   val s = Stream(1, 2, 3)
   s.append(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: Stream.Empty

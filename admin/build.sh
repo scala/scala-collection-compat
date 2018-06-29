@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -18,10 +18,6 @@ set -e
 
 RELEASE_COMBO=true
 
-if [[ "$TEST_SCALAFIX" == "true" ]]; then
-  sbt scalafixTests/test
-fi
-
 if [ "$SCALAJS_VERSION" = "" ]; then
   if [[ "$TEST_SCALAFIX" == "true" ]]; then
     projectPrefix="scalafixRules"
@@ -32,8 +28,19 @@ else
   projectPrefix="compatJS"
 fi
 
+if [[ "$TEST_SCALAFIX" == "true" ]]; then
+  crossScalaVersion="noop"
+  testProjectPrefix="scalafixTests"
+else
+  crossScalaVersion="++$TRAVIS_SCALA_VERSION"
+  testProjectPrefix="$projectPrefix"
+fi
+
 verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
 tagPat="^v$verPat(#.*)?$"
+
+publishVersion="noop"
+publishTask="noop"
 
 if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   tagVer=$(echo $TRAVIS_TAG | sed s/#.*// | sed s/^v//)
@@ -55,10 +62,4 @@ if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   fi
 fi
 
-sbt -Dhttps.protocols=TLSv1.2 \
-  "++$TRAVIS_SCALA_VERSION" \
-  "$publishVersion" \
-  "$projectPrefix/clean" \
-  "$projectPrefix/test" \
-  "$projectPrefix/publishLocal" \
-  "$publishTask"
+sbt -Dhttps.protocols=TLSv1.2 -sbt-dir=/home/travis/.sbt ";$crossScalaVersion ;$publishVersion ;$projectPrefix/clean ;$testProjectPrefix/test ;$projectPrefix/publishLocal ;$publishTask"

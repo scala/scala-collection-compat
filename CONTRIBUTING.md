@@ -29,7 +29,7 @@ Even better, instead of providing a diff, you can directly add it as a test case
 
 1. Fork this repository and create a separate branch;
 
-2. Add a file in the `scalafix-input/src/main/scala/fix/` directory with code
+2. Add a file in the `scalafix/input/src/main/scala/fix/` directory with code
    that uses the standard collections:
 
 ~~~ scala
@@ -38,7 +38,7 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 }
 ~~~
 
-3. Add a corresponding file in the `scalafix-output213/src/main/scala/fix/` directory
+3. Add a corresponding file in the `scalafix/output213/src/main/scala/fix/` directory
    with the same code but using the strawman:
 
 ~~~ scala

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #
 # Encrypt sonatype credentials so that they can be
 # decrypted in trusted builds on Travis CI.

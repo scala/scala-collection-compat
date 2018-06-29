@@ -9,7 +9,7 @@ import scala.meta._
  * This rules is marked unstable since Stream is not strictly equivalent to LazyList.
  * LazyList has a lazy head but not Stream
  */
-case class UnstableStreamToLazyList(index: SemanticdbIndex) extends SemanticRule(index, "UnstableStreamToLazyList") {
+case class RoughlyStreamToLazyList(index: SemanticdbIndex) extends SemanticRule(index, "RoughlyStreamToLazyList") {
 
   val streamAppend = SymbolMatcher.normalized(
     Symbol("_root_.scala.collection.immutable.Stream.append.")

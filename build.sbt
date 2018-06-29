@@ -49,7 +49,7 @@ lazy val compatJVM = compat.jvm
 lazy val compatJS  = compat.js
 
 lazy val scalafixRules = project
-  .in(file("scalafix-rules"))
+  .in(file("scalafix/rules"))
   .settings(scalaModuleSettings)
   .settings(scalaModuleSettingsJVM)
   .settings(
@@ -61,7 +61,7 @@ lazy val scalafixRules = project
 // == Scalafix Test Setup ==
 
 lazy val scalafixInput = project
-  .in(file("scalafix-input"))
+  .in(file("scalafix/input"))
   .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
@@ -69,23 +69,23 @@ lazy val scalafixInput = project
   )
 
 lazy val scalafixOutput212 = project
-  .in(file("scalafix-output212"))
+  .in(file("scalafix/output212"))
   .settings(scalaVersion := scalafixScala212)
   .settings(dontPublish)
   .dependsOn(compatJVM)
 
 lazy val scalafixOutput213 = project
-  .in(file("scalafix-output213"))
+  .in(file("scalafix/output213"))
   .settings(scala213Settings)
   .settings(dontPublish)
 
 lazy val scalafixOutput213Failure = project
-  .in(file("scalafix-output213-failure"))
+  .in(file("scalafix/output213-failure"))
   .settings(scala213Settings)
   .settings(dontPublish)
 
 lazy val scalafixTests = project
-  .in(file("scalafix-tests"))
+  .in(file("scalafix/tests"))
   .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
@@ -128,5 +128,9 @@ lazy val scala213Settings = Seq(
 
 // required by sbt-scala-module
 inThisBuild(Seq(
-  crossScalaVersions := Seq(scala212, scala213, "2.11.12")
+  crossScalaVersions := Seq(scala212, scala213, "2.11.12"),
+  commands += Command.command("noop") { state =>
+    println("noop")
+    state
+  }
 ))
