@@ -1,7 +1,6 @@
 package fix
 
 import scalafix._
-import scalafix.syntax._
 import scalafix.util._
 import scala.meta._
 

@@ -2,21 +2,9 @@ import ScalaModulePlugin._
 import sbtcrossproject.{crossProject, CrossType}
 import _root_.scalafix.Versions.{version => scalafixVersion, scala212 => scalafixScala212}
 
-lazy val scala212 = "2.12.6"
-lazy val scala213 = "2.13.0-M4"
-
-lazy val scala213Settings = Seq(
-  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  scalaVersion := scala213
-)
-
-inThisBuild(Seq(
-  crossScalaVersions := Seq(scala212, scala213, "2.11.12")
-))
-
-
 lazy val root = project
   .in(file("."))
+  .settings(dontPublish)
   .aggregate(
     compatJVM, compatJS,
     scalafixRules, scalafixInput, scalafixTests,
@@ -24,58 +12,7 @@ lazy val root = project
   )
   .disablePlugins(ScalafixPlugin)
 
-lazy val scalafixInput = project
-  .in(file("scalafix-input"))
-  .settings(
-    scalaVersion := scalafixScala212,
-    scalafixSourceroot := sourceDirectory.in(Compile).value
-  )
-
-lazy val scalafixOutput212 = project
-  .in(file("scalafix-output212"))
-  .settings(scalaVersion := scalafixScala212)
-  .dependsOn(compatJVM)
-
-lazy val scalafixOutput213 = project
-  .in(file("scalafix-output213"))
-  .settings(scala213Settings)
-
-lazy val scalafixOutput213Failure = project
-  .in(file("scalafix-output213-failure"))
-  .settings(scala213Settings)
-
-lazy val scalafixRules = project
-  .in(file("scalafix-rules"))
-  .settings(
-    scalaVersion := scalafixScala212,
-    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
-  )
-
-lazy val scalafixTests = project
-  .in(file("scalafix-tests"))
-  .settings(
-    scalaVersion := scalafixScala212,
-    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    buildInfoPackage := "fix",
-    buildInfoKeys := Seq[BuildInfoKey](
-      "inputSourceroot" ->
-        sourceDirectory.in(scalafixInput, Compile).value,
-      "output212Sourceroot" ->
-        sourceDirectory.in(scalafixOutput212, Compile).value,
-      "output213Sourceroot" ->
-        sourceDirectory.in(scalafixOutput213, Compile).value,
-      "output213FailureSourceroot" ->
-        sourceDirectory.in(scalafixOutput213Failure, Compile).value,
-      "inputClassdirectory" ->
-        classDirectory.in(scalafixInput, Compile).value
-    ),
-    test in Test := (test in Test).dependsOn(
-      compile in (scalafixOutput212, Compile),
-      compile in (scalafixOutput213, Compile)
-    ).value
-  )
-  .dependsOn(scalafixInput, scalafixRules)
-  .enablePlugins(BuildInfoPlugin)
+// == Core Libraries ==
 
 lazy val compat = crossProject(JSPlatform, JVMPlatform)
   .withoutSuffixFor(JVMPlatform)
@@ -110,3 +47,86 @@ lazy val compat = crossProject(JSPlatform, JVMPlatform)
 
 lazy val compatJVM = compat.jvm
 lazy val compatJS  = compat.js
+
+lazy val scalafixRules = project
+  .in(file("scalafix-rules"))
+  .settings(scalaModuleSettings)
+  .settings(
+    name := "scala-collection-migrations",
+    scalaVersion := scalafixScala212,
+    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
+  )
+
+
+// == Scalafix Test Setup ==
+
+lazy val scalafixInput = project
+  .in(file("scalafix-input"))
+  .settings(dontPublish)
+  .settings(
+    scalaVersion := scalafixScala212,
+    scalafixSourceroot := sourceDirectory.in(Compile).value
+  )
+
+lazy val scalafixOutput212 = project
+  .in(file("scalafix-output212"))
+  .settings(scalaVersion := scalafixScala212)
+  .settings(dontPublish)
+  .dependsOn(compatJVM)
+
+lazy val scalafixOutput213 = project
+  .in(file("scalafix-output213"))
+  .settings(scala213Settings)
+  .settings(dontPublish)
+
+lazy val scalafixOutput213Failure = project
+  .in(file("scalafix-output213-failure"))
+  .settings(scala213Settings)
+  .settings(dontPublish)
+
+lazy val scalafixTests = project
+  .in(file("scalafix-tests"))
+  .settings(dontPublish)
+  .settings(
+    scalaVersion := scalafixScala212,
+    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
+    buildInfoPackage := "fix",
+    buildInfoKeys := Seq[BuildInfoKey](
+      "inputSourceroot" ->
+        sourceDirectory.in(scalafixInput, Compile).value,
+      "output212Sourceroot" ->
+        sourceDirectory.in(scalafixOutput212, Compile).value,
+      "output213Sourceroot" ->
+        sourceDirectory.in(scalafixOutput213, Compile).value,
+      "output213FailureSourceroot" ->
+        sourceDirectory.in(scalafixOutput213Failure, Compile).value,
+      "inputClassdirectory" ->
+        classDirectory.in(scalafixInput, Compile).value
+    ),
+    test in Test := (test in Test).dependsOn(
+      compile in (scalafixOutput212, Compile),
+      compile in (scalafixOutput213, Compile)
+    ).value
+  )
+  .dependsOn(scalafixInput, scalafixRules)
+  .enablePlugins(BuildInfoPlugin)
+
+lazy val dontPublish = Seq(
+  publishArtifact := false,
+  packagedArtifacts := Map.empty,
+  publish := {},
+  publishLocal := {}
+)
+
+lazy val scala212 = "2.12.6"
+lazy val scala213 = "2.13.0-M4"
+
+lazy val scala213Settings = Seq(
+  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+  scalaVersion := scala213
+)
+
+// required by sbt-scala-module
+inThisBuild(Seq(
+  crossScalaVersions := Seq(scala212, scala213, "2.11.12")
+))
