@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #
 # Generates a key pair for this repository to sign artifacts.
 # Encrypt the private key and its passphrase in trusted builds

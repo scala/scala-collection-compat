@@ -1,5 +1,5 @@
 /*
-rule = "scala:fix.Scalacollectioncompat_newcollections"
+rule = "scala:fix.CrossCompat"
  */
 package fix
 

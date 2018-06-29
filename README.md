@@ -48,11 +48,3 @@ The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
 report it as described in the
 [contributing documentation](CONTRIBUTING.md#migration-tool).
-
-### Migrating a 2.12 code base to 2.13
-
-Run the following sbt task on your project:
-
-~~~
-> scalafix github:scala/scala-collection-compat/NewCollections
-~~~
