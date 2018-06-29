@@ -20,11 +20,14 @@ RELEASE_COMBO=true
 
 if [[ "$TEST_SCALAFIX" == "true" ]]; then
   sbt scalafixTests/test
-  exit 0
 fi
 
 if [ "$SCALAJS_VERSION" = "" ]; then
-  projectPrefix="compat"
+  if [[ "$TEST_SCALAFIX" == "true" ]]; then
+    projectPrefix="scalafixRules"
+  else
+    projectPrefix="compat"
+  fi
 else
   projectPrefix="compatJS"
 fi
@@ -52,4 +55,10 @@ if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   fi
 fi
 
-sbt -Dhttps.protocols=TLSv1.2 "++$TRAVIS_SCALA_VERSION" "$publishVersion" "$projectPrefix/clean" "$projectPrefix/test" "$projectPrefix/publishLocal" "$publishTask"
+sbt -Dhttps.protocols=TLSv1.2 \
+  "++$TRAVIS_SCALA_VERSION" \
+  "$publishVersion" \
+  "$projectPrefix/clean" \
+  "$projectPrefix/test" \
+  "$projectPrefix/publishLocal" \
+  "$publishTask"

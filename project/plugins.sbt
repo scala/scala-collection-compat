@@ -1,3 +1,5 @@
+import coursier.util.Properties.{version => coursierVersion}
+
 if (System.getProperty("java.version").startsWith("1."))
   Seq()
 else
@@ -12,3 +14,4 @@ addSbtPlugin("org.portable-scala"     % "sbt-scalajs-crossproject" % "0.4.0")
 addSbtPlugin("org.scala-lang.modules" % "sbt-scala-module"         % "1.0.14")
 addSbtPlugin("ch.epfl.scala"          % "sbt-scalafix"             % "0.5.10")
 addSbtPlugin("com.eed3si9n"           % "sbt-buildinfo"            % "0.7.0")
+addSbtPlugin("io.get-coursier"        % "sbt-coursier"             % coursierVersion)
