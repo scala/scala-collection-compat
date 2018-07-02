@@ -54,6 +54,12 @@ package object compat {
     def rangeUntil(until: K): T = fact.until(until)
   }
 
+  implicit class IteratorExtensionMethods[A](private val self: Iterator[A]) extends AnyVal {
+    def sameElements[B >: A](that: IterableOnce[B]): Boolean = {
+      self.sameElements(that.iterator)
+    }
+  }
+
   implicit class TraversableOnceExtensionMethods[A](private val self: TraversableOnce[A]) extends AnyVal {
     def iterator: Iterator[A] = self.toIterator
   }
