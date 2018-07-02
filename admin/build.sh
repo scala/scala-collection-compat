@@ -18,6 +18,12 @@ set -e
 
 RELEASE_COMBO=true
 
+if [[ "$TRAVIS_JDK_VERSION" == "openjdk6" ]]; then
+  # https://github.com/sbt/sbt/blob/3972b7a3fcc8ea2e4c987e6c1adc13468f49e0be/launch/src/main/input_resources/sbt/sbt.boot.properties#L13-L19
+  mkdir -p ~/.sbt
+  cp admin/repositories-jdk6 ~/.sbt/repositories
+fi
+
 if [ "$SCALAJS_VERSION" = "" ]; then
   if [[ "$TEST_SCALAFIX" == "true" ]]; then
     projectPrefix="scalafixRules"

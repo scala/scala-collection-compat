@@ -5,7 +5,7 @@ scala:
   - 2.12.6
   - 2.13.0-M4
 jdk:
-  - openjdk7
+  - openjdk6
   - oraclejdk8
 env:
   global:
@@ -23,10 +23,10 @@ env:
 matrix:
   exclude:
     # > 2.12 requires jdk8
-    - jdk: openjdk7
+    - jdk: openjdk6
       scala: 2.12.6
 
-    - jdk: openjdk7
+    - jdk: openjdk6
       scala: 2.13.0-M4
 
     # ?
@@ -45,9 +45,9 @@ matrix:
 
 # | jdk         |   scala   | scala target | scala target version | scalafix test |
 # | ----------- | --------- | ------------ | -------------------- |---------------|
-# |    openjdk7 | 2.11.12   | jvm          |                      |               |
-# |    openjdk7 | 2.11.12   | js           | 0.6.23               |               |
-# |    openjdk7 | 2.11.12   | js           | 1.0.0-M3             |               |
+# |    openjdk6 | 2.11.12   | jvm          |                      |               |
+# |    openjdk6 | 2.11.12   | js           | 0.6.23               |               |
+# |    openjdk6 | 2.11.12   | js           | 1.0.0-M3             |               |
 # |  oraclejdk8 | 2.12.6    | jvm          |                      |               |
 # |  oraclejdk8 | 2.12.6    | js           | 0.6.23               |               |
 # |  oraclejdk8 | 2.12.6    | js           | 1.0.0-M3             |               |
