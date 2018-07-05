@@ -62,4 +62,4 @@ if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
   fi
 fi
 
-sbt -Dhttps.protocols=TLSv1.2 -sbt-dir=/home/travis/.sbt ";$crossScalaVersion ;$publishVersion ;$projectPrefix/clean ;$testProjectPrefix/test ;$projectPrefix/publishLocal ;$publishTask"
+sbt ";$crossScalaVersion ;$publishVersion ;$projectPrefix/clean ;$testProjectPrefix/test ;$projectPrefix/publishLocal ;$publishTask"
