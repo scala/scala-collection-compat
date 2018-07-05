@@ -32,7 +32,24 @@ lazy val compat = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
+    javaHome := {
+      val oldValue = javaHome.value
+      val isOnCi = sys.env.get("CI").isDefined
+
+      if (isOnCi) {
+        // switch back to the jdk set by the build matrix
+        val ciJavaHome =
+          sys.env("TRAVIS_JDK_VERSION") match {
+            case "openjdk6"   => "/usr/lib/jvm/java-6-openjdk-amd64"
+            case "oraclejdk8" => "/usr/lib/jvm/java-8-oracle"
+          }
+
+        println(s"using JAVA_HOME: $ciJavaHome")
+        Some(file(ciJavaHome))
+      }
+      else oldValue
+    }
   )
   .jsSettings(
     scalacOptions += {
