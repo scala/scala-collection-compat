@@ -190,7 +190,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       case iterator(t: Name) =>
         ctx.replaceTree(t, "iterator")
 
-      case t @ toTpe(n: Name) if !handledTo.contains(n) =>
+      case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
         trailingBrackets(n, ctx).map { case (open, close) =>
           ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
         }.asPatch
