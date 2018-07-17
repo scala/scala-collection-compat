@@ -45,17 +45,21 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val traversable = exact(
     "_root_.scala.package.Traversable#",
     "_root_.scala.collection.Traversable#",
-    "_root_.scala.package.Iterable#",
-    "_root_.scala.collection.Iterable#"
   )
 
   // == Rules ==
-
   def replaceIterableSameElements(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
-        ctx.addRight(lhs, ".iterator")
-    }.asPatch
+    val sameElements =
+      ctx.tree.collect {
+        case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
+          ctx.addRight(lhs, ".iterator")
+      }.asPatch
+
+    val compatImport =
+      if(sameElements.nonEmpty) addCompatImport(ctx)
+      else Patch.empty
+
+    sameElements + compatImport
   }
 
 
