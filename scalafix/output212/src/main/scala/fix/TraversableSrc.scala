@@ -11,4 +11,9 @@ object TraversableSrc {
     xs.iterator
     ys.iterator
   }
+
+  def m1(xs: Iterable[Int]): List[Int] =
+    xs.to
+
+  def m2(xs: Iterable[Int]): List[Int] = xs.to
 }
