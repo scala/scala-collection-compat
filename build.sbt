@@ -50,9 +50,8 @@ lazy val compatJS  = compat.js
 
 lazy val scalafixRules = project
   .in(file("scalafix/rules"))
-  .settings(scalaModuleSettings)
-  .settings(scalaModuleSettingsJVM)
   .settings(
+    organization := (organization in compatJVM).value,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
