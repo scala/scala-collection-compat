@@ -45,17 +45,21 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val traversable = exact(
     "_root_.scala.package.Traversable#",
     "_root_.scala.collection.Traversable#",
-    "_root_.scala.package.Iterable#",
-    "_root_.scala.collection.Iterable#"
   )
 
   // == Rules ==
-
   def replaceIterableSameElements(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
-        ctx.addRight(lhs, ".iterator")
-    }.asPatch
+    val sameElements =
+      ctx.tree.collect {
+        case Term.Apply(Term.Select(lhs, iterableSameElement(_)), List(_)) =>
+          ctx.addRight(lhs, ".iterator")
+      }.asPatch
+
+    val compatImport =
+      if(sameElements.nonEmpty) addCompatImport(ctx)
+      else Patch.empty
+
+    sameElements + compatImport
   }
 
 
@@ -64,11 +68,6 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       ctx.replaceSymbols(
         "scala.Traversable"            -> "scala.Iterable",
         "scala.collection.Traversable" -> "scala.collection.Iterable"
-      )
-
-    val linearSeqToList =
-      ctx.replaceSymbols(
-        "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
       )
 
     import scala.meta.contrib._
@@ -83,7 +82,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       if (hasTraversable) addCompatImport(ctx)
       else Patch.empty
 
-    traversableToIterable + linearSeqToList + compatImport
+    traversableToIterable + compatImport
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {
@@ -173,15 +172,17 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
             CanBuildFrom(paramss, body, ctx, collectionCanBuildFrom, nothing)
       }.asPatch
 
-    val imports =
-      ctx.tree.collect {
-        case i: Importee if collectionCanBuildFromImport.matches(i) =>
-            ctx.removeImportee(i)
-      }.asPatch
+    if (useSites.nonEmpty) {
+      val imports =
+        ctx.tree.collect {
+          case i: Importee if collectionCanBuildFromImport.matches(i) =>
+              ctx.removeImportee(i)
+        }.asPatch
 
-    val compatImport = addCompatImport(ctx)
+      val compatImport = addCompatImport(ctx)
 
-    if (useSites.nonEmpty) useSites + imports + compatImport
+      useSites + imports + compatImport
+    }
     else Patch.empty
   }
 
@@ -212,15 +213,18 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
    }
 
   def replaceToList(ctx: RuleCtx): Patch = {
-    ctx.tree.collect {
-      case iterator(t: Name) =>
-        ctx.replaceTree(t, "iterator")
+    val replaceToIterator =
+      ctx.tree.collect {
+        case iterator(t: Name) =>
+          ctx.replaceTree(t, "iterator")
+      }.asPatch
 
-      case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
-        trailingBrackets(n, ctx).map { case (open, close) =>
-          ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
-        }.asPatch
-
+    val replaceTo =
+      ctx.tree.collect {
+        case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
+          trailingBrackets(n, ctx).map { case (open, close) =>
+            ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
+          }.asPatch
       case Term.Select(_, to @ toTpe(_)) =>
         val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
         synth.map{ s =>
@@ -228,13 +232,24 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           val col = extractCollection(toCol)
           ctx.addRight(to, "(" + col + ")")
         }.getOrElse(Patch.empty)
-    }.asPatch
+      }.asPatch
+
+    val compatImport =
+      if (replaceTo.nonEmpty) addCompatImport(ctx)
+      else Patch.empty
+
+    compatImport + replaceToIterator + replaceTo
   }
 
+  private val compatImportAdded = mutable.Set[Input]()
 
   def addCompatImport(ctx: RuleCtx): Patch = {
-    if (isCrossCompatible) ctx.addGlobalImport(importer"scala.collection.compat._")
-    else Patch.empty
+    if (isCrossCompatible && !compatImportAdded.contains(ctx.input)) {
+      compatImportAdded += ctx.input
+      ctx.addGlobalImport(importer"scala.collection.compat._")
+    } else {
+      Patch.empty
+    }
   }
 
   override def fix(ctx: RuleCtx): Patch = {
