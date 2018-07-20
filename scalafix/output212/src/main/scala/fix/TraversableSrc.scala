@@ -12,7 +12,7 @@ object TraversableSrc {
     ys.iterator
   }
 
-  def m1(xs: Iterable[Int]): List[Int] =
+  def m1(xs: IterableOnce[Int]): List[Int] =
     xs.to(scala.collection.immutable.List)
 
   List[Int]() // unrelated matching brackets

@@ -11,7 +11,7 @@ object TraversableSrc {
     ys.iterator
   }
 
-  def m1(xs: Traversable[Int]): List[Int] =
+  def m1(xs: TraversableOnce[Int]): List[Int] =
     xs.to
 
   List[Int]() // unrelated matching brackets

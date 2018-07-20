@@ -32,7 +32,12 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val foldRightSymbol = foldSymbol(isLeft = false)
 
   val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
-  val toTpe = normalized("_root_.scala.collection.TraversableLike.to.")
+  val toTpe = normalized(
+    "_root_.scala.collection.TraversableLike.to.",
+    "_root_.scala.collection.TraversableOnce.to.",
+    "_root_.scala.collection.GenTraversableOnce.to.",
+    "_root_.scala.collection.parallel.ParIterableLike.to."
+  )
   val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
   val arrayBuilderMake = normalized("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
   val iterableSameElement = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
@@ -48,8 +53,10 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val `Future.onSuccess` = exact("_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
 
   val traversable = exact(
+    "_root_.scala.collection.Traversable#",
+    "_root_.scala.collection.TraversableOnce#",
     "_root_.scala.package.Traversable#",
-    "_root_.scala.collection.Traversable#"
+    "_root_.scala.package.TraversableOnce#"
   )
 
   // == Rules ==
@@ -74,13 +81,15 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   def replaceSymbols0(ctx: RuleCtx): Patch = {
     val traversableToIterable =
       ctx.replaceSymbols(
-        "scala.Traversable"            -> "scala.Iterable",
-        "scala.collection.Traversable" -> "scala.collection.Iterable"
+        "scala.Traversable"               -> "scala.Iterable",
+        "scala.collection.Traversable"    -> "scala.collection.Iterable",
+        "scala.TraversableOnce"           -> "scala.IterableOnce",
+        "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
       )
 
     val linearSeqToList =
       ctx.replaceSymbols(
-        "scala.collection.LinearSeq" -> "scala.collection.immutable.List",
+        "scala.collection.LinearSeq" -> "scala.collection.immutable.List"
       )
 
     import scala.meta.contrib._
