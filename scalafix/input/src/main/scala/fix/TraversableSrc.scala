@@ -14,5 +14,5 @@ object TraversableSrc {
   def m1(xs: Traversable[Int]): List[Int] =
     xs.to
 
-  def m2(xs: Traversable[Int]): List[Int] = xs.to
+  List[Int]() // unrelated matching brackets
 }

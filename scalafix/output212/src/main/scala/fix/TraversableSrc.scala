@@ -13,7 +13,7 @@ object TraversableSrc {
   }
 
   def m1(xs: Iterable[Int]): List[Int] =
-    xs.to
+    xs.to(scala.collection.immutable.List)
 
-  def m2(xs: Iterable[Int]): List[Int] = xs.to
+  List[Int]() // unrelated matching brackets
 }

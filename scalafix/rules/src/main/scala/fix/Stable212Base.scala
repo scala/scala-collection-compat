@@ -185,6 +185,32 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     else Patch.empty
   }
 
+   def extractCollection(toCol: Tree): String = {
+     toCol match {
+       case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
+         "scala.collection.immutable.IndexedSeq"
+       case Term.ApplyType(Term.Select(coll,_), _) =>
+         coll.syntax
+       case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
+         coll.syntax
+       case Term.Select(coll,_) =>
+         coll.syntax
+       case _ => {
+         throw new Exception(
+           s"""|cannot extract collection from .to
+               |
+               |---------------------------------------------
+               |syntax:
+               |${toCol.syntax}
+               |
+               |---------------------------------------------
+               |structure:
+               |${toCol.structure}""".stripMargin
+         )
+       }
+     }
+   }
+
   def replaceToList(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
       case iterator(t: Name) =>
@@ -194,6 +220,14 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         trailingBrackets(n, ctx).map { case (open, close) =>
           ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
         }.asPatch
+
+      case Term.Select(_, to @ toTpe(_)) =>
+        val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
+        synth.map{ s =>
+          val Term.Apply(_, List(toCol)) = s.text.parse[Term].get
+          val col = extractCollection(toCol)
+          ctx.addRight(to, "(" + col + ")")
+        }.getOrElse(Patch.empty)
     }.asPatch
   }
 
