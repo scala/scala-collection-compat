@@ -185,31 +185,33 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     else Patch.empty
   }
 
-   def extractCollection(toCol: Tree): String = {
-     toCol match {
-       case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
-         "scala.collection.immutable.IndexedSeq"
-       case Term.ApplyType(Term.Select(coll,_), _) =>
-         coll.syntax
-       case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
-         coll.syntax
-       case Term.Select(coll,_) =>
-         coll.syntax
-       case _ => {
-         throw new Exception(
-           s"""|cannot extract collection from .to
-               |
-               |---------------------------------------------
-               |syntax:
-               |${toCol.syntax}
-               |
-               |---------------------------------------------
-               |structure:
-               |${toCol.structure}""".stripMargin
-         )
-       }
-     }
-   }
+  def extractCollection(toCol: Tree): String = {
+    toCol match {
+      case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
+        "scala.collection.immutable.IndexedSeq"
+      case Term.ApplyType(Term.Select(coll,_), _) =>
+        coll.syntax
+      case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
+        coll.syntax
+      case Term.Select(coll,_) =>
+        coll.syntax
+      case coll: Type.Name =>
+        coll.syntax
+      case _ => {
+        throw new Exception(
+          s"""|cannot extract collection from .to
+              |
+              |---------------------------------------------
+              |syntax:
+              |${toCol.syntax}
+              |
+              |---------------------------------------------
+              |structure:
+              |${toCol.structure}""".stripMargin
+        )
+      }
+    }
+  }
 
   def replaceToList(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
@@ -221,13 +223,24 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
         }.asPatch
 
-      case Term.Select(_, to @ toTpe(_)) =>
-        val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
-        synth.map{ s =>
-          val Term.Apply(_, List(toCol)) = s.text.parse[Term].get
-          val col = extractCollection(toCol)
-          ctx.addRight(to, "(" + col + ")")
-        }.getOrElse(Patch.empty)
+      case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
+        // we only want f.to, not f.to(X)
+        val applied =
+          t.parent match {
+            case Some(_:Term.Apply) =>  true
+            case _ => false
+          }
+
+        if (!applied) {
+          val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
+          synth.map{ s =>
+            val res = s.text.parse[Term].get
+            val Term.Apply(_, List(toCol)) = res
+            val col = extractCollection(toCol)
+            ctx.addRight(to, "(" + col + ")")
+          }.getOrElse(Patch.empty)
+        } else Patch.empty
+
     }.asPatch
   }
 
