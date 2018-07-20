@@ -3,7 +3,7 @@
 
 package fix
 
-class RoughlyStreamToLazyListSrc() {
+class Roughly213Src() {
   val s = LazyList(1, 2, 3)
   s.lazyAppendedAll(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: LazyList.Empty

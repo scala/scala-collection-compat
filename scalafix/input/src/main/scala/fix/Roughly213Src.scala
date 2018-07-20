@@ -1,9 +1,13 @@
 /*
-rule = "scala:fix.RoughlyStreamToLazyList"
+rule = "scala:fix.Roughly"
+Roughly = {
+  withLazyAppendedAll = true
+  withLazyList = true
+}
  */
 package fix
 
-class RoughlyStreamToLazyListSrc() {
+class Roughly213Src() {
   val s = Stream(1, 2, 3)
   s.append(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: Stream.Empty

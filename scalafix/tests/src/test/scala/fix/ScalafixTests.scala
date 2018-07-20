@@ -17,5 +17,5 @@ class ScalafixTests
 
   runAllTests()
   // to run only one test:
-  // testsToRun.filter(_.filename.toNIO.getFileName.toString == "IterableSrc.scala" ).foreach(runOn)
+  // testsToRun.filter(_.filename.toNIO.getFileName.toString == "Playground.scala" ).foreach(runOn)
 }
