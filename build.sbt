@@ -83,6 +83,7 @@ lazy val scalafixInput = project
     scalaVersion := scalafixScala212,
     scalafixSourceroot := sourceDirectory.in(Compile).value
   )
+  .dependsOn(compatJVM)
 
 lazy val scalafixOutput212 = project
   .in(file("scalafix/output212"))
