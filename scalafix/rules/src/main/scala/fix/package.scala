@@ -16,13 +16,16 @@ package object fix {
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
-  def startsWithParens(tree: Tree): Boolean =
-    tree.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)
-
   def trailingParens(tree: Tree, ctx: RuleCtx): Option[(Token.LeftParen, Token.RightParen)] =
     for {
       end <- tree.tokens.lastOption
       open <- ctx.tokenList.find(end)(_.is[Token.LeftParen]).map(_.asInstanceOf[Token.LeftParen])
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
+
+  def trailingApply(tree: Tree, ctx: RuleCtx): Option[(Token, Token)] = 
+    trailingParens(tree, ctx).orElse(trailingBrackets(tree, ctx))
+
+  def startsWithParens(tree: Tree): Boolean =
+    tree.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)
 }

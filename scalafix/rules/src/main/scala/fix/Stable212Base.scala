@@ -6,6 +6,8 @@ import scala.meta._
 
 import scala.collection.mutable
 
+import System.{lineSeparator => nl}
+
 trait CrossCompatibility {
   def isCrossCompatible: Boolean
 }
@@ -26,6 +28,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     normalized(s"_root_.scala.collection.TraversableOnce.`$op`.")
   }
 
+  val foldLeftSymbol = foldSymbol(isLeft = true)
+  val foldRightSymbol = foldSymbol(isLeft = false)
+
   val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
   val toTpe = normalized("_root_.scala.collection.TraversableLike.to.")
   val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
@@ -39,8 +44,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val mutSetPlus = exact("_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
   val mutMapPlus = exact("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
   val mutMapUpdate = exact("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
-  val foldLeftSymbol = foldSymbol(isLeft = true)
-  val foldRightSymbol = foldSymbol(isLeft = false)
+  val `Future.onFailure` = exact("_root_.scala.concurrent.Future#onFailure(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
+  val `Future.onSuccess` = exact("_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
 
   val traversable = exact(
     "_root_.scala.package.Traversable#",
@@ -262,6 +267,29 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     compatImport + replaceToIterator + replaceTo
   }
 
+  def replaceFuture(ctx: RuleCtx): Patch = {
+
+    def toOnCompletePF(f: Tree, cases: List[Tree], tryApply: String): Patch = {
+      val indent = " " * cases.head.pos.startColumn
+
+      ctx.replaceTree(f, "onComplete") +
+      cases.map{ case Case(c, _, _) =>
+        ctx.addLeft(c, tryApply +"(") +
+        ctx.addRight(c, ")")
+      }.asPatch +
+      ctx.addRight(cases.last, nl + indent + "case _ => ()" )
+    }
+
+    ctx.tree.collect {
+      case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)), List(Term.PartialFunction(cases))) =>
+        toOnCompletePF(f, cases, "scala.util.Failure")
+
+      case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)), List(Term.PartialFunction(cases))) =>
+        toOnCompletePF(f, cases, "scala.util.Success")
+
+    }.asPatch
+  }
+
   private val compatImportAdded = mutable.Set[Input]()
 
   def addCompatImport(ctx: RuleCtx): Patch = {
@@ -284,7 +312,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       replaceMutMapUpdated(ctx) +
       replaceArrayBuilderMake(ctx) +
       replaceIterableSameElements(ctx) +
-      replaceBreakout(ctx)
+      replaceBreakout(ctx) +
+      replaceFuture(ctx)
   }
-
 }

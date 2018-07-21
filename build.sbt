@@ -77,8 +77,19 @@ lazy val scalafixRules = project
 
 // == Scalafix Test Setup ==
 
+lazy val sharedScalafixSettings = Seq(
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding",
+    "UTF-8",
+    "-feature",
+    "-unchecked"
+  )
+)
+
 lazy val scalafixInput = project
   .in(file("scalafix/input"))
+  .settings(sharedScalafixSettings)
   .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
@@ -88,22 +99,26 @@ lazy val scalafixInput = project
 
 lazy val scalafixOutput212 = project
   .in(file("scalafix/output212"))
+  .settings(sharedScalafixSettings)
   .settings(scalaVersion := scalafixScala212)
   .settings(dontPublish)
   .dependsOn(compatJVM)
 
 lazy val scalafixOutput213 = project
   .in(file("scalafix/output213"))
+  .settings(sharedScalafixSettings)
   .settings(scala213Settings)
   .settings(dontPublish)
 
 lazy val scalafixOutput213Failure = project
   .in(file("scalafix/output213-failure"))
+  .settings(sharedScalafixSettings)
   .settings(scala213Settings)
   .settings(dontPublish)
 
 lazy val scalafixTests = project
   .in(file("scalafix/tests"))
+  .settings(sharedScalafixSettings)
   .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
