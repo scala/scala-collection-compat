@@ -52,6 +52,27 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val `Future.onFailure` = exact("_root_.scala.concurrent.Future#onFailure(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
   val `Future.onSuccess` = exact("_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
 
+  private val sortedFrom = exact(
+    "_root_.scala.collection.generic.Sorted#from(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
+    "_root_.scala.collection.immutable.TreeMap#from(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
+    "_root_.scala.collection.immutable.TreeSet#from(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;.",
+    "_root_.scala.collection.SortedSetLike#from(Ljava/lang/Object;)Lscala/collection/SortedSet;."
+  )
+
+  private val sortedTo = exact(
+    "_root_.scala.collection.generic.Sorted#to(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
+    "_root_.scala.collection.immutable.TreeMap#to(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
+    "_root_.scala.collection.immutable.TreeSet#to(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
+  )
+
+
+  private val sortedUntil = exact(
+    "_root_.scala.collection.SortedSetLike#until(Ljava/lang/Object;)Lscala/collection/SortedSet;.",
+    "_root_.scala.collection.generic.Sorted#until(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
+    "_root_.scala.collection.immutable.TreeMap#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
+    "_root_.scala.collection.immutable.TreeSet#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
+  )
+
   val traversable = exact(
     "_root_.scala.collection.Traversable#",
     "_root_.scala.collection.TraversableOnce#",
@@ -299,6 +320,21 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     }.asPatch
   }
 
+  private def replaceSorted(ctx: RuleCtx): Patch = {
+    val replaced =
+      ctx.tree.collect {
+        case Term.Apply(Term.Select(_, op @ sortedFrom(_)), _)  => ctx.replaceTree(op, "rangeFrom")
+        case Term.Apply(Term.Select(_, op @ sortedTo(_)), _)    => ctx.replaceTree(op, "rangeTo")
+        case Term.Apply(Term.Select(_, op @ sortedUntil(_)), _) => ctx.replaceTree(op, "rangeUntil")
+      }.asPatch
+
+    val compatImport =
+      if (replaced.nonEmpty) addCompatImport(ctx)
+      else Patch.empty
+
+    replaced + compatImport
+  }
+
   private val compatImportAdded = mutable.Set[Input]()
 
   def addCompatImport(ctx: RuleCtx): Patch = {
@@ -322,6 +358,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       replaceArrayBuilderMake(ctx) +
       replaceIterableSameElements(ctx) +
       replaceBreakout(ctx) +
-      replaceFuture(ctx)
+      replaceFuture(ctx) +
+      replaceSorted(ctx)
   }
 }
