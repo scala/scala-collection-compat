@@ -11,6 +11,10 @@ class JdkVersionTest {
     if (isOnCi) {
       val travisJdkVersion = sys.env("TRAVIS_JDK_VERSION")
       val jdkVersion = sys.props("java.specification.version")
+
+      println(s"travisJdkVersion: $travisJdkVersion")
+      println(s"jdkVersion: $jdkVersion")
+
       if (travisJdkVersion == "openjdk6") {
         assertEquals(jdkVersion, "1.8")
       } else if (travisJdkVersion == "oraclejdk8") {

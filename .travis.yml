@@ -1,5 +1,12 @@
+# slower instance startup, but needed to work around https://github.com/travis-ci/travis-ci/issues/9713
+sudo: true
+
 language: scala
 
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
 scala:
   - 2.11.12
   - 2.12.6
@@ -40,18 +47,12 @@ matrix:
     # 2.13.0-M4 is not available in Scala.js 1.0.0-M3
     - scala: 2.13.0-M4
       env: SCALAJS_VERSION=1.0.0-M3
-
-  # run migration test
   include:
-    - scala: 2.12.6
-      jdk: oraclejdk8
-      env: TEST_SCALAFIX=true
 
-    - addons:
-       apt:
-         packages:
-           - openjdk-6-jdk
-     jdk: openjdk6
+    # run migration test
+    - jdk: oraclejdk8
+      scala: 2.12.6
+      env: TEST_SCALAFIX=true
 
 # | jdk         |   scala   | scala target | scala target version | scalafix test |
 # | ----------- | --------- | ------------ | -------------------- |---------------|
