@@ -44,6 +44,46 @@ package object compat {
     def fromSpecific(source: TraversableOnce[Int]): C = fact.apply(source.toSeq: _*)
   }
 
+  private def build[T, CC](builder: m.Builder[T, CC], source: TraversableOnce[T]): CC = {
+    builder ++= source
+    builder.result()
+  }
+
+  implicit class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
+    def from[K: Ordering, V](source: TraversableOnce[(K, V)]): i.SortedMap[K, V] =
+      build(i.SortedMap.newBuilder[K, V], source)
+  }
+
+  implicit class ImmutableTreeMapExtensions(private val fact: i.TreeMap.type) extends AnyVal {
+    def from[K: Ordering, V](source: TraversableOnce[(K, V)]): i.TreeMap[K, V] =
+      build(i.TreeMap.newBuilder[K, V], source)
+  }
+
+  implicit class ImmutableIntMapExtensions(private val fact: i.IntMap.type) extends AnyVal {
+    def from[V](source: TraversableOnce[(Int, V)]): i.IntMap[V] =
+      build(i.IntMap.canBuildFrom[Int, V](), source)
+  }
+
+  implicit class ImmutableLongMapExtensions(private val fact: i.LongMap.type) extends AnyVal {
+    def from[V](source: TraversableOnce[(Long, V)]): i.LongMap[V] =
+      build(i.LongMap.canBuildFrom[Long, V](), source)
+  }
+
+  implicit class MutableSortedMapExtensions(private val fact: m.SortedMap.type) extends AnyVal {
+    def from[K: Ordering, V](source: TraversableOnce[(K, V)]): m.SortedMap[K, V] =
+      build(m.SortedMap.newBuilder[K, V], source)
+  }
+
+  implicit class MutableTreeMapExtensions(private val fact: m.TreeMap.type) extends AnyVal {
+    def from[K: Ordering, V](source: TraversableOnce[(K, V)]): m.TreeMap[K, V] =
+      build(m.TreeMap.newBuilder[K, V], source)
+  }
+
+  implicit class MutableLongMapExtensions(private val fact: m.LongMap.type) extends AnyVal {
+    def from[V](source: TraversableOnce[(Long, V)]): m.LongMap[V] =
+      build(m.LongMap.canBuildFrom[Long, V](), source)
+  }
+
   implicit class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
     def lazyAppendedAll(as: => TraversableOnce[A]): Stream[A] = stream.append(as)
   }
@@ -58,6 +98,7 @@ package object compat {
     def sameElements[B >: A](that: IterableOnce[B]): Boolean = {
       self.sameElements(that.iterator)
     }
+    def concat[B >: A](that: IterableOnce[B]): IterableOnce[B] = self ++ that
   }
 
   implicit class TraversableOnceExtensionMethods[A](private val self: TraversableOnce[A]) extends AnyVal {
