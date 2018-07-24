@@ -87,6 +87,14 @@ lazy val sharedScalafixSettings = Seq(
   )
 )
 
+// common part between input/output
+lazy val scalafixData = project
+  .in(file("scalafix/data"))
+  .settings(sharedScalafixSettings)
+  .settings(dontPublish)
+  .settings(scalaVersion := scalafixScala212)
+  .dependsOn(compatJVM)
+
 lazy val scalafixInput = project
   .in(file("scalafix/input"))
   .settings(sharedScalafixSettings)
@@ -95,14 +103,14 @@ lazy val scalafixInput = project
     scalaVersion := scalafixScala212,
     scalafixSourceroot := sourceDirectory.in(Compile).value
   )
-  .dependsOn(compatJVM)
+  .dependsOn(compatJVM, scalafixData)
 
 lazy val scalafixOutput212 = project
   .in(file("scalafix/output212"))
   .settings(sharedScalafixSettings)
   .settings(scalaVersion := scalafixScala212)
   .settings(dontPublish)
-  .dependsOn(compatJVM)
+  .dependsOn(compatJVM, scalafixData)
 
 lazy val scalafixOutput213 = project
   .in(file("scalafix/output213"))
