@@ -226,11 +226,95 @@ lazy val scala213Settings = Seq(
   scalaVersion := scala213
 )
 
+val preRelease = "pre-release"
+val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
+val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
+val isScalaJs          = sys.env.get("SCALAJS_VERSION").nonEmpty
+val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
+val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
+val isRelease          = releaseVersion.nonEmpty
+
+val releaseCredentials =
+  if (isRelease) {
+    def env(key: String): String = Option(System.getenv(key)).getOrElse("")
+
+    Seq(
+      pgpPassphrase := Some(env("PGP_PASSPHRASE").toArray),
+      pgpPublicRing := file("admin/pubring.asc"),
+      pgpSecretRing := file("admin/secring.asc"),
+      credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", env("SONA_USER"), env("SONA_PASS"))
+    )
+  } else {
+    Seq()
+  }
+
+inThisBuild(releaseCredentials)
+
+
 // required by sbt-scala-module
 inThisBuild(Seq(
   crossScalaVersions := Seq(scala211, scala212, scala213),
-  commands += Command.command("noop") { state =>
-    println("noop")
+  commands += Command.command(preRelease) { state =>
+    // Show Compat version, Scala version, and Java Version
+    val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
+    val tagVersion = releaseVersion.get
+    println(s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
+
+    // Copy pgp stuff
+    "admin/pre-release.sh" ! state.globalLogging.full
+
     state
+  },
+  commands += Command.command("ci") { state =>
+    val platformSuffix = if (isScalaJs) "JS" else ""
+
+    val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
+    val binaryCompatProject = "binary-compat"
+
+    val testProjectPrefix =
+      if (isScalafix) {
+        "scalafix-tests"
+      } else if (isBinaryCompat) {
+        binaryCompatProject
+      } else {
+        compatProject
+      }
+
+    val projectPrefix =
+      if (isScalafix) {
+        "scalafix-rules"
+      } else if (isBinaryCompat) {
+        binaryCompatProject
+      } else {
+        compatProject
+      }
+
+    val setPublishVersion = releaseVersion.map("set every version := " + _).toList
+
+    val publishTask =
+      if (releaseVersion.nonEmpty) {
+        List(
+          preRelease,
+          s"$projectPrefix/publish-signed"
+        )
+      } else {
+        Nil
+      }
+
+    val toRun = Seq(
+      setPublishVersion,
+      List(s"$projectPrefix/clean"),
+      List(s"$testProjectPrefix/test"),
+      List(s"$projectPrefix/publishLocal"),
+      publishTask
+    ).flatten
+
+    println("---------")
+    println("Running CI: ")
+    toRun.foreach(println)
+    println("---------")
+
+
+    toRun ::: state
   }
 ))
