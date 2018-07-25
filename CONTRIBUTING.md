@@ -68,7 +68,7 @@ migration tool on the input files and check whether the result matches the
 expected output files:
 
 ~~~
-> scalafixTests/test
+> scalafix-tests/test
 ~~~
 
 Fix the implementation of the rule (in the
