@@ -115,6 +115,9 @@ private[compat] trait PackageShared {
   implicit def toIteratorExtensionMethods[A](self: Iterator[A]): IteratorExtensionMethods[A] =
     new IteratorExtensionMethods[A](self)
 
+  implicit def toTraversableExtensionMethods[A](self: Traversable[A]): TraversableExtensionMethods[A] =
+    new TraversableExtensionMethods[A](self)
+
   implicit def toTraversableOnceExtensionMethods[A](self: TraversableOnce[A]): TraversableOnceExtensionMethods[A] =
     new TraversableOnceExtensionMethods[A](self)
 
@@ -193,4 +196,8 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
   def iterator: Iterator[A] = self.toIterator
+}
+
+class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
+  def iterableFactory: GenericCompanion[Traversable] = self.companion
 }

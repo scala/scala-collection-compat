@@ -335,6 +335,87 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     replaced + compatImport
   }
 
+  val companionSuffix = "#companion()Lscala/collection/generic/GenericCompanion;."
+  val companion = {
+    val cols =
+      Set(
+        "_root_.scala.collection." -> List(
+          "IndexedSeq",
+          "Iterable",
+          "LinearSeq",
+          "Seq",
+          "Set",
+          "Traversable"
+        ),
+        "_root_.scala.collection.immutable." -> List(
+          "HashSet",
+          "IndexedSeq",
+          "Iterable",
+          "LinearSeq",
+          "List",
+          "ListSet",
+          "Queue",
+          "Seq",
+          "Set",
+          "Stack",
+          "Stream",
+          "Traversable",
+          "Vector"
+        ),
+        "_root_.scala.collection.mutable." -> List(
+          "ArrayBuffer",
+          "ArraySeq",
+          "Buffer",
+          "DoubleLinkedList",
+          "HashSet",
+          "IndexedSeq",
+          "Iterable",
+          "LinearSeq",
+          "LinkedHashSet",
+          "LinkedList",
+          "ListBuffer",
+          "MutableList",
+          "Queue",
+          "ResizableArray",
+          "Seq",
+          "Set",
+          "Traversable",
+        )
+      ).flatMap{ case (prefix, cols) =>
+        cols.map(col => prefix + col + companionSuffix)
+      }
+
+    val specific =
+      Set(
+        "_root_.scala.collection.mutable.Stack#companion()Lscala/collection/mutable/Stack;.",
+        "_root_.scala.collection.mutable.ArrayStack#companion()Lscala/collection/mutable/ArrayStack;."
+      )
+
+    exact((cols ++ specific).toSeq:_*)
+  }
+
+  val classManifestCompanion = exact(
+    "_root_.scala.collection.generic.GenericClassTagTraversableTemplate#classManifestCompanion()Lscala/collection/generic/GenericClassTagCompanion;."
+  )
+
+  private def replaceCompanion(ctx: RuleCtx): Patch = {
+    val replaced =
+      ctx.tree.collect {
+        case Term.Select(_, t @ companion(_)) => {
+          ctx.replaceTree(t, "iterableFactory")
+        }
+        case Term.Select(_, t @ classManifestCompanion(_)) => {
+          ctx.replaceTree(t, "classTagCompanion")
+        }
+      }.asPatch
+
+    val compatImport =
+      if (replaced.nonEmpty) addCompatImport(ctx)
+      else Patch.empty
+
+    replaced + compatImport
+  }
+
   private val compatImportAdded = mutable.Set[Input]()
 
   def addCompatImport(ctx: RuleCtx): Patch = {
@@ -502,6 +583,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       replaceBreakout(ctx) +
       replaceFuture(ctx) +
       replaceSorted(ctx) +
-      replaceJavaConversions(ctx)
+      replaceJavaConversions(ctx) +
+      replaceCompanion(ctx)
   }
 }
