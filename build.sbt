@@ -131,7 +131,6 @@ lazy val `scalafix-rules` = project
   )
 
 // == Scalafix Test Setup ==
-
 lazy val sharedScalafixSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
@@ -161,7 +160,6 @@ lazy val `scalafix-input` = project
     scalafixSourceroot := sourceDirectory.in(Compile).value
   )
   .dependsOn(`scalafix-data212`)
-
 
 val `scalafix-output` = MultiScalaProject("scalafix-output", "scalafix/output",
   _.settings(sharedScalafixSettings)
@@ -194,16 +192,12 @@ lazy val `scalafix-tests` = project
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     buildInfoPackage := "fix",
     buildInfoKeys := Seq[BuildInfoKey](
-      "inputSourceroot" ->
-        sourceDirectory.in(`scalafix-input`, Compile).value,
-      "outputSourceroot" ->
-        (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
-      "output212Sourceroot" -> output212.value,
-      "output213Sourceroot" -> output213.value,
-      "output213FailureSourceroot" ->
-        sourceDirectory.in(`scalafix-output213-failure`, Compile).value,
-      "inputClassdirectory" ->
-        classDirectory.in(`scalafix-input`, Compile).value
+      "inputSourceroot"            -> sourceDirectory.in(`scalafix-input`, Compile).value,
+      "outputSourceroot"           -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
+      "output212Sourceroot"        -> output212.value,
+      "output213Sourceroot"        -> output213.value,
+      "output213FailureSourceroot" -> sourceDirectory.in(`scalafix-output213-failure`, Compile).value,
+      "inputClassdirectory"        -> classDirectory.in(`scalafix-input`, Compile).value
     ),
     test in Test := (test in Test).dependsOn(
       compile in (`scalafix-output211`, Compile),

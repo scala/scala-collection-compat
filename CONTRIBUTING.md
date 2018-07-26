@@ -38,11 +38,11 @@ class toIteratorVsIterator(xs: Iterable[Int]) {
 }
 ~~~
 
-3. Add a corresponding file in the `scalafix/output213/src/main/scala/fix/` directory
+3. Add a corresponding file in the `scalafix/output/src/main/scala/fix/` directory
    with the same code but using the strawman:
 
 ~~~ scala
-import strawman.collection.Iterable
+import scala.collection.compat._
 
 class toIteratorVsIterator(xs: Iterable[Int]) {
   xs.iterator
@@ -75,3 +75,43 @@ Fix the implementation of the rule (in the
 `rules/src/main/scala/fix/NewCollections.scala` file) until the
 tests are green. You can find more help about the scalafix API in its
 [documentation](https://scalacenter.github.io/scalafix/docs/rule-authors/setup).
+
+
+### Scalafix Teskit Directory Layout
+
+```
+.
+├── data                    |
+│   └── src                 |
+│       └── main            |
+│           └── scala       | Project to avoid duplicating code between input and output
+├── input                   |
+│   └── src                 |
+│       └── main            |
+│           ├── scala       | Input that cross-compile
+│           └── scala-2.12  | 2.12 specific input
+├── output                  |
+│   └── src                 |
+│       └── main            |
+│           └── scala       | Output that cross-compile
+├── output212               |
+│   └── src                 |
+│       └── main            |
+│           └── scala-2.12  | 2.12 specific output
+├── output213               |
+│   └── src                 |
+│       └── main            |
+│           └── scala       | 2.13 specific output (from a cross-compiled input)
+├── output213-failure       |
+│   └── src                 |
+│       └── main            |
+│           └── scala       | 2.13 specific output that cannot be migrated due to technical limitations
+├── rules                   |
+│   └── src                 |
+│       └── main            |
+│           └── scala       | Rule implementations
+└── tests                   |
+    └── src                 |
+        └── test            |
+            └── scala       | Scalafix testkit launcher (useful to run a single input file)
+```

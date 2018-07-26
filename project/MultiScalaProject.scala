@@ -8,6 +8,24 @@ import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 
 import java.io.File
 
+/** MultiScalaCrossProject and MultiScalaProject are an alternative to crossScalaVersion
+  * it allows you to create a template for a sbt project you can instanciate with a
+  * specific scala version.
+  *
+  * {{{
+  * // create a project template
+  * val myProject = MultiScalaProject(
+  *   "name",
+  *   "path/to/dir",
+  *   _.settings(...) // Project => Project (scala version independent configurations)
+  * )
+  *
+  * // instanciate a sbt project
+  * lazy val myProject211 = myProject("2.11.12", _.settings(...) /* scala version dependent configurations */)
+  * lazy val myProject212 = myProject("2.12.6" , _.settings(...))
+  * // ...
+  * }}}
+  */
 trait MultiScala {
   def majorMinor(in: String): String = {
     val Array(major, minor, _) = in.split("\\.")
@@ -100,22 +118,4 @@ class MultiScalaProject(
 
     configurePerScala(configure(resultingProject))
   }
-}
-
-object TestProject {
-  private def base(sub: String): String =
-    s"scalafix/$sub"
-
-  def apply(
-      sub: String,
-      configure: (Project, String) => Project): MultiScalaProject =
-    apply(sub, project => configure(project, s"${base(sub)}/src/main"))
-
-  def apply(sub: String, configure: Project => Project): MultiScalaProject =
-    MultiScalaProject(
-      s"tests${sub.capitalize}",
-      base(sub),
-      configure.andThen(_.disablePlugins(scalafix.sbt.ScalafixPlugin))
-    )
-
 }
