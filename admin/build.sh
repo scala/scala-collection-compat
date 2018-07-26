@@ -22,7 +22,11 @@ if [ "$SCALAJS_VERSION" = "" ]; then
   if [[ "$TEST_SCALAFIX" == "true" ]]; then
     projectPrefix="scalafixRules"
   else
-    projectPrefix="compat"
+    if [[ "$TEST_BINARY_COMPAT" == "true" ]]; then
+      projectPrefix="binary-compat"
+    else
+      projectPrefix="compat"
+    fi
   fi
 else
   projectPrefix="compatJS"
