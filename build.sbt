@@ -14,6 +14,8 @@ lazy val root = project
 
 // == Core Libraries ==
 
+lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
+
 lazy val compat = crossProject(JSPlatform, JVMPlatform)
   .withoutSuffixFor(JVMPlatform)
   .crossType(CrossType.Pure)
@@ -32,7 +34,7 @@ lazy val compat = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
+    junit,
     javaHome in Compile := {
       val oldValue = (javaHome in Compile).value
       val isOnCi = sys.env.get("CI").isDefined
@@ -64,6 +66,36 @@ lazy val compat = crossProject(JSPlatform, JVMPlatform)
 
 lazy val compatJVM = compat.jvm
 lazy val compatJS  = compat.js
+
+lazy val `binary-compat-old` = project
+  .in(file("binary-compat/old"))
+  .settings(scalaVersion := scala212)
+  .disablePlugins(ScalafixPlugin)
+
+lazy val `binary-compat-new` = project
+  .in(file("binary-compat/new"))
+  .settings(scalaVersion := scala212)
+  .dependsOn(compatJVM)
+  .disablePlugins(ScalafixPlugin)
+
+lazy val `binary-compat` = project
+  .in(file("binary-compat/test"))
+  .settings(
+    scalaVersion := scala212,
+    libraryDependencies += "com.typesafe" %% "mima-reporter" % "0.3.0" % Test,
+    junit,
+    buildInfoPackage := "build",
+    buildInfoKeys := Seq[BuildInfoKey](
+      "oldClasspath" -> (classDirectory in (`binary-compat-old`, Compile)).value.toString,
+      "newClasspath" -> (classDirectory in (`binary-compat-new`, Compile)).value.toString
+    ),
+    test in Test := (test in Test).dependsOn(
+      compile in (`binary-compat-old`, Compile),
+      compile in (`binary-compat-new`, Compile)
+    ).value
+  )
+  .enablePlugins(BuildInfoPlugin)
+  .disablePlugins(ScalafixPlugin)
 
 lazy val scalafixRules = project
   .in(file("scalafix/rules"))
