@@ -11,6 +11,6 @@ class BinaryCompaTest {
     Config.setup("foo", Array(oldClasspath, newClasspath))
     val mima = new MiMaLib(Config.baseClassPath)
     val allProblems = mima.collectProblems(oldClasspath, newClasspath)
-    Assert.assertTrue(allProblems.isEmpty)
+    Assert.assertEquals(allProblems, Nil)
   }
 }
