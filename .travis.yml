@@ -54,6 +54,11 @@ matrix:
       scala: 2.12.6
       env: TEST_SCALAFIX=true
 
+    # run binary compatibility test
+    - jdk: oraclejdk8
+      scala: 2.12.6
+      env: TEST_BINARY_COMPAT=true
+
 # | jdk         |   scala   | scala target | scala target version | scalafix test |
 # | ----------- | --------- | ------------ | -------------------- |---------------|
 # |    openjdk6 | 2.11.12   | jvm          |                      |               |

@@ -10,6 +10,33 @@ import scala.{collection => c}
 private[compat] trait PackageShared {
   import CompatImpl._
 
+  /**
+    * A factory that builds a collection of type `C` with elements of type `A`.
+    *
+    * @tparam A Type of elements (e.g. `Int`, `Boolean`, etc.)
+    * @tparam C Type of collection (e.g. `List[Int]`, `TreeMap[Int, String]`, etc.)
+    */
+  type Factory[-A, +C] <: CanBuildFrom[Nothing, A, C] // Ideally, this would be an opaque type
+
+  implicit class FactoryOps[-A, +C](private val factory: Factory[A, C]) {
+    /**
+      * @return A collection of type `C` containing the same elements
+      *         as the source collection `it`.
+      * @param it Source collection
+      */
+    def fromSpecific(it: TraversableOnce[A]): C = (factory() ++= it).result()
+
+    /** Get a Builder for the collection. For non-strict collection types this will use an intermediate buffer.
+      * Building collections with `fromSpecific` is preferred because it can be lazy for lazy collections. */
+    def newBuilder: m.Builder[A, C] = factory()
+  }
+
+  implicit def fromCanBuildFrom[A, C](implicit cbf: CanBuildFrom[Nothing, A, C]): Factory[A, C] =
+    cbf.asInstanceOf[Factory[A, C]]
+
+  implicit def fromCanBuildFromConversion[X, A, C](x: X)(implicit toCanBuildFrom: X => CanBuildFrom[Nothing, A, C]): Factory[A, C] =
+    fromCanBuildFrom(toCanBuildFrom(x))
+
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
     simpleCBF(fact.newBuilder[A])
