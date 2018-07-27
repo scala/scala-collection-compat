@@ -9,6 +9,7 @@ class ScalafixTests
     SemanticdbIndex.load(Classpath(AbsolutePath(BuildInfo.inputClassdirectory))),
     AbsolutePath(BuildInfo.inputSourceroot),
     Seq(
+      AbsolutePath(BuildInfo.outputSourceroot),
       AbsolutePath(BuildInfo.output212Sourceroot),
       AbsolutePath(BuildInfo.output213Sourceroot),
       AbsolutePath(BuildInfo.output213FailureSourceroot)

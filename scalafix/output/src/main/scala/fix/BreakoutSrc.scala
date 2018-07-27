@@ -58,7 +58,7 @@ class BreakoutSrc(ts: Iterable[Int], vec: Vector[Int], list: List[Int], seq: Seq
   (ts.iterator ++ ts ).to(scala.collection.immutable.Set): Set[Int]
 
   // `TraversableLike ++:`
-  (ts ++: ts.view).to(scala.collection.immutable.Set): Set[Int]
+  // (ts ++: ts)(breakOut): Set[Int]
 
   // `TraversableLike.collect`
   ts.iterator.collect{ case x => x }.to(scala.collection.immutable.Set): Set[Int]
@@ -97,10 +97,8 @@ class BreakoutSrc(ts: Iterable[Int], vec: Vector[Int], list: List[Int], seq: Seq
   scala.collection.immutable.HashMap.from(List(1 -> "1").iterator.map(x => x)): immutable.HashMap[Int, String]
   scala.collection.immutable.ListMap.from(List(1 -> "1").iterator.map(x => x)): immutable.ListMap[Int, String]
   scala.collection.immutable.TreeMap.from(List(1 -> "1").iterator.map(x => x)): immutable.TreeMap[Int, String]
-  scala.collection.mutable.SortedMap.from(List(1 -> "1").iterator.map(x => x)): mutable.SortedMap[Int, String]
   scala.collection.mutable.HashMap.from(List(1 -> "1").iterator.map(x => x)): mutable.HashMap[Int, String]
   scala.collection.mutable.ListMap.from(List(1 -> "1").iterator.map(x => x)): mutable.ListMap[Int, String]
-  scala.collection.mutable.TreeMap.from(List(1 -> "1").iterator.map(x => x)): mutable.TreeMap[Int, String]
   scala.collection.mutable.Map.from(List(1 -> "1").iterator.map(x => x)): mutable.Map[Int, String]
   scala.collection.immutable.IntMap.from(List(1 -> "1").iterator.map(x => x)): immutable.IntMap[String]
   scala.collection.immutable.LongMap.from(List(1L -> "1").iterator.map(x => x)): immutable.LongMap[String]

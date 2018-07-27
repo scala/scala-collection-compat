@@ -58,7 +58,7 @@ class BreakoutSrc(ts: Traversable[Int], vec: Vector[Int], list: List[Int], seq: 
   (ts ++ ts )(breakOut): Set[Int]
 
   // `TraversableLike ++:`
-  (ts ++: ts)(breakOut): Set[Int]
+  // (ts ++: ts)(breakOut): Set[Int]
 
   // `TraversableLike.collect`
   ts.collect{ case x => x }(breakOut): Set[Int]
@@ -97,10 +97,8 @@ class BreakoutSrc(ts: Traversable[Int], vec: Vector[Int], list: List[Int], seq: 
   List(1 -> "1").map(x => x)(breakOut): immutable.HashMap[Int, String]
   List(1 -> "1").map(x => x)(breakOut): immutable.ListMap[Int, String]
   List(1 -> "1").map(x => x)(breakOut): immutable.TreeMap[Int, String]
-  List(1 -> "1").map(x => x)(breakOut): mutable.SortedMap[Int, String]
   List(1 -> "1").map(x => x)(breakOut): mutable.HashMap[Int, String]
   List(1 -> "1").map(x => x)(breakOut): mutable.ListMap[Int, String]
-  List(1 -> "1").map(x => x)(breakOut): mutable.TreeMap[Int, String]
   List(1 -> "1").map(x => x)(breakOut): mutable.Map[Int, String]
   List(1 -> "1").map(x => x)(breakOut): immutable.IntMap[String]
   List(1L -> "1").map(x => x)(breakOut): immutable.LongMap[String]

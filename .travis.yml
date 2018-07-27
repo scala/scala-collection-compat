@@ -74,7 +74,7 @@ matrix:
 before_script: ./checkCLA.sh
 script:
   - java -version
-  - admin/build.sh
+  - sbt ci
 
 cache:
   directories:
