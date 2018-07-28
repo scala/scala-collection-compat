@@ -38,6 +38,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)("compat",
   .jvmSettings(scalaModuleSettingsJVM)
   .settings(
     name := "scala-collection-compat",
+    moduleName := "scala-collection-compat",
     version := "0.2.0-SNAPSHOT",
     scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
     unmanagedSourceDirectories in Compile += {
