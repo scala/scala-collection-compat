@@ -182,15 +182,13 @@ val `scalafix-output` = MultiScalaProject("scalafix-output",
                                             .settings(dontPublish)
                                             .disablePlugins(ScalafixPlugin))
 
-lazy val output212    = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main")
-lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value / "scala"
-
+lazy val addOutput212     = unmanagedSourceDirectories in Compile += output212.value / "scala"
+lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value / "scala"
+lazy val addOutput213     = unmanagedSourceDirectories in Compile += output213.value / "scala"
+lazy val output212        = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main")
 lazy val output212Plus =
   Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main")
-lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value / "scala"
-
-lazy val output213    = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main")
-lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value / "scala"
+lazy val output213 = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main")
 
 lazy val `scalafix-output211` = `scalafix-output`(
   scala211,
@@ -232,6 +230,7 @@ lazy val `scalafix-tests` = project
       "output212Sourceroot"     -> output212.value,
       "output212PlusSourceroot" -> output212Plus.value,
       "output213Sourceroot"     -> output213.value,
+      "output212PlusSourceroot" -> output212Plus.value,
       "output213FailureSourceroot" -> sourceDirectory
         .in(`scalafix-output213-failure`, Compile)
         .value,
