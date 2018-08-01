@@ -9,8 +9,8 @@ import scala.meta._
 // if we have a simple identifier, we can look at his definition at query it's type
 // this should be improved in future version of scalameta
 object TypeMatcher {
-  def apply(symbols: Symbol*)(implicit index: SemanticdbIndex): TypeMatcher =
-    new TypeMatcher(symbols: _*)(index)
+  def apply(symbols: String*)(implicit index: SemanticdbIndex): TypeMatcher =
+    new TypeMatcher(symbols.map(Symbol(_)): _*)(index)
 }
 
 final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
