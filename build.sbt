@@ -29,9 +29,21 @@ lazy val root = project
 
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
-lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.6"
+lazy val scala211   = "2.11.12"
+lazy val scala212   = "2.12.6"
+lazy val scalaJs213 = "2.13.0-M4" // Scala.js does no have -pre
+
+
+
 lazy val scala213 = "2.13.0-M4"
+// lazy val scala213 = "2.13.0-pre-3ae6282" // use the sbt command `latest-213` to fetch the latest version
+
+
+
+lazy val scala213Settings = Seq(
+  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+  scalaVersion := scala213
+)
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)("compat",
   _.settings(scalaModuleSettings)
@@ -82,7 +94,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)("compat",
 
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
-val compat213 = compat(scala213)
+val compat213 = compat(scala213, scalaJs213, _.jvmSettings(scala213Settings))
 
 lazy val compat211JVM = compat211.jvm
 lazy val compat211JS  = compat211.js
@@ -150,7 +162,7 @@ lazy val `scalafix-data` = MultiScalaProject("scalafix-data", "scalafix/data",
 
 val `scalafix-data211` = `scalafix-data`(scala211,         _.dependsOn(compat211JVM))
 val `scalafix-data212` = `scalafix-data`(scalafixScala212, _.dependsOn(compat212JVM))
-val `scalafix-data213` = `scalafix-data`(scala213,         _.dependsOn(compat213JVM))
+val `scalafix-data213` = `scalafix-data`(scala213,         _.settings(scala213Settings).dependsOn(compat213JVM))
 
 lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
@@ -176,7 +188,12 @@ lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value
 
 lazy val `scalafix-output211` = `scalafix-output`(scala211, _.dependsOn(`scalafix-data211`))
 lazy val `scalafix-output212` = `scalafix-output`(scala212, _.settings(addOutput212).dependsOn(`scalafix-data212`))
-lazy val `scalafix-output213` = `scalafix-output`(scala213, _.settings(addOutput213).dependsOn(`scalafix-data213`))
+lazy val `scalafix-output213` = `scalafix-output`(
+  scala213,
+  _.settings(addOutput213)
+   .settings(scala213Settings)
+   .dependsOn(`scalafix-data213`)
+)
 
 lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
@@ -216,11 +233,6 @@ lazy val dontPublish = Seq(
   publishLocal := {}
 )
 
-lazy val scala213Settings = Seq(
-  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  scalaVersion := scala213
-)
-
 val preRelease = "pre-release"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
@@ -249,6 +261,10 @@ inThisBuild(releaseCredentials)
 // required by sbt-scala-module
 inThisBuild(Seq(
   crossScalaVersions := Seq(scala211, scala212, scala213),
+  commands += Command.command("latest-213") { state =>
+    LatestScala.printLatestScala213()
+    state
+  },
   commands += Command.command(preRelease) { state =>
     // Show Compat version, Scala version, and Java Version
     val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
