@@ -62,8 +62,12 @@ class MultiScalaCrossProject(
     name: String,
     configure: CrossProject => CrossProject)
     extends MultiScala {
+
+  def apply(scalaV: String): CrossProject = apply(scalaV, scalaV, x => x)
+
   def apply(
       scalaV: String,
+      scalaVJs: String,
       configurePerScala: CrossProject => CrossProject = x => x
   ): CrossProject = {
     val projectId = projectIdPerScala(name, scalaV)
@@ -74,10 +78,9 @@ class MultiScalaCrossProject(
       )(platforms: _*)
         .crossType(CrossType.Full)
         .withoutSuffixFor(JVMPlatform)
-        .settings(
-          scalaVersion := scalaV,
-          moduleName := name
-        )
+        .settings(moduleName := name)
+        .jvmSettings(scalaVersion := scalaV)
+        .jsSettings(scalaVersion := scalaVJs)
         .settings(srcFull(name))
 
     configurePerScala(configure(resultingProject))
@@ -111,8 +114,8 @@ class MultiScalaProject(
     val resultingProject =
       Project(id = projectId, base = file(s".cross/$projectId"))
         .settings(
-          scalaVersion := scalaV,
-          moduleName := fullName
+          moduleName := fullName,
+          scalaVersion := scalaV
         )
         .settings(srcFull(base))
 
