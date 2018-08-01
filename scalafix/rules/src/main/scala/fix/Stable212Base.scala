@@ -108,11 +108,6 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
       )
 
-    val linearSeqToList =
-      ctx.replaceSymbols(
-        "scala.collection.LinearSeq" -> "scala.collection.immutable.List"
-      )
-
     import scala.meta.contrib._
     val hasTraversable =
         ctx.tree.exists {
@@ -125,7 +120,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       if (hasTraversable) addCompatImport(ctx)
       else Patch.empty
 
-    traversableToIterable + linearSeqToList + compatImport
+    traversableToIterable + compatImport
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {
