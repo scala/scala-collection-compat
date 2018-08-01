@@ -45,7 +45,7 @@ object JavaConversionsGlobalImportSrc extends JavaConversionsDataSrc {
   m.Map(1 -> 1): ju.Dictionary[Int, Int]
 
   // mapAsJavaMap
-  m.Map(1 -> 1): ju.Map[Int, Int]
+  Map(1 -> 1): ju.Map[Int, Int]
 
   // mapAsJavaConcurrentMap
   concMap: juc.ConcurrentMap[Int, Int]
