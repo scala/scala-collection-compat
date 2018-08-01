@@ -4,7 +4,7 @@ rule = "scala:fix.NewCollections"
 package fix
 
 import scala.language.postfixOps
-object Collectionstrawman_v0_Tuple2Zipped {
+object Tuple2ZippedSrc213 {
   def zipped(xs: List[Int], ys: List[Int]): Unit = {
     (xs, ys).zipped
     (xs,ys).zipped
@@ -19,7 +19,7 @@ object Collectionstrawman_v0_Tuple2Zipped {
   def coll(x: Int): List[Int] = ???
 }
 
-object Collectionstrawman_v0_Tuple3Zipped {
+object Tuple3ZippedSrc213 {
   def zipped(xs: List[Int], ys: List[Int], zs: List[Int]): Unit = {
     (xs, ys, zs).zipped
     (xs,ys,zs).zipped

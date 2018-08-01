@@ -7,7 +7,7 @@ Roughly = {
  */
 package fix
 
-class Roughly213Src() {
+object RoughlySrc213 {
   val s = Stream(1, 2, 3)
   s.append(List(4, 5, 6))
   1 #:: 2 #:: 3 #:: Stream.Empty
