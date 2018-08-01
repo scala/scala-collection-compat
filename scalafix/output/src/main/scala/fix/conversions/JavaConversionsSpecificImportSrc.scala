@@ -68,7 +68,7 @@ object JavaConversionsSpecificImportSrc extends JavaConversionsDataSrc {
 
   // mapAsJavaMap
   {
-    m.Map(1 -> 1).asJava: ju.Map[Int, Int]
+    Map(1 -> 1).asJava: ju.Map[Int, Int]
   }
 
   // mapAsJavaConcurrentMap

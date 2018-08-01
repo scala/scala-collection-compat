@@ -440,15 +440,17 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         "_root_.scala.collection.convert.LowPriorityWrapAsJava#mutableSetAsJavaSet(Lscala/collection/mutable/Set;)Ljava/util/Set;.",
         "_root_.scala.collection.convert.LowPriorityWrapAsJava#seqAsJavaList(Lscala/collection/Seq;)Ljava/util/List;.",
         "_root_.scala.collection.convert.LowPriorityWrapAsJava#setAsJavaSet(Lscala/collection/Set;)Ljava/util/Set;.",
+        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaIterable`(Lscala/collection/Iterable;)Ljava/lang/Iterable;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaIterator`(Lscala/collection/Iterator;)Ljava/util/Iterator;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated bufferAsJavaList`(Lscala/collection/mutable/Buffer;)Ljava/util/List;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated mapAsJavaConcurrentMap`(Lscala/collection/concurrent/Map;)Ljava/util/concurrent/ConcurrentMap;.",
+        "_root_.scala.collection.convert.WrapAsJava#`deprecated mapAsJavaMap`(Lscala/collection/Map;)Ljava/util/Map;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableMapAsJavaMap`(Lscala/collection/mutable/Map;)Ljava/util/Map;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableMapAsJavaMap`(Lscala/collection/mutable/Map;)Ljava/util/Map;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableSeqAsJavaList`(Lscala/collection/mutable/Seq;)Ljava/util/List;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableSetAsJavaSet`(Lscala/collection/mutable/Set;)Ljava/util/Set;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated seqAsJavaList`(Lscala/collection/Seq;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated setAsJavaSet`(Lscala/collection/Set;)Ljava/util/Set;.",
+        "_root_.scala.collection.convert.WrapAsJava#`deprecated setAsJavaSet`(Lscala/collection/Set;)Ljava/util/Set;."
       ),
       "asJavaEnumeration" -> List(
         "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaEnumeration(Lscala/collection/Iterator;)Ljava/util/Enumeration;.",
@@ -545,20 +547,19 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val patch =
       ctx.tree.collect {
+        // ex: juSet: Set[Int]
         case tree @ ImplicitConversion(asX) =>
           ctx.addRight(tree, "." + asX)
+
+        // ex: mapAsScalaMap(juMap)
+        case ap @ Term.Apply(ExplicitConversion(asX), List(rhs)) =>
+          explicitToAsX(ap, rhs, asX)
 
         case Importer(JavaConversions(_), importees) =>
           importees.map(ctx.removeImportee).asPatch
 
         case i @ Importee.Name(JavaConversionsImport(_)) =>
           ctx.removeImportee(i)
-
-        case ap @ Term.Apply(Term.Select(_, ExplicitConversion(asX)), List(rhs)) =>
-          explicitToAsX(ap, rhs, asX)
-
-        case ap @ Term.Apply(ExplicitConversion(asX), List(rhs)) =>
-          explicitToAsX(ap, rhs, asX)
 
       }.asPatch
 
