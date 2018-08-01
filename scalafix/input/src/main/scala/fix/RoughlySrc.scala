@@ -10,7 +10,7 @@ package fix
 import scala.{collection => c}
 import scala.collection.{immutable => i, mutable => m}
 
-object Roughly212Src {
+object RoughlySrc {
 
   def id[T](x: T): T = x
   def f[T](x: T): Boolean = true

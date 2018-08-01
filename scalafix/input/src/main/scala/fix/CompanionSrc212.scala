@@ -6,7 +6,7 @@ package fix
 import scala.collection.{immutable => i, mutable => m}
 import scala.{collection => c}
 
-object CompanionSrc {
+object CompanionSrc212 {
 
   (null: c.IndexedSeq[Int]).companion
   (null: c.Iterable[Int]).companion

@@ -6,6 +6,7 @@
 
 - `compat` project: implementation of the compatibility library ;
 - `scalafix*`: implementation of the migration tool.
+- `binary-compat`: preserve binary compatibility when using the compat library on 2.12
 
 ## Migration tool
 
@@ -13,10 +14,9 @@ Several levels of contribution are possible!
 
 ### Report a missing case
 
-Create an issue tagged with the
-[migration](https://github.com/scala/collection-strawman/labels/migration) label.
+Create an issue [scala-collection-compat/issues](https://github.com/scala/scala-collection-compat/issues).
 Embrace `diff`s to describe differences between the standard collections and
-the strawman:
+the new collection:
 
 ~~~ diff
 - xs.toIterator
@@ -33,18 +33,18 @@ Even better, instead of providing a diff, you can directly add it as a test case
    that uses the standard collections:
 
 ~~~ scala
-class toIteratorVsIterator(xs: Iterable[Int]) {
+class ToIteratorVsIteratorSrc(xs: Iterable[Int]) {
   xs.toIterator
 }
 ~~~
 
 3. Add a corresponding file in the `scalafix/output/src/main/scala/fix/` directory
-   with the same code but using the strawman:
+   with the same code but using the new collection:
 
 ~~~ scala
 import scala.collection.compat._
 
-class toIteratorVsIterator(xs: Iterable[Int]) {
+class ToIteratorVsIteratorSrc(xs: Iterable[Int]) {
   xs.iterator
 }
 ~~~
@@ -63,55 +63,35 @@ Then maybe someone will take over and implement your use case… or maybe you wi
 Even better, complete the migration tool implementation to support the missing case!
 
 After you have added the missing case (see previous section), run the following
-sbt task (with sbt started from the `scalafix/` directory) to run the
-migration tool on the input files and check whether the result matches the
+sbt task to run the migration tool on the input files and check whether the result matches the
 expected output files:
 
 ~~~
 > scalafix-tests/test
 ~~~
 
-Fix the implementation of the rule (in the
-`rules/src/main/scala/fix/NewCollections.scala` file) until the
+Fix the implementation of the rule (in the `rules/src/main/scala/fix/NewCollections.scala` file) until the
 tests are green. You can find more help about the scalafix API in its
 [documentation](https://scalacenter.github.io/scalafix/docs/rule-authors/setup).
 
 
 ### Scalafix Teskit Directory Layout
 
+
 ```
-.
-├── data                    |
-│   └── src                 |
-│       └── main            |
-│           └── scala       | Project to avoid duplicating code between input and output
-├── input                   |
-│   └── src                 |
-│       └── main            |
-│           ├── scala       | Input that cross-compile
-│           └── scala-2.12  | 2.12 specific input
-├── output                  |
-│   └── src                 |
-│       └── main            |
-│           └── scala       | Output that cross-compile
-├── output212               |
-│   └── src                 |
-│       └── main            |
-│           └── scala-2.12  | 2.12 specific output
-├── output213               |
-│   └── src                 |
-│       └── main            |
-│           └── scala       | 2.13 specific output (from a cross-compiled input)
-├── output213-failure       |
-│   └── src                 |
-│       └── main            |
-│           └── scala       | 2.13 specific output that cannot be migrated due to technical limitations
-├── rules                   |
-│   └── src                 |
-│       └── main            |
-│           └── scala       | Rule implementations
-└── tests                   |
-    └── src                 |
-        └── test            |
-            └── scala       | Scalafix testkit launcher (useful to run a single input file)
++------------------+-----+-----------------+
+|                  |Input|     Output      |
+|                  | 2.12| 2.11| 2.12| 2.13|
++------------------+-----+-----+-----+-----+
+|data              |  X  |  X  |  X  |  X  |
+|input             |  X  |     |     |     |
+|output            |     |  X  |  X  |  X  |
+|output212         |     |     |  X  |     |
+|output212+        |     |     |  X  |  X  |
+|output213         |     |     |     |  X  |
+|output213-failure |     |     |     |  X  |
++------------------+-----+-----+-----+-----+
+
+rules: Rule implementations
+tests: Scalafix testkit launcher (useful to run a single input file)
 ```

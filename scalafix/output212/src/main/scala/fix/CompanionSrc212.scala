@@ -7,7 +7,7 @@ import scala.collection.{immutable => i, mutable => m}
 import scala.{collection => c}
 import scala.collection.compat._
 
-object CompanionSrc {
+object CompanionSrc212 {
 
   (null: c.IndexedSeq[Int]).iterableFactory
   (null: c.Iterable[Int]).iterableFactory

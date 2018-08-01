@@ -12,6 +12,7 @@ class ScalafixTests
       AbsolutePath(BuildInfo.outputSourceroot),
       AbsolutePath(BuildInfo.output212Sourceroot),
       AbsolutePath(BuildInfo.output213Sourceroot),
+      AbsolutePath(BuildInfo.output212PlusSourceroot),
       AbsolutePath(BuildInfo.output213FailureSourceroot)
     )
   ) {

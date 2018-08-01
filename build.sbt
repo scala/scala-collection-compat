@@ -183,14 +183,29 @@ val `scalafix-output` = MultiScalaProject("scalafix-output", "scalafix/output",
 lazy val output212 = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main")
 lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value / "scala"
 
+lazy val output212Plus = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main")
+lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value / "scala"
+
 lazy val output213 = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main")
 lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value / "scala"
 
-lazy val `scalafix-output211` = `scalafix-output`(scala211, _.dependsOn(`scalafix-data211`))
-lazy val `scalafix-output212` = `scalafix-output`(scala212, _.settings(addOutput212).dependsOn(`scalafix-data212`))
+lazy val `scalafix-output211` = `scalafix-output`(
+  scala211,
+  _.dependsOn(`scalafix-data211`)
+)
+
+
+lazy val `scalafix-output212` = `scalafix-output`(
+  scala212,
+  _.settings(addOutput212)
+   .settings(addOutput212Plus)
+   .dependsOn(`scalafix-data212`)
+)
+
 lazy val `scalafix-output213` = `scalafix-output`(
   scala213,
   _.settings(addOutput213)
+   .settings(addOutput212Plus)
    .settings(scala213Settings)
    .dependsOn(`scalafix-data213`)
 )
@@ -213,7 +228,9 @@ lazy val `scalafix-tests` = project
       "inputSourceroot"            -> sourceDirectory.in(`scalafix-input`, Compile).value,
       "outputSourceroot"           -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
       "output212Sourceroot"        -> output212.value,
+      "output212PlusSourceroot"    -> output212Plus.value,
       "output213Sourceroot"        -> output213.value,
+      "output212PlusSourceroot"    -> output212Plus.value,
       "output213FailureSourceroot" -> sourceDirectory.in(`scalafix-output213-failure`, Compile).value,
       "inputClassdirectory"        -> classDirectory.in(`scalafix-input`, Compile).value
     ),

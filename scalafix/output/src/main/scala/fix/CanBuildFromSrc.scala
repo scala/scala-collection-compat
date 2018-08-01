@@ -7,7 +7,7 @@ import scala.language.higherKinds
 
 import scala.collection.compat._
 
-class CanBuildFromSrc() {
+object CanBuildFromSrc {
 
   def f[C0, A, C1[_]](c0: C0)(implicit
       cbf: Factory[Int, C1[Int]],

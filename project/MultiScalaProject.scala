@@ -40,6 +40,13 @@ trait MultiScala {
         (baseDirectory in ThisBuild).value / base / "src" / "main" / "scala",
       unmanagedSourceDirectories in Compile +=
         (baseDirectory in ThisBuild).value / base / "src" / "main" / ("scala-" + scalaBinaryVersion.value),
+      unmanagedSourceDirectories in Compile ++= {
+        val sourceDir = (baseDirectory in ThisBuild).value / base / "src" / "main"
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, n)) if n >= 12 => List(sourceDir / "scala-2.12+")
+          case _                       => Nil
+        }
+      },
       unmanagedSourceDirectories in Test +=
         (baseDirectory in ThisBuild).value / base / "src" / "test" / "scala",
       unmanagedResourceDirectories in Compile +=
