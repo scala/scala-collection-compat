@@ -73,10 +73,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "_root_.scala.collection.immutable.TreeSet#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
   )
 
-  val traversable = exact(
-    "_root_.scala.collection.Traversable#",
+  val traversableOnce = exact(
     "_root_.scala.collection.TraversableOnce#",
-    "_root_.scala.package.Traversable#",
     "_root_.scala.package.TraversableOnce#"
   )
 
@@ -102,25 +100,32 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   def replaceTraversable(ctx: RuleCtx): Patch = {
     val traversableToIterable =
       ctx.replaceSymbols(
-        "scala.Traversable"               -> "scala.Iterable",
-        "scala.collection.Traversable"    -> "scala.collection.Iterable",
-        "scala.TraversableOnce"           -> "scala.IterableOnce",
-        "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
+        "scala.Traversable"                      -> "scala.Iterable",
+        "scala.collection.Traversable"           -> "scala.collection.Iterable",
+        "scala.collection.immutable.Traversable" -> "scala.collection.immutable.Iterable",
+        "scala.collection.mutable.Traversable"   -> "scala.collection.mutable.Iterable",
       )
 
-    import scala.meta.contrib._
-    val hasTraversable =
-        ctx.tree.exists {
-          case traversable(_) => true
-          case _ => false
+    val traversableOnceToIterableOnce =
+      ctx.tree.collect {
+        case Type.Apply(sel @ Type.Select(chain, traversableOnce(n: Name)), _) =>
+          val dot = chain.tokens.toList.reverse.drop(1)
 
-        }
+          ctx.removeTokens(chain.tokens) +
+            ctx.removeTokens(dot) +
+            ctx.replaceTree(sel, "IterableOnce")
+
+        case Type.Apply(traversableOnce(n: Name), _) =>
+          ctx.replaceTree(n, "IterableOnce")
+
+
+      }.asPatch
 
     val compatImport =
-      if (hasTraversable) addCompatImport(ctx)
+      if (traversableOnceToIterableOnce.nonEmpty) addCompatImport(ctx)
       else Patch.empty
 
-    traversableToIterable + compatImport
+    traversableOnceToIterableOnce + traversableToIterable + compatImport
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {

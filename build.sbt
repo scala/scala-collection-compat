@@ -223,7 +223,7 @@ lazy val `scalafix-tests` = project
   .settings(
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    buildInfoPackage := "fix",
+    buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
       "inputSourceroot"            -> sourceDirectory.in(`scalafix-input`, Compile).value,
       "outputSourceroot"           -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
