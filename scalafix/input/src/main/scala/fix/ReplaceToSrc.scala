@@ -11,4 +11,7 @@ object ReplaceToSrc {
     xs.to
 
   List[Int]() // unrelated matching brackets
+
+  def m2(xs: List[Int]): Iterable[Int] =
+    xs.to
 }

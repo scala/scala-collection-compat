@@ -12,4 +12,7 @@ object ReplaceToSrc {
     xs.to(scala.collection.immutable.List)
 
   List[Int]() // unrelated matching brackets
+
+  def m2(xs: List[Int]): Iterable[Int] =
+    xs.to(scala.collection.immutable.IndexedSeq)
 }
