@@ -99,7 +99,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     sameElements + compatImport
   }
 
-  def replaceSymbols0(ctx: RuleCtx): Patch = {
+  def replaceTraversable(ctx: RuleCtx): Patch = {
     val traversableToIterable =
       ctx.replaceSymbols(
         "scala.Traversable"               -> "scala.Iterable",
@@ -566,7 +566,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
-    replaceSymbols0(ctx) +
+    replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
       replaceToList(ctx) +
       replaceCopyToBuffer(ctx) +

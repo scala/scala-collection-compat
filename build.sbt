@@ -230,7 +230,6 @@ lazy val `scalafix-tests` = project
       "output212Sourceroot"        -> output212.value,
       "output212PlusSourceroot"    -> output212Plus.value,
       "output213Sourceroot"        -> output213.value,
-      "output212PlusSourceroot"    -> output212Plus.value,
       "output213FailureSourceroot" -> sourceDirectory.in(`scalafix-output213-failure`, Compile).value,
       "inputClassdirectory"        -> classDirectory.in(`scalafix-input`, Compile).value
     ),
