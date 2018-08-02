@@ -6,14 +6,14 @@ import scalafix._
 
 class ScalafixTests
   extends SemanticRuleSuite(
-    SemanticdbIndex.load(Classpath(AbsolutePath(BuildInfo.inputClassdirectory))),
-    AbsolutePath(BuildInfo.inputSourceroot),
+    SemanticdbIndex.load(Classpath(AbsolutePath(build.BuildInfo.inputClassdirectory))),
+    AbsolutePath(build.BuildInfo.inputSourceroot),
     Seq(
-      AbsolutePath(BuildInfo.outputSourceroot),
-      AbsolutePath(BuildInfo.output212Sourceroot),
-      AbsolutePath(BuildInfo.output213Sourceroot),
-      AbsolutePath(BuildInfo.output212PlusSourceroot),
-      AbsolutePath(BuildInfo.output213FailureSourceroot)
+      AbsolutePath(build.BuildInfo.outputSourceroot),
+      AbsolutePath(build.BuildInfo.output212Sourceroot),
+      AbsolutePath(build.BuildInfo.output213Sourceroot),
+      AbsolutePath(build.BuildInfo.output212PlusSourceroot),
+      AbsolutePath(build.BuildInfo.output213FailureSourceroot)
     )
   ) {
 

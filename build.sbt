@@ -223,14 +223,13 @@ lazy val `scalafix-tests` = project
   .settings(
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    buildInfoPackage := "fix",
+    buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
       "inputSourceroot"            -> sourceDirectory.in(`scalafix-input`, Compile).value,
       "outputSourceroot"           -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
       "output212Sourceroot"        -> output212.value,
       "output212PlusSourceroot"    -> output212Plus.value,
       "output213Sourceroot"        -> output213.value,
-      "output212PlusSourceroot"    -> output212Plus.value,
       "output213FailureSourceroot" -> sourceDirectory.in(`scalafix-output213-failure`, Compile).value,
       "inputClassdirectory"        -> classDirectory.in(`scalafix-input`, Compile).value
     ),

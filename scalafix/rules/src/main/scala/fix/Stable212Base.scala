@@ -31,7 +31,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val foldLeftSymbol = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
 
-  val iterator = normalized("_root_.scala.collection.TraversableLike.toIterator.")
+
   val toTpe = normalized(
     "_root_.scala.collection.TraversableLike.to.",
     "_root_.scala.collection.TraversableOnce.to.",
@@ -73,10 +73,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "_root_.scala.collection.immutable.TreeSet#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
   )
 
-  val traversable = exact(
-    "_root_.scala.collection.Traversable#",
+  val `TraversableLike.toIterator` = normalized("_root_.scala.collection.TraversableLike.toIterator.")
+  val traversableOnce = exact(
     "_root_.scala.collection.TraversableOnce#",
-    "_root_.scala.package.Traversable#",
     "_root_.scala.package.TraversableOnce#"
   )
 
@@ -99,28 +98,42 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     sameElements + compatImport
   }
 
-  def replaceSymbols0(ctx: RuleCtx): Patch = {
+  def replaceTraversable(ctx: RuleCtx): Patch = {
+
+    val traversableIterator =
+      ctx.tree.collect {
+        case `TraversableLike.toIterator`(t: Name) =>
+          ctx.replaceTree(t, "iterator")
+      }.asPatch
+
     val traversableToIterable =
       ctx.replaceSymbols(
-        "scala.Traversable"               -> "scala.Iterable",
-        "scala.collection.Traversable"    -> "scala.collection.Iterable",
-        "scala.TraversableOnce"           -> "scala.IterableOnce",
-        "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
+        "scala.Traversable"                      -> "scala.Iterable",
+        "scala.collection.Traversable"           -> "scala.collection.Iterable",
+        "scala.collection.immutable.Traversable" -> "scala.collection.immutable.Iterable",
+        "scala.collection.mutable.Traversable"   -> "scala.collection.mutable.Iterable",
       )
 
-    import scala.meta.contrib._
-    val hasTraversable =
-        ctx.tree.exists {
-          case traversable(_) => true
-          case _ => false
+    val traversableOnceToIterableOnce =
+      ctx.tree.collect {
+        case Type.Apply(sel @ Type.Select(chain, traversableOnce(n: Name)), _) =>
+          val dot = chain.tokens.toList.reverse.drop(1)
 
-        }
+          ctx.removeTokens(chain.tokens) +
+            ctx.removeTokens(dot) +
+            ctx.replaceTree(sel, "IterableOnce")
+
+        case Type.Apply(traversableOnce(n: Name), _) =>
+          ctx.replaceTree(n, "IterableOnce")
+
+
+      }.asPatch
 
     val compatImport =
-      if (hasTraversable) addCompatImport(ctx)
+      if (traversableOnceToIterableOnce.nonEmpty || traversableIterator.nonEmpty) addCompatImport(ctx)
       else Patch.empty
 
-    traversableToIterable + compatImport
+    traversableOnceToIterableOnce + traversableToIterable + traversableIterator + compatImport
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {
@@ -251,14 +264,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     }
   }
 
-  def replaceToList(ctx: RuleCtx): Patch = {
-    val replaceToIterator =
-      ctx.tree.collect {
-        case iterator(t: Name) =>
-          ctx.replaceTree(t, "iterator")
-      }.asPatch
-
-    val replaceTo =
+  def replaceTo(ctx: RuleCtx): Patch = {
+    val patch =
       ctx.tree.collect {
         case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
           trailingBrackets(n, ctx).map { case (open, close) =>
@@ -286,10 +293,10 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       }.asPatch
 
     val compatImport =
-      if (replaceTo.nonEmpty) addCompatImport(ctx)
+      if (patch.nonEmpty) addCompatImport(ctx)
       else Patch.empty
 
-    compatImport + replaceToIterator + replaceTo
+    compatImport + patch
   }
 
   def replaceFuture(ctx: RuleCtx): Patch = {
@@ -566,9 +573,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
-    replaceSymbols0(ctx) +
+    replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
-      replaceToList(ctx) +
+      replaceTo(ctx) +
       replaceCopyToBuffer(ctx) +
       replaceSymbolicFold(ctx) +
       replaceSetMapPlus2(ctx) +

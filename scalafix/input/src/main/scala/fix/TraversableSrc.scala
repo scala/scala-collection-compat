@@ -3,16 +3,15 @@ rule = "scala:fix.CrossCompat"
  */
 package fix
 
-object TraversableSrc {
-  def foo(xs: Traversable[(Int, String)], ys: List[Int]): Unit = {
-    xs.to[List]
-    xs.to[Set]
-    xs.toIterator
-    ys.iterator
-  }
+import scala.collection.immutable
+import scala.collection.mutable
 
-  def m1(xs: TraversableOnce[Int]): List[Int] =
-    xs.to
+trait TraversableSrc {
+  val to: TraversableOnce[Int]
+  val cto: collection.TraversableOnce[Int]
 
-  List[Int]() // unrelated matching brackets
+  val t: Traversable[Int]
+  val ct: collection.Traversable[Int]
+  val it: immutable.Traversable[Int]
+  val mt: mutable.Traversable[Int]
 }
