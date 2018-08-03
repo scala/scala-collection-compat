@@ -9,7 +9,7 @@ class BinaryCompaTest {
   @Test
   def compat(): Unit = {
     Config.setup("foo", Array(oldClasspath, newClasspath))
-    val mima = new MiMaLib(Config.baseClassPath)
+    val mima        = new MiMaLib(Config.baseClassPath)
     val allProblems = mima.collectProblems(oldClasspath, newClasspath)
     Assert.assertEquals(allProblems, Nil)
   }

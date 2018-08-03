@@ -16,26 +16,30 @@ object CanBuildFrom {
     def emptyApply(param: Name): Boolean = {
       import scala.meta.contrib._
       val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
-      body.exists{
+      body.exists {
         case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
-        case Term.Apply(matchCbf(_), Nil) => true
-        case _ => false
+        case Term.Apply(matchCbf(_), Nil)                 => true
+        case _                                            => false
       }
     }
 
-    paramss.flatten.collect{
-      case Term.Param(
-          List(Mod.Implicit()),
-          param,
-          Some(
-            Type.Apply(
-              cbf @ collectionCanBuildFrom(_),
-              List(p1, _, _)
-            )
-          ),
-          _
-        ) if !nothing.matches(p1) && !emptyApply(param) => new CanBuildFrom(param, cbf)
-    }.map(_.toBuildFrom(body, ctx)).asPatch
+    paramss.flatten
+      .collect {
+        case Term.Param(
+            List(Mod.Implicit()),
+            param,
+            Some(
+              Type.Apply(
+                cbf @ collectionCanBuildFrom(_),
+                List(p1, _, _)
+              )
+            ),
+            _
+            ) if !nothing.matches(p1) && !emptyApply(param) =>
+          new CanBuildFrom(param, cbf)
+      }
+      .map(_.toBuildFrom(body, ctx))
+      .asPatch
   }
 }
 
@@ -81,27 +85,30 @@ object CanBuildFromNothing {
             nothing: SymbolMatcher,
             toTpe: SymbolMatcher,
             handledTo: mutable.Set[Tree])(implicit index: SemanticdbIndex): Patch = {
-    paramss.flatten.collect{
-      case
-        Term.Param(
-          List(Mod.Implicit()),
-          param,
-          Some(
-            tpe @ Type.Apply(
-              collectionCanBuildFrom(_),
-              List(
-                nothing(_),
-                t,
-                cct @ Type.Apply(
-                  cc,
-                  _
+    paramss.flatten
+      .collect {
+        case Term.Param(
+            List(Mod.Implicit()),
+            param,
+            Some(
+              tpe @ Type.Apply(
+                collectionCanBuildFrom(_),
+                List(
+                  nothing(_),
+                  t,
+                  cct @ Type.Apply(
+                    cc,
+                    _
+                  )
                 )
               )
-            )
-          ),
-          _
-        ) => new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe, handledTo)
-    }.map(_.toFactory).asPatch
+            ),
+            _
+            ) =>
+          new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe, handledTo)
+      }
+      .map(_.toFactory)
+      .asPatch
   }
 }
 
@@ -149,18 +156,16 @@ case class CanBuildFromNothing(param: Name,
           replaceNewBuilder(ap, cbf2)
       }.asPatch
 
-
     val matchCC = SymbolMatcher.exact(ctx.index.symbol(cc).get)
 
     // e.to[CC] => cbf.fromSpecific(e)
     val toCalls =
       body.collect {
         case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
-
           handledTo += to
 
           // e.to[CC](*cbf*) extract implicit parameter
-          val synth = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
+          val synth                            = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
           val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
 
           // This is a bit unsafe
@@ -171,8 +176,8 @@ case class CanBuildFromNothing(param: Name,
             val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
 
             ctx.removeTokens(apToRemove) +
-            ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
-            ctx.addRight(e, ")")
+              ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
+              ctx.addRight(e, ")")
           } else Patch.empty
 
       }.asPatch

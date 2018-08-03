@@ -12,18 +12,20 @@ package object fix {
   def trailingBrackets(tree: Tree, ctx: RuleCtx): Option[(Token.LeftBracket, Token.RightBracket)] =
     for {
       end <- tree.tokens.lastOption
-      open <- ctx.tokenList.find(end)(_.is[Token.LeftBracket]).map(_.asInstanceOf[Token.LeftBracket])
+      open <- ctx.tokenList
+        .find(end)(_.is[Token.LeftBracket])
+        .map(_.asInstanceOf[Token.LeftBracket])
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
   def trailingParens(tree: Tree, ctx: RuleCtx): Option[(Token.LeftParen, Token.RightParen)] =
     for {
-      end <- tree.tokens.lastOption
-      open <- ctx.tokenList.find(end)(_.is[Token.LeftParen]).map(_.asInstanceOf[Token.LeftParen])
+      end   <- tree.tokens.lastOption
+      open  <- ctx.tokenList.find(end)(_.is[Token.LeftParen]).map(_.asInstanceOf[Token.LeftParen])
       close <- ctx.matchingParens.close(open)
     } yield (open, close)
 
-  def trailingApply(tree: Tree, ctx: RuleCtx): Option[(Token, Token)] = 
+  def trailingApply(tree: Tree, ctx: RuleCtx): Option[(Token, Token)] =
     trailingParens(tree, ctx).orElse(trailingBrackets(tree, ctx))
 
   def startsWithParens(tree: Tree): Boolean =

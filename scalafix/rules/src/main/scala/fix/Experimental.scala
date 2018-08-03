@@ -15,10 +15,13 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
   val CollectionSet = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
 
   // == Symbols ==
-  val mapZip   = exact("_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val mapPlus  = exact("_root_.scala.collection.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/Map;.")
-  val setPlus  = exact("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/Set;.")
-  val setMinus = exact("_root_.scala.collection.SetLike#`-`(Ljava/lang/Object;)Lscala/collection/Set;.")
+  val mapZip = exact(
+    "_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
+  val mapPlus = exact("_root_.scala.collection.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/Map;.")
+  val setPlus = exact(
+    "_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/Set;.")
+  val setMinus = exact(
+    "_root_.scala.collection.SetLike#`-`(Ljava/lang/Object;)Lscala/collection/Set;.")
 
   def replaceMapZip(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
@@ -33,10 +36,9 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
       val callSite =
         if (startsWithParens(rhs)) {
           ctx.addLeft(rhs, col)
-        }
-        else {
+        } else {
           ctx.addLeft(rhs, col + "(") +
-          ctx.addRight(rhs, ")")
+            ctx.addRight(rhs, ")")
         }
 
       ctx.addRight(op, doubleOp) + callSite
@@ -56,5 +58,5 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
 
   override def fix(ctx: RuleCtx): Patch =
     replaceSetMapPlusMinus(ctx) +
-    replaceMapZip(ctx)
+      replaceMapZip(ctx)
 }

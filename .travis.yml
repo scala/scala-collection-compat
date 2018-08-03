@@ -59,10 +59,10 @@ matrix:
       scala: 2.12.6
       env: TEST_BINARY_COMPAT=true
 
-    # # run scalafmt
-    # - jdk: oraclejdk8
-    #   scala: 2.12.6
-    #   env: TEST_SCALAFMT=true
+    # run scalafmt
+    - jdk: oraclejdk8
+      scala: 2.12.6
+      env: TEST_SCALAFMT=true
 
 # | jdk         |   scala   | scala target | scala target version | scalafix test |
 # | ----------- | --------- | ------------ | -------------------- |---------------|

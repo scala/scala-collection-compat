@@ -28,9 +28,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     normalized(s"_root_.scala.collection.TraversableOnce.`$op`.")
   }
 
-  val foldLeftSymbol = foldSymbol(isLeft = true)
+  val foldLeftSymbol  = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
-
 
   val toTpe = normalized(
     "_root_.scala.collection.TraversableLike.to.",
@@ -39,18 +38,28 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "_root_.scala.collection.parallel.ParIterableLike.to."
   )
   val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
-  val arrayBuilderMake = normalized("_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
-  val iterableSameElement = exact("_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
+  val arrayBuilderMake = normalized(
+    "_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
+  val iterableSameElement = exact(
+    "_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
   val collectionCanBuildFrom = exact("_root_.scala.collection.generic.CanBuildFrom#")
-  val collectionCanBuildFromImport = exact("_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
+  val collectionCanBuildFromImport = exact(
+    "_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
   val nothing = exact("_root_.scala.Nothing#")
-  val setPlus2 = exact("_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
-  val mapPlus2 = exact("_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
-  val mutSetPlus = exact("_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
-  val mutMapPlus = exact("_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
-  val mutMapUpdate = exact("_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
-  val `Future.onFailure` = exact("_root_.scala.concurrent.Future#onFailure(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
-  val `Future.onSuccess` = exact("_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
+  val setPlus2 = exact(
+    "_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
+  val mapPlus2 = exact(
+    "_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
+  val mutSetPlus = exact(
+    "_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
+  val mutMapPlus = exact(
+    "_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
+  val mutMapUpdate = exact(
+    "_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
+  val `Future.onFailure` = exact(
+    "_root_.scala.concurrent.Future#onFailure(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
+  val `Future.onSuccess` = exact(
+    "_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
 
   private val sortedFrom = exact(
     "_root_.scala.collection.generic.Sorted#from(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
@@ -65,7 +74,6 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "_root_.scala.collection.immutable.TreeSet#to(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
   )
 
-
   private val sortedUntil = exact(
     "_root_.scala.collection.SortedSetLike#until(Ljava/lang/Object;)Lscala/collection/SortedSet;.",
     "_root_.scala.collection.generic.Sorted#until(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
@@ -73,7 +81,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "_root_.scala.collection.immutable.TreeSet#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
   )
 
-  val `TraversableLike.toIterator` = normalized("_root_.scala.collection.TraversableLike.toIterator.")
+  val `TraversableLike.toIterator` = normalized(
+    "_root_.scala.collection.TraversableLike.toIterator.")
   val traversableOnce = exact(
     "_root_.scala.collection.TraversableOnce#",
     "_root_.scala.package.TraversableOnce#"
@@ -81,7 +90,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
   // == Rules ==
 
-  val breakoutRewrite = new BreakoutRewrite(addCompatImport)
+  val breakoutRewrite                      = new BreakoutRewrite(addCompatImport)
   def replaceBreakout(ctx: RuleCtx): Patch = breakoutRewrite(ctx)
 
   def replaceIterableSameElements(ctx: RuleCtx): Patch = {
@@ -92,7 +101,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       }.asPatch
 
     val compatImport =
-      if(sameElements.nonEmpty) addCompatImport(ctx)
+      if (sameElements.nonEmpty) addCompatImport(ctx)
       else Patch.empty
 
     sameElements + compatImport
@@ -126,11 +135,11 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         case Type.Apply(traversableOnce(n: Name), _) =>
           ctx.replaceTree(n, "IterableOnce")
 
-
       }.asPatch
 
     val compatImport =
-      if (traversableOnceToIterableOnce.nonEmpty || traversableIterator.nonEmpty) addCompatImport(ctx)
+      if (traversableOnceToIterableOnce.nonEmpty || traversableIterator.nonEmpty)
+        addCompatImport(ctx)
       else Patch.empty
 
     traversableOnceToIterableOnce + traversableToIterable + traversableIterator + compatImport
@@ -154,23 +163,29 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   def replaceSetMapPlus2(ctx: RuleCtx): Patch = {
-    def rewritePlus(ap: Term.ApplyInfix, lhs: Term, op: Term.Name, rhs1: Term, rhs2: Term): Patch = {
+    def rewritePlus(ap: Term.ApplyInfix,
+                    lhs: Term,
+                    op: Term.Name,
+                    rhs1: Term,
+                    rhs2: Term): Patch = {
       val tokensToReplace =
-        if(startsWithParens(ap)) {
+        if (startsWithParens(ap)) {
           // don't drop surrounding parens
           ap.tokens.slice(1, ap.tokens.size - 1)
         } else ap.tokens
 
       val newTree =
-        Term.ApplyInfix(
-          Term.ApplyInfix(lhs, op, Nil, List(rhs1)),
-          op,
-          Nil,
-          List(rhs2)
-        ).syntax
+        Term
+          .ApplyInfix(
+            Term.ApplyInfix(lhs, op, Nil, List(rhs1)),
+            op,
+            Nil,
+            List(rhs2)
+          )
+          .syntax
 
       ctx.removeTokens(tokensToReplace) +
-      tokensToReplace.headOption.map(x => ctx.addRight(x, newTree))
+        tokensToReplace.headOption.map(x => ctx.addRight(x, newTree))
     }
     ctx.tree.collect {
       case ap @ Term.ApplyInfix(lhs, op @ mapPlus2(_), _, List(a, b)) =>
@@ -184,7 +199,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   def replaceMutSetMapPlus(ctx: RuleCtx): Patch = {
     def rewriteMutPlus(lhs: Term, op: Term.Name): Patch = {
       ctx.addRight(lhs, ".clone()") +
-      ctx.addRight(op, "=")
+        ctx.addRight(op, "=")
     }
 
     ctx.tree.collect {
@@ -200,8 +215,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     ctx.tree.collect {
       case Term.Apply(Term.Select(a, up @ mutMapUpdate(_)), List(k, v)) => {
         ctx.addRight(up, "clone() += (") +
-        ctx.removeTokens(up.tokens) +
-        ctx.addRight(v, ")")
+          ctx.removeTokens(up.tokens) +
+          ctx.addRight(v, ")")
       }
     }.asPatch
   }
@@ -226,25 +241,24 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     val imports =
       ctx.tree.collect {
         case i: Importee if collectionCanBuildFromImport.matches(i) =>
-            ctx.removeImportee(i)
+          ctx.removeImportee(i)
       }.asPatch
 
     if (useSites.nonEmpty) {
       val compatImport = addCompatImport(ctx)
       useSites + imports + compatImport
-    }
-    else Patch.empty
+    } else Patch.empty
   }
 
   def extractCollection(toCol: Tree): String = {
     toCol match {
       case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
         "scala.collection.immutable.IndexedSeq"
-      case Term.ApplyType(Term.Select(coll,_), _) =>
+      case Term.ApplyType(Term.Select(coll, _), _) =>
         coll.syntax
       case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
         coll.syntax
-      case Term.Select(coll,_) =>
+      case Term.Select(coll, _) =>
         coll.syntax
       case coll: Type.Name =>
         coll.syntax
@@ -268,21 +282,24 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     val patch =
       ctx.tree.collect {
         case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
-          trailingBrackets(n, ctx).map { case (open, close) =>
-            ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
+          trailingBrackets(n, ctx).map {
+            case (open, close) =>
+              ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
           }.asPatch
 
         case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
           val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
-          synth.map{ s =>
-            s.text.parse[Term].get match {
-              // we only want f.to, not f.to(X)
-              case Term.Apply(_, List(toCol)) =>
-                val col = extractCollection(toCol)
-                ctx.addRight(to, "(" + col + ")")
-              case _ => Patch.empty
+          synth
+            .map { s =>
+              s.text.parse[Term].get match {
+                // we only want f.to, not f.to(X)
+                case Term.Apply(_, List(toCol)) =>
+                  val col = extractCollection(toCol)
+                  ctx.addRight(to, "(" + col + ")")
+                case _ => Patch.empty
+              }
             }
-          }.getOrElse(Patch.empty)
+            .getOrElse(Patch.empty)
 
       }.asPatch
 
@@ -299,18 +316,21 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       val indent = " " * cases.head.pos.startColumn
 
       ctx.replaceTree(f, "onComplete") +
-      cases.map{ case Case(c, _, _) =>
-        ctx.addLeft(c, tryApply +"(") +
-        ctx.addRight(c, ")")
-      }.asPatch +
-      ctx.addRight(cases.last, nl + indent + "case _ => ()" )
+        cases.map {
+          case Case(c, _, _) =>
+            ctx.addLeft(c, tryApply + "(") +
+              ctx.addRight(c, ")")
+        }.asPatch +
+        ctx.addRight(cases.last, nl + indent + "case _ => ()")
     }
 
     ctx.tree.collect {
-      case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)), List(Term.PartialFunction(cases))) =>
+      case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)),
+                      List(Term.PartialFunction(cases))) =>
         toOnCompletePF(f, cases, "scala.util.Failure")
 
-      case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)), List(Term.PartialFunction(cases))) =>
+      case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)),
+                      List(Term.PartialFunction(cases))) =>
         toOnCompletePF(f, cases, "scala.util.Success")
 
     }.asPatch
@@ -377,8 +397,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           "Set",
           "Traversable",
         )
-      ).flatMap{ case (prefix, cols) =>
-        cols.map(col => prefix + col + companionSuffix)
+      ).flatMap {
+        case (prefix, cols) =>
+          cols.map(col => prefix + col + companionSuffix)
       }
 
     val specific =
@@ -387,7 +408,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         "_root_.scala.collection.mutable.ArrayStack#companion()Lscala/collection/mutable/ArrayStack;."
       )
 
-    exact((cols ++ specific).toSeq:_*)
+    exact((cols ++ specific).toSeq: _*)
   }
 
   val classManifestCompanion = exact(
@@ -460,8 +481,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaDictionary(Lscala/collection/mutable/Map;)Ljava/util/Dictionary;.",
         "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaDictionary`(Lscala/collection/mutable/Map;)Ljava/util/Dictionary;.",
       )
-    ).flatMap{ case (asX, symbols) =>
-      symbols.map(s => Symbol(s) -> asX)
+    ).flatMap {
+      case (asX, symbols) =>
+        symbols.map(s => Symbol(s) -> asX)
     }.toMap
 
   private val deprecatedAsScalaConversions: Map[Symbol, String] =
@@ -492,7 +514,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     private def collect(deprecatedSymbols: Map[Symbol, String]): Map[Position, String] = {
       def deprecatedConversion(synthetic: Synthetic): Option[String] = {
         var found: Option[String] = None
-        synthetic.names.find{name =>
+        synthetic.names.find { name =>
           found = deprecatedSymbols.get(name.symbol)
           found.nonEmpty
         }
@@ -505,28 +527,35 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     }
 
     val asScalaConvertions = collect(deprecatedAsScalaConversions)
-    val asJavaConvertions = collect(deprecatedAsJavaConversions)
+    val asJavaConvertions  = collect(deprecatedAsJavaConversions)
 
     def unapply(tree: Tree): Option[String] = {
       val pos = tree.pos
-      asJavaConvertions.get(pos).orElse(
-        asScalaConvertions.get(pos)
-      )
+      asJavaConvertions
+        .get(pos)
+        .orElse(
+          asScalaConvertions.get(pos)
+        )
     }
   }
 
   private class DeprecatedExplicitConversion(ctx: RuleCtx) {
     def unapply(tree: Tree): Option[String] = {
-      ctx.index.symbol(tree).flatMap( symbol =>
-        deprecatedAsJavaConversions.get(symbol).orElse(
-          deprecatedAsScalaConversions.get(symbol)
-        )
-      )
+      ctx.index
+        .symbol(tree)
+        .flatMap(
+          symbol =>
+            deprecatedAsJavaConversions
+              .get(symbol)
+              .orElse(
+                deprecatedAsScalaConversions.get(symbol)
+            ))
     }
   }
 
   private val JavaConversions = exact("_root_.scala.collection.JavaConversions.")
-  private val JavaConversionsImport = exact("_root_.scala.collection.JavaConversions.;_root_.scala.collection.JavaConversions#")
+  private val JavaConversionsImport = exact(
+    "_root_.scala.collection.JavaConversions.;_root_.scala.collection.JavaConversions#")
 
   def replaceJavaConversions(ctx: RuleCtx): Patch = {
     val ImplicitConversion = new DeprecatedImplicitConversion(ctx)
@@ -534,11 +563,11 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     def explicitToAsX(ap: Term.Apply, rhs: Term, asX: String): Patch = {
       // ap: f(x), rhs: x, left: f(, right: )
-      val left = ap.tokens.slice(0, rhs.tokens.start - ap.tokens.start)
+      val left  = ap.tokens.slice(0, rhs.tokens.start - ap.tokens.start)
       val right = ap.tokens.slice(rhs.tokens.end - ap.tokens.start, ap.tokens.size)
       ctx.removeTokens(left) +
-      ctx.addRight(rhs, "." + asX) +
-      ctx.removeTokens(right)
+        ctx.addRight(rhs, "." + asX) +
+        ctx.removeTokens(right)
     }
 
     val patch =

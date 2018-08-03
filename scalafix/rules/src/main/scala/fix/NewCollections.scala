@@ -6,9 +6,8 @@ import scala.meta._
 
 // Not 2.12 Cross-Compatible
 case class NewCollections(index: SemanticdbIndex)
-  extends SemanticRule(index, "NewCollections")
-  with Stable212Base {
-
+    extends SemanticRule(index, "NewCollections")
+    with Stable212Base {
 
   def isCrossCompatible: Boolean = false
 
@@ -43,10 +42,11 @@ case class NewCollections(index: SemanticdbIndex)
         ctx.replaceTree(n, "filterInPlace")
 
       case Term.Apply(Term.Select(_, retainMap(n: Name)), List(_: Term.Function)) =>
-        trailingParens(n, ctx).map { case (open, close) =>
-          ctx.replaceToken(open, "{case ") +
-          ctx.replaceToken(close, "}") +
-          ctx.replaceTree(n, "filterInPlace")
+        trailingParens(n, ctx).map {
+          case (open, close) =>
+            ctx.replaceToken(open, "{case ") +
+              ctx.replaceToken(close, "}") +
+              ctx.replaceTree(n, "filterInPlace")
         }.asPatch
     }.asPatch
   }
@@ -56,9 +56,9 @@ case class NewCollections(index: SemanticdbIndex)
       case tupleZipped(Term.Select(Term.Tuple(args), name)) =>
         val removeTokensPatch =
           (for {
-            zipped <- name.tokens.headOption
+            zipped     <- name.tokens.headOption
             closeTuple <- ctx.tokenList.leading(zipped).find(_.is[Token.RightParen])
-            openTuple <- ctx.matchingParens.open(closeTuple.asInstanceOf[Token.RightParen])
+            openTuple  <- ctx.matchingParens.open(closeTuple.asInstanceOf[Token.RightParen])
             maybeDot = ctx.tokenList.slice(closeTuple, zipped).find(_.is[Token.Dot])
           } yield {
             ctx.removeToken(openTuple) +
@@ -91,8 +91,6 @@ case class NewCollections(index: SemanticdbIndex)
         removeTokensPatch + replaceCommasPatch
     }.asPatch
   }
-
-  
 
   override def fix(ctx: RuleCtx): Patch = {
     super.fix(ctx) +
