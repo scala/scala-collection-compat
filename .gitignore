@@ -13,3 +13,5 @@ target/
 /bin/
 /.cache-main
 /.cache-tests
+admin/.coursier
+admin/.scalafmt*

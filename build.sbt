@@ -254,6 +254,7 @@ val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.par
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").nonEmpty
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
+val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
 val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
 val isRelease          = releaseVersion.nonEmpty
 
@@ -292,55 +293,68 @@ inThisBuild(Seq(
 
     state
   },
+  commands += Command.command("scalafmt-test") { state =>
+    Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
+    state
+  },
+  commands += Command.command("scalafmt") { state =>
+    Seq("admin/scalafmt.sh") ! state.globalLogging.full
+    state
+  },
   commands += Command.command("ci") { state =>
-    val platformSuffix = if (isScalaJs) "JS" else ""
-
-    val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
-    val binaryCompatProject = "binary-compat"
-
-    val testProjectPrefix =
-      if (isScalafix) {
-        "scalafix-tests"
-      } else if (isBinaryCompat) {
-        binaryCompatProject
+    val toRun =
+      if (isScalafmt) {
+        Seq("scalafmt-test")
       } else {
-        compatProject
+        val platformSuffix = if (isScalaJs) "JS" else ""
+
+        val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
+        val binaryCompatProject = "binary-compat"
+
+        val testProjectPrefix =
+          if (isScalafix) {
+            "scalafix-tests"
+          } else if (isBinaryCompat) {
+            binaryCompatProject
+          } else {
+            compatProject
+          }
+
+        val projectPrefix =
+          if (isScalafix) {
+            "scalafix-rules"
+          } else if (isBinaryCompat) {
+            binaryCompatProject
+          } else {
+            compatProject
+          }
+
+        val setPublishVersion =
+          releaseVersion.map("set every version := " + _).toList
+
+        val publishTask =
+          if (releaseVersion.nonEmpty) {
+            List(
+              preRelease,
+              s"$projectPrefix/publish-signed"
+            )
+          } else {
+            Nil
+          }
+
+        Seq(
+          setPublishVersion,
+          List(s"$projectPrefix/clean"),
+          List(s"$testProjectPrefix/test"),
+          List(s"$projectPrefix/publishLocal"),
+          publishTask
+        ).flatten
       }
-
-    val projectPrefix =
-      if (isScalafix) {
-        "scalafix-rules"
-      } else if (isBinaryCompat) {
-        binaryCompatProject
-      } else {
-        compatProject
-      }
-
-    val setPublishVersion = releaseVersion.map("set every version := " + _).toList
-
-    val publishTask =
-      if (releaseVersion.nonEmpty) {
-        List(
-          preRelease,
-          s"$projectPrefix/publish-signed"
-        )
-      } else {
-        Nil
-      }
-
-    val toRun = Seq(
-      setPublishVersion,
-      List(s"$projectPrefix/clean"),
-      List(s"$testProjectPrefix/test"),
-      List(s"$projectPrefix/publishLocal"),
-      publishTask
-    ).flatten
 
     println("---------")
     println("Running CI: ")
     toRun.foreach(println)
     println("---------")
-
 
     toRun ::: state
   }
