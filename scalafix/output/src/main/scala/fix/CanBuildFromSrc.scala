@@ -33,4 +33,11 @@ object CanBuildFromSrc {
     cbf2.newBuilder("")
     ()
   }
+
+  def f2[T, That](implicit cbf: Factory[T, That]): Foo[T, That] =
+    new Foo
+
+  class Foo[T, That](implicit cbf: Factory[T, That]) {
+    val b = cbf.newBuilder
+  }
 }
