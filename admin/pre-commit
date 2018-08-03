@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+$GIT_DIR/../admin/scalafmt.sh --test $GIT_DIR/..

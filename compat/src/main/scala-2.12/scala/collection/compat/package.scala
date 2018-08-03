@@ -13,5 +13,3 @@ package object compat extends compat.PackageShared {
       build(m.SortedMap.newBuilder[K, V], source)
   }
 }
-
-

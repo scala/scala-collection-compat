@@ -9,23 +9,23 @@ import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 import java.io.File
 
 /** MultiScalaCrossProject and MultiScalaProject are an alternative to crossScalaVersion
-  * it allows you to create a template for a sbt project you can instanciate with a
-  * specific scala version.
-  *
-  * {{{
-  * // create a project template
-  * val myProject = MultiScalaProject(
-  *   "name",
-  *   "path/to/dir",
-  *   _.settings(...) // Project => Project (scala version independent configurations)
-  * )
-  *
-  * // instanciate a sbt project
-  * lazy val myProject211 = myProject("2.11.12", _.settings(...) /* scala version dependent configurations */)
-  * lazy val myProject212 = myProject("2.12.6" , _.settings(...))
-  * // ...
-  * }}}
-  */
+ * it allows you to create a template for a sbt project you can instanciate with a
+ * specific scala version.
+ *
+ * {{{
+ * // create a project template
+ * val myProject = MultiScalaProject(
+ *   "name",
+ *   "path/to/dir",
+ *   _.settings(...) // Project => Project (scala version independent configurations)
+ * )
+ *
+ * // instanciate a sbt project
+ * lazy val myProject211 = myProject("2.11.12", _.settings(...) /* scala version dependent configurations */)
+ * lazy val myProject212 = myProject("2.12.6" , _.settings(...))
+ * // ...
+ * }}}
+ */
 trait MultiScala {
   def majorMinor(in: String): String = {
     val Array(major, minor, _) = in.split("\\.")
@@ -58,16 +58,14 @@ trait MultiScala {
 }
 
 object MultiScalaCrossProject {
-  def apply(platforms: Platform*)(
-      name: String,
-      configure: CrossProject => CrossProject): MultiScalaCrossProject =
+  def apply(platforms: Platform*)(name: String,
+                                  configure: CrossProject => CrossProject): MultiScalaCrossProject =
     new MultiScalaCrossProject(platforms, name, configure)
 }
 
-class MultiScalaCrossProject(
-    platforms: Seq[Platform],
-    name: String,
-    configure: CrossProject => CrossProject)
+class MultiScalaCrossProject(platforms: Seq[Platform],
+                             name: String,
+                             configure: CrossProject => CrossProject)
     extends MultiScala {
 
   def apply(scalaV: String): CrossProject = apply(scalaV, scalaV, x => x)
@@ -98,25 +96,17 @@ object MultiScalaProject {
   def apply(name: String, configure: Project => Project): MultiScalaProject =
     new MultiScalaProject(name, s"scalafix-$name", configure)
 
-  def apply(
-      name: String,
-      base: String,
-      configure: Project => Project): MultiScalaProject =
+  def apply(name: String, base: String, configure: Project => Project): MultiScalaProject =
     new MultiScalaProject(name, base, configure)
 }
 
-class MultiScalaProject(
-    name: String,
-    base: String,
-    configure: Project => Project)
+class MultiScalaProject(name: String, base: String, configure: Project => Project)
     extends MultiScala {
 
   def srcMain: String = s"$base/src/main"
 
-  def apply(
-      scalaV: String,
-      configurePerScala: Project => Project = x => x): Project = {
-    val fullName = s"scalafix-$name"
+  def apply(scalaV: String, configurePerScala: Project => Project = x => x): Project = {
+    val fullName  = s"scalafix-$name"
     val projectId = projectIdPerScala(name, scalaV)
     val resultingProject =
       Project(id = projectId, base = file(s".cross/$projectId"))

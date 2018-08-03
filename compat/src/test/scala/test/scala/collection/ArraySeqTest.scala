@@ -48,7 +48,9 @@ class ArraySeqTest {
     check(unitArray, Array(unit1, unit1), Array(unit1, unit1))
   }
 
-  private def check[T](array: ArraySeq[T], expectedSliceResult1: ArraySeq[T], expectedSliceResult2: ArraySeq[T]) {
+  private def check[T](array: ArraySeq[T],
+                       expectedSliceResult1: ArraySeq[T],
+                       expectedSliceResult2: ArraySeq[T]) {
     Assert.assertEquals(array, array.slice(-1, 4))
     Assert.assertEquals(array, array.slice(0, 5))
     Assert.assertEquals(array, array.slice(-1, 5))

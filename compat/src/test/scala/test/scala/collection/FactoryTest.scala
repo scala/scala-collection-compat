@@ -23,8 +23,8 @@ class FactoryTest {
   def streamFactoryPreservesLaziness(): Unit = {
     val factory = implicitly[Factory[Int, Stream[Int]]]
     var counter = 0
-    val source = Stream.continually { counter += 1; 1 }
-    val result = factory.fromSpecific(source)
+    val source  = Stream.continually { counter += 1; 1 }
+    val result  = factory.fromSpecific(source)
     Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
   }
 

@@ -20,18 +20,21 @@ import metaconfig.generic.Surface
  * LazyList has a lazy head, were Stream has a strict head
  *
  */
-final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig) extends SemanticRule(index, "Roughly") {
+final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
+    extends SemanticRule(index, "Roughly") {
   def this(index: SemanticdbIndex) = this(index, RoughlyConfig.default)
 
   val mapValues =
     SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;."),
+      Symbol(
+        "_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;."),
       Symbol("_root_.scala.collection.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/Map;.")
     )
 
   val filterKeys =
     SymbolMatcher.exact(
-      Symbol("_root_.scala.collection.immutable.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/immutable/Map;."),
+      Symbol(
+        "_root_.scala.collection.immutable.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/immutable/Map;."),
       Symbol("_root_.scala.collection.MapLike#mapValues(Lscala/Function1;)Lscala/collection/Map;.")
     )
 
@@ -48,7 +51,7 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig) extends 
   def replaceSymbols(ctx: RuleCtx): Patch = {
     if (config.withLazyList) {
       ctx.replaceSymbols(
-        "scala.Stream" -> "scala.LazyList",
+        "scala.Stream"                      -> "scala.LazyList",
         "scala.collection.immutable.Stream" -> "scala.collection.immutable.LazyList"
       )
     } else Patch.empty
@@ -82,14 +85,14 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig) extends 
 }
 
 case class RoughlyConfig(
-  strictMapValues: Boolean = false,
-  strictFilterKeys: Boolean = false,
-  withLazyAppendedAll: Boolean = false,
-  withLazyList: Boolean = false
+    strictMapValues: Boolean = false,
+    strictFilterKeys: Boolean = false,
+    withLazyAppendedAll: Boolean = false,
+    withLazyList: Boolean = false
 )
 
 object RoughlyConfig {
-  val default: RoughlyConfig = RoughlyConfig()
-  implicit val surface: Surface[RoughlyConfig] = generic.deriveSurface[RoughlyConfig]
+  val default: RoughlyConfig                       = RoughlyConfig()
+  implicit val surface: Surface[RoughlyConfig]     = generic.deriveSurface[RoughlyConfig]
   implicit val decoder: ConfDecoder[RoughlyConfig] = generic.deriveDecoder[RoughlyConfig](default)
 }

@@ -15,7 +15,8 @@ object TypeMatcher {
 
 final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
   def unapply(tree: Tree): Boolean = {
-    index.denotation(tree)
-         .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
+    index
+      .denotation(tree)
+      .exists(_.names.headOption.exists(n => symbols.exists(_ == n.symbol)))
   }
 }
