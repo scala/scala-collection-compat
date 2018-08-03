@@ -14,4 +14,7 @@ object ReplaceToSrc {
 
   def m2(xs: List[Int]): Iterable[Int] =
     xs.to
+
+  def f(xs: List[Int]): Unit = ()
+  f(Set(1).to)
 }

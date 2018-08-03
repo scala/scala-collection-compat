@@ -273,22 +273,16 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           }.asPatch
 
         case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
-          // we only want f.to, not f.to(X)
-          val applied =
-            t.parent match {
-              case Some(_:Term.Apply) =>  true
-              case _ => false
+          val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
+          synth.map{ s =>
+            s.text.parse[Term].get match {
+              // we only want f.to, not f.to(X)
+              case Term.Apply(_, List(toCol)) =>
+                val col = extractCollection(toCol)
+                ctx.addRight(to, "(" + col + ")")
+              case _ => Patch.empty
             }
-
-          if (!applied) {
-            val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
-            synth.map{ s =>
-              val res = s.text.parse[Term].get
-              val Term.Apply(_, List(toCol)) = res
-              val col = extractCollection(toCol)
-              ctx.addRight(to, "(" + col + ")")
-            }.getOrElse(Patch.empty)
-          } else Patch.empty
+          }.getOrElse(Patch.empty)
 
       }.asPatch
 

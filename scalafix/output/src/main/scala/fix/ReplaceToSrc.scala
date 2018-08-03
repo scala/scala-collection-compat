@@ -15,4 +15,7 @@ object ReplaceToSrc {
 
   def m2(xs: List[Int]): Iterable[Int] =
     xs.to(scala.collection.immutable.IndexedSeq)
+
+  def f(xs: List[Int]): Unit = ()
+  f(Set(1).to(scala.collection.immutable.List))
 }
