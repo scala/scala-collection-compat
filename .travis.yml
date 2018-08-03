@@ -78,6 +78,7 @@ script:
 
 cache:
   directories:
+  - "$HOME/.sbt/preloaded"
   - "$HOME/.sbt/0.13/dependency"
   - "$HOME/.sbt/boot/scala*"
   - "$HOME/.sbt/launchers"
