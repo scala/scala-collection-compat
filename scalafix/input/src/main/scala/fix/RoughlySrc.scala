@@ -20,6 +20,8 @@ object RoughlySrc {
   val d2 = 1L -> 1
   val multi = new m.HashMap[Int, m.Set[Int]] with m.MultiMap[Int, Int]
 
+  Map(d) mapValues (id)          : i.Map[Int, Int]
+  Map(d).mapValues(id)           : i.Map[Int, Int]
   // i.SortedMap(d).mapValues(id): i.SortedMap[Int, Int]
   // m.SortedMap(d).mapValues(id): c.SortedMap[Int, Int]
   i.IntMap(d).mapValues(f2)      : i.Map[Int, Int]
@@ -31,6 +33,8 @@ object RoughlySrc {
   multi.mapValues(f2)            : c.Map[Int, Int]
   props.mapValues(id)            : c.Map[String, String]
 
+  Map(d) filterKeys (f)          : i.Map[Int, Int]
+  Map(d).filterKeys(f)           : i.Map[Int, Int]
   // i.SortedMap(d).filterKeys(f): i.SortedMap[Int, Int]
   // m.SortedMap(d).filterKeys(f): c.SortedMap[Int, Int]
   i.IntMap(d).filterKeys(f)    : i.Map[Int, Int]

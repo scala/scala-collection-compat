@@ -69,8 +69,16 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
 
     val collectFixes =
       ctx.tree.collect {
+        case ap @ Term.ApplyInfix(_, mapValues(_), _, _) if strictMapValues =>
+          ctx.addLeft(ap, "(") +
+          ctx.addRight(ap, ").toMap")
+
         case ap @ Term.Apply(Term.Select(_, mapValues(_)), List(_)) if strictMapValues =>
           ctx.addRight(ap, ".toMap")
+
+        case ap @ Term.ApplyInfix(_, filterKeys(_), _, _) if strictFilterKeys =>
+          ctx.addLeft(ap, "(") +
+          ctx.addRight(ap, ").toMap")
 
         case ap @ Term.Apply(Term.Select(_, filterKeys(_)), List(_)) if strictFilterKeys =>
           ctx.addRight(ap, ".toMap")
