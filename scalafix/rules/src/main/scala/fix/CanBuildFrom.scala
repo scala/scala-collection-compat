@@ -8,7 +8,7 @@ import scala.collection.mutable
 
 object CanBuildFrom {
   def apply(paramss: List[List[Term.Param]],
-            body: Term,
+            stats: List[Tree],
             ctx: RuleCtx,
             collectionCanBuildFrom: SymbolMatcher,
             nothing: SymbolMatcher)(implicit index: SemanticdbIndex): Patch = {
@@ -16,11 +16,13 @@ object CanBuildFrom {
     def emptyApply(param: Name): Boolean = {
       import scala.meta.contrib._
       val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
-      body.exists {
-        case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
-        case Term.Apply(matchCbf(_), Nil)                 => true
-        case _                                            => false
-      }
+      stats.exists(
+        _.exists {
+          case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
+          case Term.Apply(matchCbf(_), Nil)                 => true
+          case _                                            => false
+        }
+      )
     }
 
     paramss.flatten
@@ -38,7 +40,7 @@ object CanBuildFrom {
             ) if !nothing.matches(p1) && !emptyApply(param) =>
           new CanBuildFrom(param, cbf)
       }
-      .map(_.toBuildFrom(body, ctx))
+      .map(_.toBuildFrom(stats, ctx))
       .asPatch
   }
 }
@@ -48,7 +50,7 @@ object CanBuildFrom {
 // param: cbf
 // cbf  : collection.generic.CanBuildFrom
 case class CanBuildFrom(param: Name, cbf: Type) {
-  def toBuildFrom(body: Term, ctx: RuleCtx)(implicit index: SemanticdbIndex): Patch = {
+  def toBuildFrom(stats: List[Tree], ctx: RuleCtx)(implicit index: SemanticdbIndex): Patch = {
 
     val matchCbf = SymbolMatcher.exact(ctx.index.symbol(param).get)
 
@@ -60,15 +62,17 @@ case class CanBuildFrom(param: Name, cbf: Type) {
       )
 
     val cbfCalls =
-      body.collect {
-        // cbf.apply(x)
-        case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), List(x)) =>
-          replaceNewBuilder(ap, cbf2, x)
+      stats
+        .map(_.collect {
+          // cbf.apply(x)
+          case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), List(x)) =>
+            replaceNewBuilder(ap, cbf2, x)
 
-        // cbf(x)
-        case ap @ Term.Apply(cbf2 @ matchCbf(_), List(x)) =>
-          replaceNewBuilder(ap, cbf2, x)
-      }.asPatch
+          // cbf(x)
+          case ap @ Term.Apply(cbf2 @ matchCbf(_), List(x)) =>
+            replaceNewBuilder(ap, cbf2, x)
+        }.asPatch)
+        .asPatch
 
     val parameterType =
       ctx.replaceTree(cbf, "BuildFrom")
@@ -79,12 +83,13 @@ case class CanBuildFrom(param: Name, cbf: Type) {
 
 object CanBuildFromNothing {
   def apply(paramss: List[List[Term.Param]],
-            body: Term,
+            stats: List[Tree],
             ctx: RuleCtx,
             collectionCanBuildFrom: SymbolMatcher,
             nothing: SymbolMatcher,
             toTpe: SymbolMatcher,
             handledTo: mutable.Set[Tree])(implicit index: SemanticdbIndex): Patch = {
+
     paramss.flatten
       .collect {
         case Term.Param(
@@ -96,16 +101,13 @@ object CanBuildFromNothing {
                 List(
                   nothing(_),
                   t,
-                  cct @ Type.Apply(
-                    cc,
-                    _
-                  )
+                  toT
                 )
               )
             ),
             _
             ) =>
-          new CanBuildFromNothing(param, tpe, t, cct, cc, body, ctx, toTpe, handledTo)
+          new CanBuildFromNothing(param, tpe, t, toT, stats, ctx, toTpe, handledTo)
       }
       .map(_.toFactory)
       .asPatch
@@ -119,14 +121,12 @@ object CanBuildFromNothing {
 // tpe  : collection.generic.CanBuildFrom[Nothing, Int, CC[Int]]
 // cbf  : CanBuildFrom
 //   v  : Int
-// cct  : CC[Int]
-//  cc  : CC
+// toT  : CC[Int]
 case class CanBuildFromNothing(param: Name,
                                tpe: Type.Apply,
                                t: Type,
-                               cct: Type.Apply,
-                               cc: Type,
-                               body: Term,
+                               toT: Type,
+                               stats: List[Tree],
                                ctx: RuleCtx,
                                toTpe: SymbolMatcher,
                                handledTo: mutable.Set[Tree]) {
@@ -141,53 +141,61 @@ case class CanBuildFromNothing(param: Name,
     val visitedCbfCalls = mutable.Set[Tree]()
 
     val cbfCalls =
-      body.collect {
-        // cbf.apply()
-        case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), Nil) =>
-          visitedCbfCalls += sel
-          replaceNewBuilder(ap, cbf2)
+      stats
+        .map(_.collect {
+          // cbf.apply()
+          case ap @ Term.Apply(sel @ Term.Select(cbf2 @ matchCbf(_), apply), Nil) =>
+            visitedCbfCalls += sel
+            replaceNewBuilder(ap, cbf2)
 
-        // cbf.apply
-        case sel @ Term.Select(cbf2 @ matchCbf(_), ap) if (!visitedCbfCalls.contains(sel)) =>
-          replaceNewBuilder(sel, cbf2)
+          // cbf.apply
+          case sel @ Term.Select(cbf2 @ matchCbf(_), ap) if (!visitedCbfCalls.contains(sel)) =>
+            replaceNewBuilder(sel, cbf2)
 
-        // cbf()
-        case ap @ Term.Apply(cbf2 @ matchCbf(_), Nil) =>
-          replaceNewBuilder(ap, cbf2)
-      }.asPatch
-
-    val matchCC = SymbolMatcher.exact(ctx.index.symbol(cc).get)
+          // cbf()
+          case ap @ Term.Apply(cbf2 @ matchCbf(_), Nil) =>
+            replaceNewBuilder(ap, cbf2)
+        }.asPatch)
+        .asPatch
 
     // e.to[CC] => cbf.fromSpecific(e)
-    val toCalls =
-      body.collect {
-        case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
-          handledTo += to
+    val toCalls = toT match {
+      case cct @ Type.Apply(cc, _) => {
+        val matchCC = SymbolMatcher.exact(ctx.index.symbol(cc).get)
 
-          // e.to[CC](*cbf*) extract implicit parameter
-          val synth                            = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
-          val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
+        stats
+          .map(_.collect {
+            case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
+              handledTo += to
 
-          // This is a bit unsafe
-          // https://github.com/scalameta/scalameta/issues/1636
-          if (implicitCbf.syntax == param.syntax) {
+              // e.to[CC](*cbf*) extract implicit parameter
+              val synth                            = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
+              val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
 
-            // .to[CC]
-            val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
+              // This is a bit unsafe
+              // https://github.com/scalameta/scalameta/issues/1636
+              if (implicitCbf.syntax == param.syntax) {
 
-            ctx.removeTokens(apToRemove) +
-              ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
-              ctx.addRight(e, ")")
-          } else Patch.empty
+                // .to[CC]
+                val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
 
-      }.asPatch
+                ctx.removeTokens(apToRemove) +
+                  ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
+                  ctx.addRight(e, ")")
+              } else Patch.empty
+
+          }.asPatch)
+          .asPatch
+      }
+      case _ => Patch.empty
+    }
 
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
     // implicit cbf: Factory[Int, CC[Int]]
     val parameterType =
       ctx.replaceTree(
         tpe,
-        Type.Apply(Type.Name("Factory"), List(t, cct)).syntax
+        Type.Apply(Type.Name("Factory"), List(t, toT)).syntax
       )
 
     parameterType + cbfCalls + toCalls

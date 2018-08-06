@@ -234,8 +234,23 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     val useSites =
       ctx.tree.collect {
         case Defn.Def(_, _, _, paramss, _, body) =>
-          CanBuildFromNothing(paramss, body, ctx, collectionCanBuildFrom, nothing, toTpe, handledTo) +
-            CanBuildFrom(paramss, body, ctx, collectionCanBuildFrom, nothing)
+          CanBuildFromNothing(paramss,
+                              List(body),
+                              ctx,
+                              collectionCanBuildFrom,
+                              nothing,
+                              toTpe,
+                              handledTo) +
+            CanBuildFrom(paramss, List(body), ctx, collectionCanBuildFrom, nothing)
+        case Defn.Class(_, _, _, Ctor.Primary(_, _, paramss), Template(_, _, _, stats)) =>
+          CanBuildFromNothing(paramss,
+                              stats,
+                              ctx,
+                              collectionCanBuildFrom,
+                              nothing,
+                              toTpe,
+                              handledTo) +
+            CanBuildFrom(paramss, stats, ctx, collectionCanBuildFrom, nothing)
       }.asPatch
 
     val imports =
