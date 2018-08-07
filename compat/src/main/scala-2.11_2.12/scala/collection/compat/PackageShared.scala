@@ -221,6 +221,7 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
   def iterator: Iterator[A] = self.toIterator
+  def knownSize: Int        = if (self.hasDefiniteSize) self.size else -1
 }
 
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
