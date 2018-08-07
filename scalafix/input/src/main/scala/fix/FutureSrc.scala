@@ -3,7 +3,7 @@ rule = "scala:fix.CrossCompat"
  */
 package fix
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{Future, ExecutionContext, future}
 import java.lang.Throwable
 
 class FutureSrc(fs: Future[Int])(implicit ec: ExecutionContext){
@@ -21,4 +21,11 @@ class FutureSrc(fs: Future[Int])(implicit ec: ExecutionContext){
     case x if x > 0 => println("x > 0")
     case x if x < 0 => println("x < 0")
   }(ec)
+
+  fs.map(identity).onFailure {
+    case x => x
+  }
+  fs.map(identity).onSuccess { case x => x }
+
+  val f = future { 1 }
 }
