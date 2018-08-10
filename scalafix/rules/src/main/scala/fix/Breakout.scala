@@ -1,7 +1,6 @@
 package fix
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: SemanticdbIndex) {
@@ -16,29 +15,19 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
       case _                => false
     }
 
-  val breakOut = SymbolMatcher.exact(Symbol(
-    "_root_.scala.collection.package.breakOut(Lscala/collection/generic/CanBuildFrom;)Lscala/collection/generic/CanBuildFrom;."))
+  val breakOut = exact("scala/collection/package.breakOut().")
 
   // == infix operators ==
 
-  val `TraversableLike ++` = Symbol(
-    "_root_.scala.collection.TraversableLike#`++`(Lscala/collection/GenTraversableOnce;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `Vector ++` = Symbol(
-    "_root_.scala.collection.immutable.Vector#`++`(Lscala/collection/GenTraversableOnce;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `List ++` = Symbol(
-    "_root_.scala.collection.immutable.List#`++`(Lscala/collection/GenTraversableOnce;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SeqLike +:` = Symbol(
-    "_root_.scala.collection.SeqLike#`+:`(Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `Vector +:` = Symbol(
-    "_root_.scala.collection.immutable.Vector#`+:`(Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `List +:` = Symbol(
-    "_root_.scala.collection.immutable.List#`+:`(Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SeqLike :+` = Symbol(
-    "_root_.scala.collection.SeqLike#`:+`(Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `Vector :+` = Symbol(
-    "_root_.scala.collection.immutable.Vector#`:+`(Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `TraversableLike ++:` = Symbol(
-    "_root_.scala.collection.TraversableLike#`++:`(Lscala/collection/Traversable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
+  val `TraversableLike ++`  = Symbol("scala/collection/TraversableLike#`++`().")
+  val `Vector ++`           = Symbol("scala/collection/immutable/Vector#`++`().")
+  val `List ++`             = Symbol("scala/collection/immutable/List#`++`().")
+  val `SeqLike +:`          = Symbol("scala/collection/SeqLike#`+:`().")
+  val `Vector +:`           = Symbol("scala/collection/immutable/Vector#`+:`().")
+  val `List +:`             = Symbol("scala/collection/immutable/List#`+:`().")
+  val `SeqLike :+`          = Symbol("scala/collection/SeqLike#`:+`().")
+  val `Vector :+`           = Symbol("scala/collection/immutable/Vector#`:+`().")
+  val `TraversableLike ++:` = Symbol("scala/collection/TraversableLike#`++:`().")
 
   val operatorsIteratorSymbols = List(`TraversableLike ++`, `List ++`, `Vector ++`)
   val operatorsViewSymbols = List(
@@ -58,34 +47,20 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
 
   // == select ==
 
-  val `List.collect` = Symbol(
-    "_root_.scala.collection.immutable.List#collect(Lscala/PartialFunction;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `TraversableLike.collect` = Symbol(
-    "_root_.scala.collection.TraversableLike#collect(Lscala/PartialFunction;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `List.flatMap` = Symbol(
-    "_root_.scala.collection.immutable.List#flatMap(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `TraversableLike.flatMap` = Symbol(
-    "_root_.scala.collection.TraversableLike#flatMap(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `List.map` = Symbol(
-    "_root_.scala.collection.immutable.List#map(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SetLike.map` = Symbol(
-    "_root_.scala.collection.SetLike#map(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `TraversableLike.map` = Symbol(
-    "_root_.scala.collection.TraversableLike#map(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `IterableLike.zip` = Symbol(
-    "_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `IndexedSeqOptimized.zip` = Symbol(
-    "_root_.scala.collection.IndexedSeqOptimized#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `IterableLike.zipAll` = Symbol(
-    "_root_.scala.collection.IterableLike#zipAll(Lscala/collection/GenIterable;Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SeqLike.union` = Symbol(
-    "_root_.scala.collection.SeqLike#union(Lscala/collection/GenSeq;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SeqLike.updated` = Symbol(
-    "_root_.scala.collection.SeqLike#updated(ILjava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `Vector.updated` = Symbol(
-    "_root_.scala.collection.immutable.Vector#updated(ILjava/lang/Object;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val `SeqLike.reverseMap` = Symbol(
-    "_root_.scala.collection.SeqLike#reverseMap(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
+  val `List.collect`            = Symbol("scala/collection/immutable/List#collect().")
+  val `TraversableLike.collect` = Symbol("scala/collection/TraversableLike#collect().")
+  val `List.flatMap`            = Symbol("scala/collection/immutable/List#flatMap().")
+  val `TraversableLike.flatMap` = Symbol("scala/collection/TraversableLike#flatMap().")
+  val `List.map`                = Symbol("scala/collection/immutable/List#map().")
+  val `SetLike.map`             = Symbol("scala/collection/SetLike#map().")
+  val `TraversableLike.map`     = Symbol("scala/collection/TraversableLike#map().")
+  val `IterableLike.zip`        = Symbol("scala/collection/IterableLike#zip().")
+  val `IndexedSeqOptimized.zip` = Symbol("scala/collection/IndexedSeqOptimized#zip().")
+  val `IterableLike.zipAll`     = Symbol("scala/collection/IterableLike#zipAll().")
+  val `SeqLike.union`           = Symbol("scala/collection/SeqLike#union().")
+  val `SeqLike.updated`         = Symbol("scala/collection/SeqLike#updated().")
+  val `Vector.updated`          = Symbol("scala/collection/immutable/Vector#updated().")
+  val `SeqLike.reverseMap`      = Symbol("scala/collection/SeqLike#reverseMap().")
 
   val functionsZipSymbols = List(
     `IterableLike.zip`,
@@ -115,12 +90,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
 
   // == special select ==
 
-  val `TraversableLike.scanLeft` = SymbolMatcher.exact(Symbol(
-    "_root_.scala.collection.TraversableLike#scanLeft(Ljava/lang/Object;Lscala/Function2;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;."))
-  val `Future.sequence` = SymbolMatcher.exact(Symbol(
-    "_root_.scala.concurrent.Future.sequence(Lscala/collection/TraversableOnce;Lscala/collection/generic/CanBuildFrom;Lscala/concurrent/ExecutionContext;)Lscala/concurrent/Future;."))
-  val `Future.traverse` = SymbolMatcher.exact(Symbol(
-    "_root_.scala.concurrent.Future.traverse(Lscala/collection/TraversableOnce;Lscala/Function1;Lscala/collection/generic/CanBuildFrom;Lscala/concurrent/ExecutionContext;)Lscala/concurrent/Future;."))
+  val `TraversableLike.scanLeft` = exact("scala/collection/TraversableLike#scanLeft().")
+  val `Future.sequence`          = exact("scala/concurrent/Future.sequence().")
+  val `Future.traverse`          = exact("scala/concurrent/Future.traverse().")
 
   val toSpecificCollectionBuiltIn = Map(
     "scala.collection.immutable.Map" -> "toMap"
@@ -128,6 +100,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
 
   val toSpecificCollectionFrom = Set(
     "scala.collection.Map",
+    "scala.collection.BitSet",
     "scala.collection.immutable.SortedMap",
     "scala.collection.immutable.HashMap",
     "scala.collection.immutable.ListMap",
@@ -145,6 +118,8 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
   // == rule ==
   def apply(ctx: RuleCtx): Patch = {
 
+    val syntheticsByEndPos: Map[Int, Seq[Synthetic]] = ctx.index.synthetics.groupBy(_.position.end)
+
     var requiresCompatImport = false
 
     def covertToCollection(intermediateLhs: String,
@@ -155,7 +130,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
                            intermediateRhs: Option[String] = None,
                            rhs: Option[Term] = None): Patch = {
 
-      val toCollection = extractCollectionFromBreakout(breakout)
+      val toCollection = extractCollectionFromBreakout(breakout, syntheticsByEndPos)
 
       val patchRhs =
         (intermediateRhs, rhs) match {
@@ -164,19 +139,24 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
         }
 
       val patchSpecificCollection =
-        toSpecificCollectionBuiltIn.get(toCollection) match {
-          case Some(toX) => ctx.addRight(ap0, '.' + toX)
-          case None =>
-            if (toSpecificCollectionFrom.contains(toCollection)) {
-              requiresCompatImport = true
-              ctx.addLeft(ap0, toCollection + ".from(") +
-                ctx.addRight(ap0, ")")
-            } else {
-              Patch.empty
+        toCollection match {
+          case Some(col) =>
+            toSpecificCollectionBuiltIn.get(col) match {
+              case Some(toX) => ctx.addRight(ap0, '.' + toX)
+              case None =>
+                if (toSpecificCollectionFrom.contains(col)) {
+                  requiresCompatImport = true
+                  ctx.addLeft(ap0, col + ".from(") +
+                    ctx.addRight(ap0, ")")
+                } else {
+                  Patch.empty
+                }
             }
+
+          case None => Patch.empty
         }
 
-      val isIterator = toCollection == "scala.collection.Iterator"
+      val isIterator = toCollection == Some("scala.collection.Iterator")
 
       val sharedPatch =
         ctx.addRight(lhs, "." + intermediateLhs) +
@@ -189,9 +169,13 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
 
       val toColl =
         if (patchSpecificCollection.isEmpty && !isIterator) {
-          requiresCompatImport = true
-          ctx.addRight(ap, ".to") +
-            ctx.replaceTree(breakout, toCollection)
+          toCollection match {
+            case Some(col) =>
+              requiresCompatImport = true
+              ctx.addRight(ap, ".to") +
+                ctx.replaceTree(breakout, col)
+            case None => Patch.empty
+          }
         } else {
           patchSpecificCollection +
             removeBreakout
@@ -201,42 +185,11 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     }
 
     def replaceBreakoutWithCollection(breakout: Tree): Patch = {
-      requiresCompatImport = true
-
-      val toCollection = extractCollectionFromBreakout(breakout)
-      ctx.replaceTree(breakout, toCollection)
-    }
-
-    def extractCollectionFromBreakout(breakout: Tree): String = {
-      val synth                            = ctx.index.synthetics.find(_.position.end == breakout.pos.end).get
-      val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
-
-      implicitCbf match {
-        case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
-          "scala.collection.immutable.IndexedSeq"
-
-        case Term.ApplyType(Term.Select(coll, _), _) =>
-          coll.syntax
-
-        case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
-          coll.syntax
-
-        case Term.Select(coll, _) =>
-          coll.syntax
-
-        case _ => {
-          throw new Exception(
-            s"""|cannot extract breakout collection:
-                |
-                |---------------------------------------------
-                |syntax:
-                |${implicitCbf.syntax}
-                |
-                |---------------------------------------------
-                |structure:
-                |${implicitCbf.structure}""".stripMargin
-          )
-        }
+      extractCollectionFromBreakout(breakout, syntheticsByEndPos) match {
+        case Some(toCollection) =>
+          requiresCompatImport = true
+          ctx.replaceTree(breakout, toCollection)
+        case None => Patch.empty
       }
     }
 

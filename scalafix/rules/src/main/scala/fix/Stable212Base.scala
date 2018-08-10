@@ -1,7 +1,6 @@
 package fix
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 import scala.collection.mutable
@@ -25,67 +24,52 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
       if (isLeft) "/:"
       else ":\\"
 
-    normalized(s"_root_.scala.collection.TraversableOnce.`$op`.")
+    normalized(s"scala/collection/TraversableOnce.`$op`.")
   }
 
   val foldLeftSymbol  = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
 
   val toTpe = normalized(
-    "_root_.scala.collection.TraversableLike.to.",
-    "_root_.scala.collection.TraversableOnce.to.",
-    "_root_.scala.collection.GenTraversableOnce.to.",
-    "_root_.scala.collection.parallel.ParIterableLike.to."
+    "scala/collection/TraversableLike#to.",
+    "scala/collection/TraversableOnce#to.",
+    "scala/collection/GenTraversableOnce#to.",
+    "scala/collection/parallel/ParIterableLike#to."
   )
-  val copyToBuffer = normalized("_root_.scala.collection.TraversableOnce.copyToBuffer.")
-  val arrayBuilderMake = normalized(
-    "_root_.scala.collection.mutable.ArrayBuilder.make(Lscala/reflect/ClassTag;)Lscala/collection/mutable/ArrayBuilder;.")
-  val iterableSameElement = exact(
-    "_root_.scala.collection.IterableLike#sameElements(Lscala/collection/GenIterable;)Z.")
-  val collectionCanBuildFrom = exact("_root_.scala.collection.generic.CanBuildFrom#")
-  val collectionCanBuildFromImport = exact(
-    "_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#")
-  val nothing = exact("_root_.scala.Nothing#")
-  val setPlus2 = exact(
-    "_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;Ljava/lang/Object;Lscala/collection/Seq;)Lscala/collection/Set;.")
-  val mapPlus2 = exact(
-    "_root_.scala.collection.immutable.MapLike#`+`(Lscala/Tuple2;Lscala/Tuple2;Lscala/collection/Seq;)Lscala/collection/immutable/Map;.")
-  val mutSetPlus = exact(
-    "_root_.scala.collection.mutable.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/mutable/Set;.")
-  val mutMapPlus = exact(
-    "_root_.scala.collection.mutable.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/mutable/Map;.")
-  val mutMapUpdate = exact(
-    "_root_.scala.collection.mutable.MapLike#updated(Ljava/lang/Object;Ljava/lang/Object;)Lscala/collection/mutable/Map;.")
-  val `Future.onFailure` = exact(
-    "_root_.scala.concurrent.Future#onFailure(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
-  val `Future.onSuccess` = exact(
-    "_root_.scala.concurrent.Future#onSuccess(Lscala/PartialFunction;Lscala/concurrent/ExecutionContext;)V.")
+  val copyToBuffer           = normalized("scala/collection/TraversableOnce/copyToBuffer().")
+  val arrayBuilderMake       = normalized("scala/collection/mutable/ArrayBuilder.make().")
+  val iterableSameElement    = exact("scala/collection/IterableLike#sameElements().")
+  val collectionCanBuildFrom = exact("scala/collection/generic/CanBuildFrom#")
+
+  val nothing      = exact("scala/Nothing#")
+  val setPlus2     = exact("scala/collection/SetLike#`+`(+1).")
+  val mapPlus2     = exact("scala/collection/immutable/MapLike#`+`(+1).")
+  val mutSetPlus   = exact("scala/collection/mutable/SetLike#`+`().")
+  val mutMapPlus   = exact("scala/collection/mutable/MapLike#`+`().")
+  val mutMapUpdate = exact("scala/collection/mutable/MapLike#updated().")
+
+  val `Future.onFailure` = exact("scala/concurrent/Future#onFailure().")
+  val `Future.onSuccess` = exact("scala/concurrent/Future#onSuccess().")
 
   private val sortedFrom = exact(
-    "_root_.scala.collection.generic.Sorted#from(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
-    "_root_.scala.collection.immutable.TreeMap#from(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
-    "_root_.scala.collection.immutable.TreeSet#from(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;.",
-    "_root_.scala.collection.SortedSetLike#from(Ljava/lang/Object;)Lscala/collection/SortedSet;."
+    "scala/collection/generic/Sorted#from().",
+    "scala/collection/immutable/TreeMap#from().",
+    "scala/collection/SortedSetLike#from()."
   )
-
   private val sortedTo = exact(
-    "_root_.scala.collection.generic.Sorted#to(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
-    "_root_.scala.collection.immutable.TreeMap#to(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
-    "_root_.scala.collection.immutable.TreeSet#to(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
+    "scala/collection/generic/Sorted#to().",
+    "scala/collection/immutable/TreeMap#to()."
   )
-
   private val sortedUntil = exact(
-    "_root_.scala.collection.SortedSetLike#until(Ljava/lang/Object;)Lscala/collection/SortedSet;.",
-    "_root_.scala.collection.generic.Sorted#until(Ljava/lang/Object;)Lscala/collection/generic/Sorted;.",
-    "_root_.scala.collection.immutable.TreeMap#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeMap;.",
-    "_root_.scala.collection.immutable.TreeSet#until(Ljava/lang/Object;)Lscala/collection/immutable/TreeSet;."
+    "scala/collection/generic/Sorted#until().",
+    "scala/collection/immutable/TreeMap#until().",
+    "scala/collection/SortedSetLike#until()."
   )
 
-  val `TraversableLike.toIterator` = normalized(
-    "_root_.scala.collection.TraversableLike.toIterator.")
+  val `TraversableLike.toIterator` = exact("scala/collection/TraversableLike#toIterator().")
   val traversableOnce = exact(
-    "_root_.scala.collection.TraversableOnce#",
-    "_root_.scala.package.TraversableOnce#"
+    "scala/collection/TraversableOnce#",
+    "scala/package.TraversableOnce#"
   )
 
   // == Rules ==
@@ -125,6 +109,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val traversableOnceToIterableOnce =
       ctx.tree.collect {
+
         case Type.Apply(sel @ Type.Select(chain, traversableOnce(n: Name)), _) =>
           val dot = chain.tokens.toList.reverse.drop(1)
 
@@ -255,7 +240,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val imports =
       ctx.tree.collect {
-        case i: Importee if collectionCanBuildFromImport.matches(i) =>
+        case i: Importee if collectionCanBuildFrom.matches(i) =>
           ctx.removeImportee(i)
       }.asPatch
 
@@ -267,16 +252,16 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
   def extractCollection(toCol: Tree): String = {
     toCol match {
-      case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
-        "scala.collection.immutable.IndexedSeq"
-      case Term.ApplyType(Term.Select(coll, _), _) =>
-        coll.syntax
-      case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
-        coll.syntax
-      case Term.Select(coll, _) =>
-        coll.syntax
-      case coll: Type.Name =>
-        coll.syntax
+      // case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
+      //   "scala.collection.immutable.IndexedSeq"
+      // case Term.ApplyType(Term.Select(coll, _), _) =>
+      //   coll.syntax
+      // case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
+      //   coll.syntax
+      // case Term.Select(coll, _) =>
+      //   coll.syntax
+      // case coll: Type.Name =>
+      //   coll.syntax
       case _ => {
         throw new Exception(
           s"""|cannot extract collection from .to
@@ -294,6 +279,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   def replaceTo(ctx: RuleCtx): Patch = {
+    val syntheticsByEndPos: Map[Int, Seq[Synthetic]] =
+      ctx.index.synthetics.groupBy(_.position.end)
+
     val patch =
       ctx.tree.collect {
         case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
@@ -302,19 +290,12 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
               ctx.replaceToken(open, "(") + ctx.replaceToken(close, ")")
           }.asPatch
 
+        // https://github.com/scalacenter/scalafix/issues/793
         case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
-          val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
-          synth
-            .map { s =>
-              s.text.parse[Term].get match {
-                // we only want f.to, not f.to(X)
-                case Term.Apply(_, List(toCol)) =>
-                  val col = extractCollection(toCol)
-                  ctx.addRight(to, "(" + col + ")")
-                case _ => Patch.empty
-              }
-            }
-            .getOrElse(Patch.empty)
+          if (t.parent.map(_.isNot[Term.ApplyType]).getOrElse(false)) {
+            val toCollection = extractCollectionFromBreakout(t, syntheticsByEndPos)
+            toCollection.map(toCol => ctx.addRight(to, "(" + toCol + ")")).getOrElse(Patch.empty)
+          } else Patch.empty
 
       }.asPatch
 
@@ -372,11 +353,11 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     replaced + compatImport
   }
 
-  val companionSuffix = "#companion()Lscala/collection/generic/GenericCompanion;."
+  val companionSuffix = "#companion()."
   val companion = {
     val cols =
       Set(
-        "_root_.scala.collection." -> List(
+        "scala/collection/" -> List(
           "IndexedSeq",
           "Iterable",
           "LinearSeq",
@@ -384,7 +365,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           "Set",
           "Traversable"
         ),
-        "_root_.scala.collection.immutable." -> List(
+        "scala/collection/immutable/" -> List(
           "HashSet",
           "IndexedSeq",
           "Iterable",
@@ -399,9 +380,10 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           "Traversable",
           "Vector"
         ),
-        "_root_.scala.collection.mutable." -> List(
+        "scala/collection/mutable/" -> List(
           "ArrayBuffer",
           "ArraySeq",
+          "ArrayStack",
           "Buffer",
           "DoubleLinkedList",
           "HashSet",
@@ -416,6 +398,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           "ResizableArray",
           "Seq",
           "Set",
+          "Stack",
           "Traversable",
         )
       ).flatMap {
@@ -423,27 +406,14 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           cols.map(col => prefix + col + companionSuffix)
       }
 
-    val specific =
-      Set(
-        "_root_.scala.collection.mutable.Stack#companion()Lscala/collection/mutable/Stack;.",
-        "_root_.scala.collection.mutable.ArrayStack#companion()Lscala/collection/mutable/ArrayStack;."
-      )
-
-    exact((cols ++ specific).toSeq: _*)
+    exact(cols.toSeq: _*)
   }
-
-  val classManifestCompanion = exact(
-    "_root_.scala.collection.generic.GenericClassTagTraversableTemplate#classManifestCompanion()Lscala/collection/generic/GenericClassTagCompanion;."
-  )
 
   private def replaceCompanion(ctx: RuleCtx): Patch = {
     val replaced =
       ctx.tree.collect {
         case Term.Select(_, t @ companion(_)) => {
           ctx.replaceTree(t, "iterableFactory")
-        }
-        case Term.Select(_, t @ classManifestCompanion(_)) => {
-          ctx.replaceTree(t, "classTagCompanion")
         }
       }.asPatch
 
@@ -468,39 +438,39 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   private val deprecatedAsJavaConversions: Map[Symbol, String] =
     List(
       "asJava" -> List(
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaIterable(Lscala/collection/Iterable;)Ljava/lang/Iterable;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaIterator(Lscala/collection/Iterator;)Ljava/util/Iterator;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#bufferAsJavaList(Lscala/collection/mutable/Buffer;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#mapAsJavaConcurrentMap(Lscala/collection/concurrent/Map;)Ljava/util/concurrent/ConcurrentMap;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#mapAsJavaMap(Lscala/collection/Map;)Ljava/util/Map;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#mutableMapAsJavaMap(Lscala/collection/mutable/Map;)Ljava/util/Map;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#mutableSeqAsJavaList(Lscala/collection/mutable/Seq;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#mutableSetAsJavaSet(Lscala/collection/mutable/Set;)Ljava/util/Set;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#seqAsJavaList(Lscala/collection/Seq;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#setAsJavaSet(Lscala/collection/Set;)Ljava/util/Set;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaIterable`(Lscala/collection/Iterable;)Ljava/lang/Iterable;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaIterator`(Lscala/collection/Iterator;)Ljava/util/Iterator;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated bufferAsJavaList`(Lscala/collection/mutable/Buffer;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mapAsJavaConcurrentMap`(Lscala/collection/concurrent/Map;)Ljava/util/concurrent/ConcurrentMap;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mapAsJavaMap`(Lscala/collection/Map;)Ljava/util/Map;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableMapAsJavaMap`(Lscala/collection/mutable/Map;)Ljava/util/Map;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableMapAsJavaMap`(Lscala/collection/mutable/Map;)Ljava/util/Map;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableSeqAsJavaList`(Lscala/collection/mutable/Seq;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated mutableSetAsJavaSet`(Lscala/collection/mutable/Set;)Ljava/util/Set;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated seqAsJavaList`(Lscala/collection/Seq;)Ljava/util/List;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated setAsJavaSet`(Lscala/collection/Set;)Ljava/util/Set;."
+        "scala/collection/convert/LowPriorityWrapAsJava#asJavaIterable().",
+        "scala/collection/convert/LowPriorityWrapAsJava#asJavaIterator().",
+        "scala/collection/convert/LowPriorityWrapAsJava#bufferAsJavaList().",
+        "scala/collection/convert/LowPriorityWrapAsJava#mapAsJavaConcurrentMap().",
+        "scala/collection/convert/LowPriorityWrapAsJava#mapAsJavaMap().",
+        "scala/collection/convert/LowPriorityWrapAsJava#mutableMapAsJavaMap().",
+        "scala/collection/convert/LowPriorityWrapAsJava#mutableSeqAsJavaList().",
+        "scala/collection/convert/LowPriorityWrapAsJava#mutableSetAsJavaSet().",
+        "scala/collection/convert/LowPriorityWrapAsJava#seqAsJavaList().",
+        "scala/collection/convert/LowPriorityWrapAsJava#setAsJavaSet().",
+        "scala/collection/convert/WrapAsJava#`deprecated asJavaIterable`().",
+        "scala/collection/convert/WrapAsJava#`deprecated asJavaIterator`().",
+        "scala/collection/convert/WrapAsJava#`deprecated bufferAsJavaList`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mapAsJavaConcurrentMap`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mapAsJavaMap`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mutableMapAsJavaMap`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mutableMapAsJavaMap`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mutableSeqAsJavaList`().",
+        "scala/collection/convert/WrapAsJava#`deprecated mutableSetAsJavaSet`().",
+        "scala/collection/convert/WrapAsJava#`deprecated seqAsJavaList`().",
+        "scala/collection/convert/WrapAsJava#`deprecated setAsJavaSet`()."
       ),
       "asJavaEnumeration" -> List(
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaEnumeration(Lscala/collection/Iterator;)Ljava/util/Enumeration;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaEnumeration`(Lscala/collection/Iterator;)Ljava/util/Enumeration;.",
+        "scala/collection/convert/LowPriorityWrapAsJava#asJavaEnumeration().",
+        "scala/collection/convert/WrapAsJava#`deprecated asJavaEnumeration`().",
       ),
       "asJavaCollection" -> List(
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaCollection(Lscala/collection/Iterable;)Ljava/util/Collection;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaCollection`(Lscala/collection/Iterable;)Ljava/util/Collection;.",
+        "scala/collection/convert/LowPriorityWrapAsJava#asJavaCollection().",
+        "scala/collection/convert/WrapAsJava#`deprecated asJavaCollection`().",
       ),
       "asJavaDictionary" -> List(
-        "_root_.scala.collection.convert.LowPriorityWrapAsJava#asJavaDictionary(Lscala/collection/mutable/Map;)Ljava/util/Dictionary;.",
-        "_root_.scala.collection.convert.WrapAsJava#`deprecated asJavaDictionary`(Lscala/collection/mutable/Map;)Ljava/util/Dictionary;.",
+        "scala/collection/convert/LowPriorityWrapAsJava#asJavaDictionary().",
+        "scala/collection/convert/WrapAsJava#`deprecated asJavaDictionary`().",
       )
     ).flatMap {
       case (asX, symbols) =>
@@ -509,26 +479,26 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
   private val deprecatedAsScalaConversions: Map[Symbol, String] =
     List(
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#asScalaBuffer(Ljava/util/List;)Lscala/collection/mutable/Buffer;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#asScalaIterator(Ljava/util/Iterator;)Lscala/collection/Iterator;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#asScalaSet(Ljava/util/Set;)Lscala/collection/mutable/Set;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#collectionAsScalaIterable(Ljava/util/Collection;)Lscala/collection/Iterable;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#dictionaryAsScalaMap(Ljava/util/Dictionary;)Lscala/collection/mutable/Map;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#enumerationAsScalaIterator(Ljava/util/Enumeration;)Lscala/collection/Iterator;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#iterableAsScalaIterable(Ljava/lang/Iterable;)Lscala/collection/Iterable;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#mapAsScalaConcurrentMap(Ljava/util/concurrent/ConcurrentMap;)Lscala/collection/concurrent/Map;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#mapAsScalaMap(Ljava/util/Map;)Lscala/collection/mutable/Map;.",
-      "_root_.scala.collection.convert.LowPriorityWrapAsScala#propertiesAsScalaMap(Ljava/util/Properties;)Lscala/collection/mutable/Map;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated asScalaBuffer`(Ljava/util/List;)Lscala/collection/mutable/Buffer;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated asScalaIterator`(Ljava/util/Iterator;)Lscala/collection/Iterator;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated asScalaSet`(Ljava/util/Set;)Lscala/collection/mutable/Set;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated collectionAsScalaIterable`(Ljava/util/Collection;)Lscala/collection/Iterable;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated dictionaryAsScalaMap`(Ljava/util/Dictionary;)Lscala/collection/mutable/Map;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated enumerationAsScalaIterator`(Ljava/util/Enumeration;)Lscala/collection/Iterator;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated iterableAsScalaIterable`(Ljava/lang/Iterable;)Lscala/collection/Iterable;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated mapAsScalaConcurrentMap`(Ljava/util/concurrent/ConcurrentMap;)Lscala/collection/concurrent/Map;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated mapAsScalaMap`(Ljava/util/Map;)Lscala/collection/mutable/Map;.",
-      "_root_.scala.collection.convert.WrapAsScala#`deprecated propertiesAsScalaMap`(Ljava/util/Properties;)Lscala/collection/mutable/Map;.",
+      "scala/collection/convert/LowPriorityWrapAsScala#asScalaBuffer().",
+      "scala/collection/convert/LowPriorityWrapAsScala#asScalaIterator().",
+      "scala/collection/convert/LowPriorityWrapAsScala#asScalaSet().",
+      "scala/collection/convert/LowPriorityWrapAsScala#collectionAsScalaIterable().",
+      "scala/collection/convert/LowPriorityWrapAsScala#dictionaryAsScalaMap().",
+      "scala/collection/convert/LowPriorityWrapAsScala#enumerationAsScalaIterator().",
+      "scala/collection/convert/LowPriorityWrapAsScala#iterableAsScalaIterable().",
+      "scala/collection/convert/LowPriorityWrapAsScala#mapAsScalaConcurrentMap().",
+      "scala/collection/convert/LowPriorityWrapAsScala#mapAsScalaMap().",
+      "scala/collection/convert/LowPriorityWrapAsScala#propertiesAsScalaMap().",
+      "scala/collection/convert/WrapAsScala#`deprecated asScalaBuffer`().",
+      "scala/collection/convert/WrapAsScala#`deprecated asScalaIterator`().",
+      "scala/collection/convert/WrapAsScala#`deprecated asScalaSet`().",
+      "scala/collection/convert/WrapAsScala#`deprecated collectionAsScalaIterable`().",
+      "scala/collection/convert/WrapAsScala#`deprecated dictionaryAsScalaMap`().",
+      "scala/collection/convert/WrapAsScala#`deprecated enumerationAsScalaIterator`().",
+      "scala/collection/convert/WrapAsScala#`deprecated iterableAsScalaIterable`().",
+      "scala/collection/convert/WrapAsScala#`deprecated mapAsScalaConcurrentMap`().",
+      "scala/collection/convert/WrapAsScala#`deprecated mapAsScalaMap`().",
+      "scala/collection/convert/WrapAsScala#`deprecated propertiesAsScalaMap`().",
     ).map(s => Symbol(s) -> "asScala").toMap
 
   private class DeprecatedImplicitConversion(ctx: RuleCtx) {
@@ -574,9 +544,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     }
   }
 
-  private val JavaConversions = exact("_root_.scala.collection.JavaConversions.")
-  private val JavaConversionsImport = exact(
-    "_root_.scala.collection.JavaConversions.;_root_.scala.collection.JavaConversions#")
+  private val JavaConversions = exact("scala/collection/JavaConversions.")
 
   def replaceJavaConversions(ctx: RuleCtx): Patch = {
     val ImplicitConversion = new DeprecatedImplicitConversion(ctx)
@@ -604,7 +572,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         case Importer(JavaConversions(_), importees) =>
           importees.map(ctx.removeImportee).asPatch
 
-        case i @ Importee.Name(JavaConversionsImport(_)) =>
+        case i @ Importee.Name(JavaConversions(_)) =>
           ctx.removeImportee(i)
 
       }.asPatch
@@ -617,6 +585,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
+    // println("-----")
+    // ctx.index.synthetics.sortBy(_.position.start).foreach(println)
+
     replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
       replaceTo(ctx) +

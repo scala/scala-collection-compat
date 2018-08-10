@@ -3,40 +3,40 @@ rule = "scala:fix.CrossCompat"
  */
 package fix
 
-import scala.collection.immutable
-import scala.collection.mutable
+import scala.{collection => c}
+import scala.collection.{immutable => i, mutable => m}
 
 object CompanionSrc {
 
-  (null: collection.IndexedSeq[Int]).companion
-  (null: collection.Iterable[Int]).companion
-  (null: collection.Seq[Int]).companion
-  (null: collection.Traversable[Int]).companion
+  (null: c.IndexedSeq[Int]).companion
+  (null: c.Iterable[Int]).companion
+  (null: c.Seq[Int]).companion
+  (null: c.Traversable[Int]).companion
 
-  (null: immutable.HashSet[Int]).companion
-  (null: immutable.IndexedSeq[Int]).companion
-  (null: immutable.Iterable[Int]).companion
-  (null: immutable.LinearSeq[Int]).companion
-  (null: immutable.List[Int]).companion
-  (null: immutable.ListSet[Int]).companion
-  (null: immutable.Queue[Int]).companion
-  (null: immutable.Seq[Int]).companion
-  (null: immutable.Set[Int]).companion
-  (null: immutable.Stream[Int]).companion
-  (null: immutable.Traversable[Int]).companion
-  (null: immutable.Vector[Int]).companion
+  (null: i.HashSet[Int]).companion
+  (null: i.IndexedSeq[Int]).companion
+  (null: i.Iterable[Int]).companion
+  (null: i.LinearSeq[Int]).companion
+  (null: i.List[Int]).companion
+  (null: i.ListSet[Int]).companion
+  (null: i.Queue[Int]).companion
+  (null: i.Seq[Int]).companion
+  (null: i.Set[Int]).companion
+  (null: i.Stream[Int]).companion
+  (null: i.Traversable[Int]).companion
+  (null: i.Vector[Int]).companion
 
-  (null: mutable.ArrayBuffer[Int]).companion
-  (null: mutable.ArraySeq[Int]).companion
-  (null: mutable.ArrayStack[Int]).companion
-  (null: mutable.Buffer[Int]).companion
-  (null: mutable.HashSet[Int]).companion
-  (null: mutable.IndexedSeq[Int]).companion
-  (null: mutable.Iterable[Int]).companion
-  (null: mutable.LinearSeq[Int]).companion
-  (null: mutable.LinkedHashSet[Int]).companion
-  (null: mutable.Queue[Int]).companion
-  (null: mutable.Seq[Int]).companion
-  (null: mutable.Set[Int]).companion
-  (null: mutable.Traversable[Int]).companion
+  (null: m.ArrayBuffer[Int]).companion
+  (null: m.ArraySeq[Int]).companion
+  (null: m.ArrayStack[Int]).companion
+  (null: m.Buffer[Int]).companion
+  (null: m.HashSet[Int]).companion
+  (null: m.IndexedSeq[Int]).companion
+  (null: m.Iterable[Int]).companion
+  (null: m.LinearSeq[Int]).companion
+  (null: m.LinkedHashSet[Int]).companion
+  (null: m.Queue[Int]).companion
+  (null: m.Seq[Int]).companion
+  (null: m.Set[Int]).companion
+  (null: m.Traversable[Int]).companion
 }

@@ -1,6 +1,9 @@
 import ScalaModulePlugin._
 import sbtcrossproject.{crossProject, CrossType}
-import _root_.scalafix.Versions.{version => scalafixVersion, scala212 => scalafixScala212}
+import _root_.scalafix.internal.sbtscalafix.BuildInfo.{
+  scalafixVersion,
+  scala212 => scalafixScala212
+}
 
 lazy val root = project
   .in(file("."))
@@ -173,7 +176,11 @@ lazy val `scalafix-input` = project
   .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
-    scalafixSourceroot := sourceDirectory.in(Compile).value
+    addCompilerPlugin(scalafixSemanticdb),
+    scalacOptions ++= Seq(
+      "-Yrangepos",
+      "-P:semanticdb:synthetics:on"
+    )
   )
   .dependsOn(`scalafix-data212`)
 
@@ -183,15 +190,20 @@ val `scalafix-output` = MultiScalaProject("scalafix-output",
                                             .settings(dontPublish)
                                             .disablePlugins(ScalafixPlugin))
 
-lazy val output212    = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main")
-lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value / "scala"
+lazy val outputCross =
+  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output/src/main/scala")
+
+lazy val output212 =
+  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main/scala")
+lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value
 
 lazy val output212Plus =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main")
-lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value / "scala"
+  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main/scala")
+lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value
 
-lazy val output213    = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main")
-lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value / "scala"
+lazy val output213 =
+  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main/scala")
+lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value
 
 lazy val `scalafix-output211` = `scalafix-output`(
   scala211,
@@ -226,28 +238,15 @@ lazy val `scalafix-tests` = project
   .settings(
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    buildInfoPackage := "build",
-    buildInfoKeys := Seq[BuildInfoKey](
-      "inputSourceroot"         -> sourceDirectory.in(`scalafix-input`, Compile).value,
-      "outputSourceroot"        -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
-      "output212Sourceroot"     -> output212.value,
-      "output212PlusSourceroot" -> output212Plus.value,
-      "output213Sourceroot"     -> output213.value,
-      "output213FailureSourceroot" -> sourceDirectory
-        .in(`scalafix-output213-failure`, Compile)
-        .value,
-      "inputClassdirectory" -> classDirectory.in(`scalafix-input`, Compile).value
-    ),
-    test in Test := (test in Test)
-      .dependsOn(
-        compile in (`scalafix-output211`, Compile),
-        compile in (`scalafix-output212`, Compile),
-        compile in (`scalafix-output213`, Compile)
-      )
-      .value
+    scalafixTestkitOutputSourceDirectories := Seq(outputCross.value,
+                                                  output212.value,
+                                                  output212Plus.value,
+                                                  output213.value),
+    scalafixTestkitInputSourceDirectories := sourceDirectories.in(`scalafix-input`, Compile).value,
+    scalafixTestkitInputClasspath := fullClasspath.in(`scalafix-input`, Compile).value
   )
   .dependsOn(`scalafix-input`, `scalafix-rules`)
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
 lazy val dontPublish = Seq(
   publishArtifact := false,
