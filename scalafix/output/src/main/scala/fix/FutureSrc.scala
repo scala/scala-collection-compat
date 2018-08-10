@@ -23,4 +23,13 @@ class FutureSrc(fs: Future[Int])(implicit ec: ExecutionContext){
     case scala.util.Success(x) if x < 0 => println("x < 0")
     case _ => ()
   }(ec)
+
+  fs.map(identity).onComplete {
+    case scala.util.Failure(x) => x
+    case _ => ()
+  }
+  fs.map(identity).onComplete { case scala.util.Success(x) => x
+                               case _ => () }
+
+  val f = Future { 1 }
 }

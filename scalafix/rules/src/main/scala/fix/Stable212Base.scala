@@ -339,16 +339,22 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         ctx.addRight(cases.last, nl + indent + "case _ => ()")
     }
 
-    ctx.tree.collect {
-      case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)),
-                      List(Term.PartialFunction(cases))) =>
-        toOnCompletePF(f, cases, "scala.util.Failure")
+    val toOnCompelete =
+      ctx.tree.collect {
+        case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)),
+                        List(Term.PartialFunction(cases))) =>
+          toOnCompletePF(f, cases, "scala.util.Failure")
 
-      case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)),
-                      List(Term.PartialFunction(cases))) =>
-        toOnCompletePF(f, cases, "scala.util.Success")
+        case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)),
+                        List(Term.PartialFunction(cases))) =>
+          toOnCompletePF(f, cases, "scala.util.Success")
+      }.asPatch
 
-    }.asPatch
+    val toFuture = ctx.replaceSymbols(
+      "scala.concurrent.future" -> "scala.concurrent.Future"
+    )
+
+    toOnCompelete + toFuture
   }
 
   private def replaceSorted(ctx: RuleCtx): Patch = {
