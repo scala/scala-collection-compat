@@ -1,7 +1,6 @@
 package fix
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 // Not 2.12 Cross-Compatible
@@ -14,11 +13,15 @@ case class NewCollections(index: SemanticdbIndex)
   //  == Symbols ==
 
   val tupleZipped = normalized(
-    "_root_.scala.runtime.Tuple2Zipped.Ops.zipped.",
-    "_root_.scala.runtime.Tuple3Zipped.Ops.zipped."
+    "scala/runtime/Tuple2Zipped.Ops#zipped().",
+    "scala/runtime/Tuple3Zipped.Ops#zipped()."
   )
-  val retainMap = normalized("_root_.scala.collection.mutable.MapLike.retain.")
-  val retainSet = normalized("_root_.scala.collection.mutable.SetLike.retain.")
+  val retainMap = normalized(
+    "scala/collection/mutable/MapLike#retain()."
+  )
+  val retainSet = normalized(
+    "scala/collection/mutable/SetLike#retain()."
+  )
 
   // == Rules ==
 

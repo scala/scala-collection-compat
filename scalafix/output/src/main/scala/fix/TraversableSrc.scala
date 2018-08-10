@@ -5,6 +5,8 @@ package fix
 
 import scala.collection.immutable
 import scala.collection.mutable
+import scala.{ Iterable, collection }
+import scala.collection.{ immutable, mutable }
 import scala.collection.compat._
 
 trait TraversableSrc {

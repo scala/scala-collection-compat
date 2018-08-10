@@ -1,23 +1,23 @@
 package fix
 
 import scala.meta._
+import scalafix.v0._
 import scalafix.testkit._
-import scalafix._
 
-class ScalafixTests
-    extends SemanticRuleSuite(
-      SemanticdbIndex.load(Classpath(AbsolutePath(build.BuildInfo.inputClassdirectory))),
-      AbsolutePath(build.BuildInfo.inputSourceroot),
-      Seq(
-        AbsolutePath(build.BuildInfo.outputSourceroot),
-        AbsolutePath(build.BuildInfo.output212Sourceroot),
-        AbsolutePath(build.BuildInfo.output213Sourceroot),
-        AbsolutePath(build.BuildInfo.output212PlusSourceroot),
-        AbsolutePath(build.BuildInfo.output213FailureSourceroot)
-      )
-    ) {
+class ScalafixTests extends scalafix.testkit.SemanticRuleSuite {
 
-  runAllTests()
-  // to run only one test:
-  // testsToRun.filter(_.filename.toNIO.getFileName.toString == "Playground.scala" ).foreach(runOn)
+  val only: Option[String] =
+    // Some("Playground") // << to run only one test:
+    None
+
+  def testOnly(file: String): Unit = {
+    testsToRun
+      .filter(_.path.testPath.toNIO.getFileName.toString.stripSuffix(".scala") == file)
+      .foreach(runOn)
+  }
+
+  only match {
+    case Some(file) => testOnly(file)
+    case None       => runAllTests()
+  }
 }

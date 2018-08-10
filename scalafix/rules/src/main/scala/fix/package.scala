@@ -1,8 +1,12 @@
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 package object fix {
+  def sym(tree: Tree)(implicit index: SemanticdbIndex): Patch = {
+    println(index.symbol(tree))
+    Patch.empty
+  }
+
   def normalized(symbols: String*)(implicit index: SemanticdbIndex): SymbolMatcher =
     SymbolMatcher.normalized(symbols.map(Symbol(_)): _*)
 
