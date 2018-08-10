@@ -6,6 +6,7 @@ package fix
 import scala.collection.{immutable, mutable}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.Iterable
 import scala.collection.compat._
 
 class BreakoutSrc(ts: Iterable[Int], vec: Vector[Int], list: List[Int], seq: Seq[Int]) {
@@ -103,4 +104,5 @@ class BreakoutSrc(ts: Iterable[Int], vec: Vector[Int], list: List[Int], seq: Seq
   scala.collection.immutable.IntMap.from(List(1 -> "1").iterator.map(x => x)): immutable.IntMap[String]
   scala.collection.immutable.LongMap.from(List(1L -> "1").iterator.map(x => x)): immutable.LongMap[String]
   scala.collection.mutable.LongMap.from(List(1L -> "1").iterator.map(x => x)): mutable.LongMap[String]
+  scala.collection.BitSet.from(List(1).iterator.map(x => x)): collection.BitSet
 }

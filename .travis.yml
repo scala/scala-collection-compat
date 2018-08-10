@@ -76,7 +76,9 @@ matrix:
 # |  oraclejdk8 | 2.13.0-M4 | js           | 0.6.23               |               |
 # |  oraclejdk8 | 2.12.6    | jvm          |                      |   true        |
 
-before_script: ./checkCLA.sh
+before_script:
+  - admin/checkCLA.sh
+
 script:
   - java -version
   - sbt ci

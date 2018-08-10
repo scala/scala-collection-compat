@@ -5,6 +5,7 @@ package fix
 
 import scala.concurrent.{Future, ExecutionContext}
 import java.lang.Throwable
+import scala.concurrent.Future
 
 class FutureSrc(fs: Future[Int])(implicit ec: ExecutionContext){
   class E1 extends Throwable
