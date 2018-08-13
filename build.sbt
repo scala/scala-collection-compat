@@ -176,7 +176,10 @@ lazy val `scalafix-input` = project
   .settings(
     scalaVersion := scalafixScala212,
     addCompilerPlugin(scalafixSemanticdb),
-    scalacOptions += "-Yrangepos"
+    scalacOptions ++= Seq(
+      "-Yrangepos",
+      "-P:semanticdb:synthetics:on"
+    )
   )
   .dependsOn(`scalafix-data212`)
 

@@ -192,6 +192,8 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     }
 
     def extractCollectionFromBreakout(breakout: Tree): Option[String] = {
+      println(ctx.index.synthetics)
+
       ctx.index.synthetics.find(_.position.end == breakout.pos.end).map { synth =>
         val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
 

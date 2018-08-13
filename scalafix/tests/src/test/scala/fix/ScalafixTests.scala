@@ -7,8 +7,8 @@ import scalafix.testkit._
 class ScalafixTests extends scalafix.testkit.SemanticRuleSuite {
 
   val only: Option[String] =
-    // Some("Playground") // << to run only one test:
-    None
+    Some("BreakoutSrc") // << to run only one test:
+  // None
 
   def testOnly(file: String): Unit = {
     testsToRun
