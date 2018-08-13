@@ -586,6 +586,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
+    println("-----")
+    ctx.index.synthetics.sortBy(_.position.start).foreach(println)
+
     replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
       replaceTo(ctx) +

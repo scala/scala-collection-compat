@@ -117,6 +117,8 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
   // == rule ==
   def apply(ctx: RuleCtx): Patch = {
 
+    val syntheticsByEndPos: Map[Int, Seq[Synthetic]] = ctx.index.synthetics.groupBy(_.position.end)
+
     var requiresCompatImport = false
 
     def covertToCollection(intermediateLhs: String,
@@ -192,7 +194,8 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     }
 
     def extractCollectionFromBreakout(breakout: Tree): Option[String] = {
-      println(ctx.index.synthetics)
+
+      // scala.Array.canBuildFrom((`macro-expandee` : scala.reflect.ClassTag[scala.Tuple2[scala.Int, scala.Int]]))
 
       ctx.index.synthetics.find(_.position.end == breakout.pos.end).map { synth =>
         val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
@@ -200,6 +203,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
         implicitCbf match {
           case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
             "scala.collection.immutable.IndexedSeq"
+
+          case Term.Apply(q"scala.Array.canBuildFrom", _) =>
+            "scala.Array"
 
           case Term.ApplyType(Term.Select(coll, _), _) =>
             coll.syntax
