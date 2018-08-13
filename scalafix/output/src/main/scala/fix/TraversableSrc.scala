@@ -14,6 +14,7 @@ trait TraversableSrc {
   val cto: IterableOnce[Int]
 
   val t: Iterable[Int]
+  t.iterator
   val ct: collection.Iterable[Int]
   val it: immutable.Iterable[Int]
   val mt: mutable.Iterable[Int]

@@ -40,9 +40,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   val arrayBuilderMake       = normalized("scala/collection/mutable/ArrayBuilder.make().")
   val iterableSameElement    = exact("scala/collection/IterableLike#sameElements().")
   val collectionCanBuildFrom = exact("scala/collection/generic/CanBuildFrom#")
-  val collectionCanBuildFromImport = exact(
-    // "_root_.scala.collection.generic.CanBuildFrom.;_root_.scala.collection.generic.CanBuildFrom#"
-  )
+
   val nothing      = exact("scala/Nothing#")
   val setPlus2     = exact("scala/collection/SetLike#`+`(+1).")
   val mapPlus2     = exact("scala/collection/immutable/MapLike#`+`(+1).")
@@ -68,9 +66,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "scala/collection/SortedSetLike#until()."
   )
 
-  val `TraversableLike.toIterator` = normalized(
-    // "_root_.scala.collection.TraversableLike.toIterator."
-  )
+  val `TraversableLike.toIterator` = exact("scala/collection/TraversableLike#toIterator().")
   val traversableOnce = exact(
     "scala/collection/TraversableOnce#",
     "scala/package.TraversableOnce#"
@@ -244,7 +240,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val imports =
       ctx.tree.collect {
-        case i: Importee if collectionCanBuildFromImport.matches(i) =>
+        case i: Importee if collectionCanBuildFrom.matches(i) =>
           ctx.removeImportee(i)
       }.asPatch
 
@@ -256,16 +252,16 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
   def extractCollection(toCol: Tree): String = {
     toCol match {
-      case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
-        "scala.collection.immutable.IndexedSeq"
-      case Term.ApplyType(Term.Select(coll, _), _) =>
-        coll.syntax
-      case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
-        coll.syntax
-      case Term.Select(coll, _) =>
-        coll.syntax
-      case coll: Type.Name =>
-        coll.syntax
+      // case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
+      //   "scala.collection.immutable.IndexedSeq"
+      // case Term.ApplyType(Term.Select(coll, _), _) =>
+      //   coll.syntax
+      // case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
+      //   coll.syntax
+      // case Term.Select(coll, _) =>
+      //   coll.syntax
+      // case coll: Type.Name =>
+      //   coll.syntax
       case _ => {
         throw new Exception(
           s"""|cannot extract collection from .to
@@ -283,6 +279,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   def replaceTo(ctx: RuleCtx): Patch = {
+    val syntheticsByEndPos: Map[Int, Seq[Synthetic]] =
+      ctx.index.synthetics.groupBy(_.position.end)
+
     val patch =
       ctx.tree.collect {
         case Term.ApplyType(Term.Select(_, t @ toTpe(n: Name)), _) if !handledTo.contains(n) =>
@@ -293,19 +292,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
         // https://github.com/scalacenter/scalafix/issues/793
         case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
-          val synth = ctx.index.synthetics.find(_.position.end == to.pos.end)
-
-          synth
-            .map { s =>
-              s.text.parse[Term].get match {
-                // we only want f.to, not f.to(X)
-                case Term.Apply(_, List(toCol)) =>
-                  val col = extractCollection(toCol)
-                  ctx.addRight(to, "(" + col + ")")
-                case _ => Patch.empty
-              }
-            }
-            .getOrElse(Patch.empty)
+          val toCollection = extractCollectionFromBreakout(t, syntheticsByEndPos)
+          toCollection.map(toCol => ctx.addRight(to, "(" + toCol + ")")).getOrElse(Patch.empty)
 
       }.asPatch
 
@@ -576,6 +564,9 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
         case Importer(JavaConversions(_), importees) =>
           importees.map(ctx.removeImportee).asPatch
 
+        case i @ Importee.Name(JavaConversions(_)) =>
+          ctx.removeImportee(i)
+
       }.asPatch
 
     val converterImport =
@@ -586,8 +577,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
-    println("-----")
-    ctx.index.synthetics.sortBy(_.position.start).foreach(println)
+    // println("-----")
+    // ctx.index.synthetics.sortBy(_.position.start).foreach(println)
 
     replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
