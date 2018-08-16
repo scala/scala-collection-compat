@@ -98,49 +98,57 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
 
   def replaceUnsorted(ctx: RuleCtx): Patch = {
 
-    val synthPos: Map[Int, Synthetic] = ctx.index.synthetics.groupBy(_.position.end).mapValues(_.head).toMap
+    val synthPos: Map[Int, Synthetic] =
+      ctx.index.synthetics.groupBy(_.position.end).mapValues(_.head).toMap
 
     def recurse(tree: Tree): Tree = {
       tree match {
         case Term.Select(_, b) => recurse(b)
-        case _ => tree
+        case _                 => tree
       }
     }
 
     def syntheticToSymbol(tree: Tree)(extract: PartialFunction[Tree, Tree]): Option[String] = {
-      synthPos.get(tree.pos.end).flatMap(synthetic =>
-        synthetic.text.parse[Term].toOption.flatMap{ syntheticTree =>
-          extract.lift(syntheticTree).flatMap{col =>
-            val byPos = synthetic.names.groupBy(s => (s.position.start, s.position.end)).mapValues(_.head).toMap
-            byPos.get((col.pos.start, col.pos.end)).map(_.symbol.toString)
-          }
-        }
-      )
+      synthPos
+        .get(tree.pos.end)
+        .flatMap(synthetic =>
+          synthetic.text.parse[Term].toOption.flatMap { syntheticTree =>
+            extract.lift(syntheticTree).flatMap { col =>
+              val byPos =
+                synthetic.names
+                  .groupBy(s => (s.position.start, s.position.end))
+                  .mapValues(_.head)
+                  .toMap
+              byPos.get((col.pos.start, col.pos.end)).map(_.symbol.toString)
+            }
+        })
     }
 
     val patch =
       ctx.tree.collect {
-        case ap @ Term.Apply(Term.Select(OrderedMapCollection(), unorderingMapOperation(op)), List(f)) => {
+        case ap @ Term.Apply(Term.Select(OrderedMapCollection(), unorderingMapOperation(op)),
+                             List(f)) => {
           val cbf =
-            syntheticToSymbol(ap){
+            syntheticToSymbol(ap) {
               case Term.Apply(_, List(Term.ApplyType(sel, _))) => recurse(sel)
             }
 
           if (cbf.map(mapCanBuildFroms.contains).getOrElse(false)) {
-            ctx.addLeft(op, "unsortedSpecific.")
+            ctx.addLeft(op, "unsorted.")
           } else {
             Patch.empty
           }
         }
 
-        case ap @ Term.Apply(Term.Select(OrderedSetCollection(), unorderingSetOperation(op)), List(f)) => {
+        case ap @ Term.Apply(Term.Select(OrderedSetCollection(), unorderingSetOperation(op)),
+                             List(f)) => {
           val cbf =
-            syntheticToSymbol(ap){
+            syntheticToSymbol(ap) {
               case Term.Apply(_, List(Term.ApplyType(sel, _))) => recurse(sel)
             }
 
           if (cbf.map(setCanBuildFroms.contains).getOrElse(false)) {
-            ctx.addLeft(op, "unsortedSpecific.")
+            ctx.addLeft(op, "unsorted.")
           } else {
             Patch.empty
           }

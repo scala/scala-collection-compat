@@ -1,6 +1,6 @@
 package scala.collection
 
-package object compat extends PackageShared0 {
+package object compat {
   type Factory[-A, +C] = scala.collection.Factory[A, C]
   val Factory = scala.collection.Factory
 

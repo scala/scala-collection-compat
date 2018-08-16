@@ -10,7 +10,18 @@ import java.net.URL
 // NB. maven-metadata.xml does not point to the latest version
 object LatestScala {
 
+  def getLatestScala213(): String = getLatestScala213WithDate()._1
+
   def printLatestScala213(): Unit = {
+    val (latestVersion, lastestDate) = getLatestScala213WithDate()
+    println()
+    println(latestVersion)
+    println()
+    println(lastestDate)
+    println()
+  }
+
+  private def getLatestScala213WithDate(): (String, String) = {
     val url =
       "https://scala-ci.typesafe.com/artifactory/scala-integration/org/scala-lang/scala-library/"
     val index = new URL(url).openStream()
@@ -35,10 +46,6 @@ object LatestScala {
     val latestVersion   = version
     val lastestDate     = dateFormat.print(date)
 
-    println()
-    println(latestVersion)
-    println()
-    println(lastestDate)
-    println()
+    (latestVersion, lastestDate)
   }
 }

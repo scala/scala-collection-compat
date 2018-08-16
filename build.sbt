@@ -19,6 +19,7 @@ lazy val root = project
     `scalafix-output211`,
     `scalafix-output212`,
     `scalafix-output213`,
+    `scalafix-output213-pre`,
     // `scalafix-output213-failure`,
     `scalafix-rules`,
     `scalafix-tests`
@@ -33,12 +34,15 @@ lazy val scala211   = "2.11.12"
 lazy val scala212   = "2.12.6"
 lazy val scalaJs213 = "2.13.0-M4" // Scala.js does no have -pre
 
-lazy val scala213 = "2.13.0-M4"
-// lazy val scala213 = "2.13.0-pre-3ae6282" // use the sbt command `latest-213` to fetch the latest version
+lazy val scala213    = "2.13.0-M4"
+lazy val scala213Pre = LatestScala.getLatestScala213()
 
 lazy val scala213Settings = Seq(
-  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
   scalaVersion := scala213
+)
+lazy val scala213PreSettings = Seq(
+  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+  scalaVersion := scala213Pre
 )
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
@@ -94,13 +98,21 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
 val compat213 = compat(scala213, scalaJs213, _.jvmSettings(scala213Settings))
+val compat213Pre = compat(
+  scala213Pre,
+  scalaJs213,
+  _.jvmSettings(
+    scala213PreSettings
+  )
+)
 
-lazy val compat211JVM = compat211.jvm
-lazy val compat211JS  = compat211.js
-lazy val compat212JVM = compat212.jvm
-lazy val compat212JS  = compat212.js
-lazy val compat213JVM = compat213.jvm
-lazy val compat213JS  = compat213.js
+lazy val compat211JVM    = compat211.jvm
+lazy val compat211JS     = compat211.js
+lazy val compat212JVM    = compat212.jvm
+lazy val compat212JS     = compat212.js
+lazy val compat213JVM    = compat213.jvm
+lazy val compat213JS     = compat213.js
+lazy val compat213PreJVM = compat213Pre.jvm
 
 lazy val `binary-compat-old` = project
   .in(file("binary-compat/old"))
@@ -156,15 +168,19 @@ lazy val sharedScalafixSettings = Seq(
 )
 
 // common part between input/output
-lazy val `scalafix-data` = MultiScalaProject("scalafix-data",
-                                             "scalafix/data",
-                                             _.settings(sharedScalafixSettings)
-                                               .settings(dontPublish))
+lazy val `scalafix-data` = MultiScalaProject(
+  "scalafix-data",
+  "scalafix/data",
+  _.settings(sharedScalafixSettings)
+    .settings(dontPublish)
+)
 
 val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
 val `scalafix-data212` = `scalafix-data`(scalafixScala212, _.dependsOn(compat212JVM))
 val `scalafix-data213` =
   `scalafix-data`(scala213, _.settings(scala213Settings).dependsOn(compat213JVM))
+val `scalafix-data213-pre` =
+  `scalafix-data`(scala213Pre, _.settings(scala213PreSettings).dependsOn(compat213PreJVM))
 
 lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
@@ -176,43 +192,74 @@ lazy val `scalafix-input` = project
   )
   .dependsOn(`scalafix-data212`)
 
-val `scalafix-output` = MultiScalaProject("scalafix-output",
-                                          "scalafix/output",
-                                          _.settings(sharedScalafixSettings)
-                                            .settings(dontPublish)
-                                            .disablePlugins(ScalafixPlugin))
+val `scalafix-output` = MultiScalaProject(
+  "scalafix-output",
+  "scalafix/output",
+  _.settings(sharedScalafixSettings)
+    .settings(dontPublish)
+    .disablePlugins(ScalafixPlugin)
+)
 
-lazy val addOutput212     = unmanagedSourceDirectories in Compile += output212.value / "scala"
-lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value / "scala"
-lazy val addOutput213     = unmanagedSourceDirectories in Compile += output213.value / "scala"
-lazy val output212        = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main")
-lazy val output212Plus =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main")
-lazy val output213 = Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main")
+val sources = Map( // scala211   scala212   scala213   scala213Pre
+  "BreakoutSrc212Plus" -> List(scala212, scala213, scala213Pre),
+  "CompanionSrc212"    -> List(scala212),
+  "RetainSrc213"       -> List(scala213, scala213Pre),
+  "RoughlySrc213"      -> List(scala213),
+  "SortedSrc212Plus"   -> List(scala212, scala213, scala213Pre),
+  "TupleNZippedSrc213" -> List(scala213, scala213Pre),
+  "UnsortedSrc212Plus" -> List(scala212, scala213Pre),
+  "UnsortedSrcPre"     -> List(scala211, scala212, scala213Pre)
+)
+
+val reverseSources: Map[String, List[String]] =
+  sources.toList
+    .flatMap {
+      case (k, vs) =>
+        vs.map(v => (v, k))
+    }
+    .groupBy(_._1)
+    .mapValues(_.map(_._2))
+    .toMap
+    .withDefaultValue(Nil)
+
+val scalaSpecific =
+  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output-scala-specific/src/main/")
+
+lazy val sourceForScalaVersion = Seq(
+  sbt.Keys.sources in Compile ++= {
+    val fileNames = reverseSources(scalaVersion.value)
+    fileNames.map(fileName => scalaSpecific.value / "scala/fix" / (fileName + ".scala"))
+  }
+)
 
 lazy val `scalafix-output211` = `scalafix-output`(
   scala211,
-  _.dependsOn(`scalafix-data211`)
+  _.settings(sourceForScalaVersion)
+    .dependsOn(`scalafix-data211`)
 )
 
 lazy val `scalafix-output212` = `scalafix-output`(
   scala212,
-  _.settings(addOutput212)
-    .settings(addOutput212Plus)
+  _.settings(sourceForScalaVersion)
     .dependsOn(`scalafix-data212`)
 )
 
 lazy val `scalafix-output213` = `scalafix-output`(
   scala213,
-  _.settings(addOutput213)
-    .settings(addOutput212Plus)
+  _.settings(sourceForScalaVersion)
     .settings(scala213Settings)
     .dependsOn(`scalafix-data213`)
 )
 
+lazy val `scalafix-output213-pre` = `scalafix-output`(
+  scala213Pre,
+  _.settings(sourceForScalaVersion)
+    .settings(scala213PreSettings)
+    .dependsOn(`scalafix-data213-pre`)
+)
+
 lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
-  .settings(sharedScalafixSettings)
   .settings(scala213Settings)
   .settings(dontPublish)
 
@@ -225,22 +272,17 @@ lazy val `scalafix-tests` = project
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
-      "inputSourceroot"         -> sourceDirectory.in(`scalafix-input`, Compile).value,
-      "outputSourceroot"        -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
-      "output212Sourceroot"     -> output212.value,
-      "output212PlusSourceroot" -> output212Plus.value,
-      "output213Sourceroot"     -> output213.value,
-      "output212PlusSourceroot" -> output212Plus.value,
-      "output213FailureSourceroot" -> sourceDirectory
-        .in(`scalafix-output213-failure`, Compile)
-        .value,
+      "inputSourceroot"     -> sourceDirectory.in(`scalafix-input`, Compile).value,
+      "outputSourceroot"    -> (baseDirectory in ThisBuild).value / "scalafix/output/src/main",
+      "outputScalaSpecific" -> scalaSpecific.value,
       "inputClassdirectory" -> classDirectory.in(`scalafix-input`, Compile).value
     ),
     test in Test := (test in Test)
       .dependsOn(
         compile in (`scalafix-output211`, Compile),
         compile in (`scalafix-output212`, Compile),
-        compile in (`scalafix-output213`, Compile)
+        compile in (`scalafix-output213`, Compile),
+        compile in (`scalafix-output213-pre`, Compile)
       )
       .value
   )
@@ -285,7 +327,7 @@ inThisBuild(releaseCredentials)
 // required by sbt-scala-module
 inThisBuild(
   Seq(
-    crossScalaVersions := Seq(scala211, scala212, scala213),
+    crossScalaVersions := Seq(scala211, scala212, scala213, scala213Pre),
     commands += Command.command("latest-213") { state =>
       LatestScala.printLatestScala213()
       state

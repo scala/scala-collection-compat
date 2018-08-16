@@ -1,6 +1,3 @@
-
-
-
 package fix
 
 import scala.collection.compat._
@@ -8,9 +5,9 @@ object UnsortedSrc212Plus {
   import Data._
   import Data212Plus._
 
-  mSortedMap.unsortedSpecific.map(unorderedMap)
+  mSortedMap.unsorted.map(unorderedMap)
   mSortedMap.map(orderedMap)
 
-  mTreeMap.unsortedSpecific.map(unorderedMap)
+  mTreeMap.unsorted.map(unorderedMap)
   mTreeMap.map(orderedMap)
 }
