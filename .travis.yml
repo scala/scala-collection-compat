@@ -11,6 +11,7 @@ scala:
   - 2.11.12
   - 2.12.6
   - 2.13.0-M4
+  - 2.13.0-pre
 jdk:
   - openjdk6
   - oraclejdk8
@@ -40,12 +41,18 @@ matrix:
     - jdk: openjdk6
       scala: 2.13.0-M4
 
+    - jdk: openjdk6
+      scala: 2.13.0-pre
+
     # ?
     - jdk: oraclejdk8
       scala: 2.11.12
 
     # 2.13.0-M4 is not available in Scala.js 1.0.0-M3
     - scala: 2.13.0-M4
+      env: SCALAJS_VERSION=1.0.0-M3
+
+    - scala: 2.13.0-pre
       env: SCALAJS_VERSION=1.0.0-M3
   include:
 
@@ -73,7 +80,7 @@ matrix:
 # |  oraclejdk8 | 2.12.6    | js           | 0.6.23               |               |
 # |  oraclejdk8 | 2.12.6    | js           | 1.0.0-M3             |               |
 # |  oraclejdk8 | 2.13.0-M4 | jvm          |                      |               |
-# |  oraclejdk8 | 2.13.0-M4 | js           | 0.6.23               |               |
+# |  oraclejdk8 | 2.13.0-pre| jvm          |                      |               |
 # |  oraclejdk8 | 2.12.6    | jvm          |                      |   true        |
 
 before_script: ./checkCLA.sh
