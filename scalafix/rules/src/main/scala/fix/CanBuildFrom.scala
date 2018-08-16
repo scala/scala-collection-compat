@@ -166,24 +166,29 @@ case class CanBuildFromNothing(param: Name,
         stats
           .map(_.collect {
             case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
-              handledTo += to
-
               // e.to[CC](*cbf*) extract implicit parameter
-              val synth                            = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
-              val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
+              ctx.index.synthetics
+                .find(_.position.end == ap.pos.end)
+                .map {
+                  synth =>
+                    handledTo += to
 
-              // This is a bit unsafe
-              // https://github.com/scalameta/scalameta/issues/1636
-              if (implicitCbf.syntax == param.syntax) {
+                    val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
 
-                // .to[CC]
-                val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
+                    // This is a bit unsafe
+                    // https://github.com/scalameta/scalameta/issues/1636
+                    if (implicitCbf.syntax == param.syntax) {
 
-                ctx.removeTokens(apToRemove) +
-                  ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
-                  ctx.addRight(e, ")")
-              } else Patch.empty
+                      // .to[CC]
+                      val apToRemove =
+                        ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
 
+                      ctx.removeTokens(apToRemove) +
+                        ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
+                        ctx.addRight(e, ")")
+                    } else Patch.empty
+                }
+                .getOrElse(Patch.empty)
           }.asPatch)
           .asPatch
       }
