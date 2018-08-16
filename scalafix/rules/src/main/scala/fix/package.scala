@@ -62,18 +62,16 @@ package object fix {
       breakout: Tree,
       syntheticsByEndPos: Map[Int, Seq[Synthetic]]): Option[String] = {
     syntheticsByEndPos.get(breakout.pos.end) match {
-      case Some(Seq(synth)) =>
+      case Some(Seq(cbf, _)) =>
         var found: Option[String] = None
-        synth.names.map(_.symbol.syntax).exists { name =>
+        cbf.names.map(_.symbol.syntax).exists { name =>
           found = canBuildFroms.get(name)
-          // if (found.isEmpty) {
-          //   println(name)
-          // }
           found.nonEmpty
         }
-
         found
       case _ => None
     }
   }
+
+  def pos(tree: Tree): String = s"[${tree.pos.start}..${tree.pos.end}]"
 }

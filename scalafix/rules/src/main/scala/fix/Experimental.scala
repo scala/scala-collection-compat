@@ -7,19 +7,19 @@ import scala.meta._
 case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Experimental") {
 
   val CollectionMap = TypeMatcher(
-    Symbol("_root_.scala.collection.immutable.Map#"),
-    Symbol("_root_.scala.collection.mutable.Map#"),
-    Symbol("_root_.scala.Predef.Map#")
+    Symbol("scala/collection/immutable/Map#"),
+    Symbol("scala/collection/mutable/Map#"),
+    Symbol("scala/Predef/Map#")
   )
   val CollectionSet = TypeMatcher(
-    Symbol("_root_.scala.collection.Set#")
+    Symbol("scala/collection/Set#")
   )
 
   // == Symbols ==
-  val mapZip   = exact("_root_.scala.collection.IterableLike#zip().")
-  val mapPlus  = exact("_root_.scala.collection.MapLike#`+`().")
-  val setPlus  = exact("_root_.scala.collection.SetLike#`+`().")
-  val setMinus = exact("_root_.scala.collection.SetLike#`-`().")
+  val mapZip   = exact("scala/collection/IterableLike#zip().")
+  val mapPlus  = exact("scala/collection/MapLike#`+`().")
+  val setPlus  = exact("scala/collection/SetLike#`+`().")
+  val setMinus = exact("scala/collection/SetLike#`-`().")
 
   def replaceMapZip(ctx: RuleCtx): Patch = {
     ctx.tree.collect {

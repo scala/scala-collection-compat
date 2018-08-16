@@ -292,8 +292,10 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
         // https://github.com/scalacenter/scalafix/issues/793
         case t @ Term.Select(_, to @ toTpe(n: Name)) if !handledTo.contains(n) =>
-          val toCollection = extractCollectionFromBreakout(t, syntheticsByEndPos)
-          toCollection.map(toCol => ctx.addRight(to, "(" + toCol + ")")).getOrElse(Patch.empty)
+          if (t.parent.map(_.isNot[Term.ApplyType]).getOrElse(false)) {
+            val toCollection = extractCollectionFromBreakout(t, syntheticsByEndPos)
+            toCollection.map(toCol => ctx.addRight(to, "(" + toCol + ")")).getOrElse(Patch.empty)
+          } else Patch.empty
 
       }.asPatch
 
