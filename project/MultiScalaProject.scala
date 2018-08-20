@@ -32,7 +32,15 @@ trait MultiScala {
     major + minor
   }
 
-  def projectIdPerScala(name: String, scalaV: String): String = s"$name${majorMinor(scalaV)}"
+  def projectIdPerScala(name: String, scalaV: String): String = {
+    val preSuffix =
+      if (scalaV.startsWith("2.13.0-pre")) "-pre"
+      else ""
+
+    val scalaVersionSuffix = majorMinor(scalaV) + preSuffix
+
+    s"${name}${scalaVersionSuffix}"
+  }
 
   def srcFull(base: String): Seq[Def.Setting[_]] = {
     Seq(

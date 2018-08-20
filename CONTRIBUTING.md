@@ -88,12 +88,11 @@ tests are green. You can find more help about the scalafix API in its
 |data              |  X  |  X  |  X  |  X  |
 |input             |  X  |     |     |     |
 |output            |     |  X  |  X  |  X  |
-|output212         |     |     |  X  |     |
-|output212+        |     |     |  X  |  X  |
-|output213         |     |     |     |  X  |
-|output213-failure |     |     |     |  X  |
+|specific*         |  ?  |  ?  |  ?  |  ?  |
 +------------------+-----+-----+-----+-----+
+specific*: see a by source build matrix via the sourceForScalaVersion setting in build.sbt
 
 rules: Rule implementations
 tests: Scalafix testkit launcher (useful to run a single input file)
+
 ```

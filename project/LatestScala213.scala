@@ -10,7 +10,18 @@ import java.net.URL
 // NB. maven-metadata.xml does not point to the latest version
 object LatestScala {
 
+  def getLatestScala213(): String = getLatestScala213WithDate()._1
+
   def printLatestScala213(): Unit = {
+    val (latestVersion, lastestDate) = getLatestScala213WithDate()
+    println()
+    println(latestVersion)
+    println()
+    println(lastestDate)
+    println()
+  }
+
+  private def getLatestScala213WithDate(): (String, String) = {
     val url =
       "https://scala-ci.typesafe.com/artifactory/scala-integration/org/scala-lang/scala-library/"
     val index = new URL(url).openStream()
@@ -22,12 +33,14 @@ object LatestScala {
     val versionsAndDateRaw = pre.split("\n").drop(1).dropRight(1)
     val dateFormat         = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm")
     val versionsAndDate =
-      versionsAndDateRaw.map { line =>
-        val Array(version, dateRaw) = line.split("/")
-        val dateClean               = dateRaw.dropRight(1).trim
-        val date                    = DateTime.parse(dateClean, dateFormat)
-        (version, date)
-      }
+      versionsAndDateRaw
+        .map { line =>
+          val Array(version, dateRaw) = line.split("/")
+          val dateClean               = dateRaw.dropRight(1).trim
+          val date                    = DateTime.parse(dateClean, dateFormat)
+          (version, date)
+        }
+        .filter { case (version, _) => version.startsWith("2.13.0") }
 
     def Descending[T: Ordering] = implicitly[Ordering[T]].reverse
 
@@ -35,10 +48,6 @@ object LatestScala {
     val latestVersion   = version
     val lastestDate     = dateFormat.print(date)
 
-    println()
-    println(latestVersion)
-    println()
-    println(lastestDate)
-    println()
+    (latestVersion, lastestDate)
   }
 }

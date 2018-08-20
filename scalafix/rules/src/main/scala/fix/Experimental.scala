@@ -8,11 +8,11 @@ import scala.meta._
 case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Experimental") {
 
   val CollectionMap = TypeMatcher(
-    Symbol("_root_.scala.collection.immutable.Map#"),
-    Symbol("_root_.scala.collection.mutable.Map#"),
-    Symbol("_root_.scala.Predef.Map#")
+    "_root_.scala.collection.immutable.Map#",
+    "_root_.scala.collection.mutable.Map#",
+    "_root_.scala.Predef.Map#"
   )
-  val CollectionSet = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
+  val CollectionSet = TypeMatcher("_root_.scala.collection.Set#")
 
   // == Symbols ==
   val mapZip = exact(
@@ -56,7 +56,119 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
     }.asPatch
   }
 
+  val unorderingSetOperation = exact(
+    "_root_.scala.collection.SetLike#map(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.",
+    "_root_.scala.collection.TraversableLike#flatMap(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;."
+  )
+  val unorderingMapOperation = exact(
+    "_root_.scala.collection.TraversableLike#map(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.",
+    "_root_.scala.collection.TraversableLike#flatMap(Lscala/Function1;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;."
+  )
+
+  val OrderedSetCollection = TypeMatcher(
+    "_root_.scala.collection.BitSet#",
+    "_root_.scala.collection.SortedSet#",
+    "_root_.scala.collection.immutable.BitSet#",
+    "_root_.scala.collection.immutable.SortedSet#",
+    "_root_.scala.collection.immutable.TreeSet#",
+    "_root_.scala.collection.mutable.BitSet#",
+    "_root_.scala.collection.mutable.SortedSet#",
+    "_root_.scala.collection.mutable.TreeSet#"
+  )
+
+  val OrderedMapCollection = TypeMatcher(
+    "_root_.scala.collection.SortedMap#",
+    "_root_.scala.collection.immutable.SortedMap#",
+    "_root_.scala.collection.immutable.TreeMap#",
+    "_root_.scala.collection.mutable.SortedMap#",
+    "_root_.scala.collection.mutable.TreeMap#"
+  )
+
+  val mapCanBuildFroms = Set(
+    "_root_.scala.collection.Map.canBuildFrom()Lscala/collection/generic/CanBuildFrom;.",
+    "_root_.scala.collection.immutable.Map.canBuildFrom()Lscala/collection/generic/CanBuildFrom;.",
+    "_root_.scala.collection.mutable.Map.canBuildFrom()Lscala/collection/generic/CanBuildFrom;."
+  )
+
+  val setCanBuildFroms = Set(
+    "_root_.scala.collection.Set.canBuildFrom()Lscala/collection/generic/CanBuildFrom;.",
+    "_root_.scala.collection.immutable.Set.canBuildFrom()Lscala/collection/generic/CanBuildFrom;.",
+    "_root_.scala.collection.mutable.Set.canBuildFrom()Lscala/collection/generic/CanBuildFrom;."
+  )
+
+  def replaceUnsorted(ctx: RuleCtx): Patch = {
+
+    val synthPos: Map[Int, Synthetic] =
+      ctx.index.synthetics.groupBy(_.position.end).mapValues(_.head).toMap
+
+    def recurse(tree: Tree): Tree = {
+      tree match {
+        case Term.Select(_, b) => recurse(b)
+        case _                 => tree
+      }
+    }
+
+    def syntheticToSymbol(tree: Tree)(extract: PartialFunction[Tree, Tree]): Option[String] = {
+      synthPos
+        .get(tree.pos.end)
+        .flatMap(synthetic =>
+          synthetic.text.parse[Term].toOption.flatMap { syntheticTree =>
+            extract.lift(syntheticTree).flatMap { col =>
+              val byPos =
+                synthetic.names
+                  .groupBy(s => (s.position.start, s.position.end))
+                  .mapValues(_.head)
+                  .toMap
+              byPos.get((col.pos.start, col.pos.end)).map(_.symbol.toString)
+            }
+        })
+    }
+
+    val patch =
+      ctx.tree.collect {
+        case ap @ Term.Apply(Term.Select(OrderedMapCollection(), unorderingMapOperation(op)),
+                             List(f)) => {
+          val cbf =
+            syntheticToSymbol(ap) {
+              case Term.Apply(_, List(Term.ApplyType(sel, _))) => recurse(sel)
+            }
+
+          if (cbf.map(mapCanBuildFroms.contains).getOrElse(false)) {
+            ctx.addLeft(op, "unsorted.")
+          } else {
+            Patch.empty
+          }
+        }
+
+        case ap @ Term.Apply(Term.Select(OrderedSetCollection(), unorderingSetOperation(op)),
+                             List(f)) => {
+          val cbf =
+            syntheticToSymbol(ap) {
+              case Term.Apply(_, List(Term.ApplyType(sel, _))) => recurse(sel)
+            }
+
+          if (cbf.map(setCanBuildFroms.contains).getOrElse(false)) {
+            ctx.addLeft(op, "unsorted.")
+          } else {
+            Patch.empty
+          }
+        }
+
+        case ap @ Term.Apply(Term.Select(OrderedMapCollection(), op), List(f)) =>
+          println(ctx.index.symbol(op))
+          Patch.empty
+
+      }.asPatch
+
+    val compatImport =
+      if (patch.nonEmpty) ctx.addGlobalImport(importer"scala.collection.compat._")
+      else Patch.empty
+
+    patch + compatImport
+  }
+
   override def fix(ctx: RuleCtx): Patch =
     replaceSetMapPlusMinus(ctx) +
-      replaceMapZip(ctx)
+      replaceMapZip(ctx) +
+      replaceUnsorted(ctx)
 }

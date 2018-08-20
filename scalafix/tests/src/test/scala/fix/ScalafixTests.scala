@@ -10,10 +10,7 @@ class ScalafixTests
       AbsolutePath(build.BuildInfo.inputSourceroot),
       Seq(
         AbsolutePath(build.BuildInfo.outputSourceroot),
-        AbsolutePath(build.BuildInfo.output212Sourceroot),
-        AbsolutePath(build.BuildInfo.output213Sourceroot),
-        AbsolutePath(build.BuildInfo.output212PlusSourceroot),
-        AbsolutePath(build.BuildInfo.output213FailureSourceroot)
+        AbsolutePath(build.BuildInfo.outputScalaSpecific)
       )
     ) {
 

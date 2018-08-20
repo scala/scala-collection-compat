@@ -97,36 +97,44 @@ private[compat] trait PackageShared {
     builder.result()
   }
 
-  implicit def toImmutableSortedMapExtensions(
-      fact: i.SortedMap.type): ImmutableSortedMapExtensions =
-    new ImmutableSortedMapExtensions(fact)
+  implicit def toImmutableSortedMapCompanionExtensions(
+      fact: i.SortedMap.type): ImmutableSortedMapCompanionExtensions =
+    new ImmutableSortedMapCompanionExtensions(fact)
 
-  implicit def toImmutableListMapExtensions(fact: i.ListMap.type): ImmutableListMapExtensions =
-    new ImmutableListMapExtensions(fact)
+  implicit def toImmutableListMapCompanionExtensions(
+      fact: i.ListMap.type): ImmutableListMapCompanionExtensions =
+    new ImmutableListMapCompanionExtensions(fact)
 
-  implicit def toImmutableHashMapExtensions(fact: i.HashMap.type): ImmutableHashMapExtensions =
-    new ImmutableHashMapExtensions(fact)
+  implicit def toImmutableHashMapCompanionExtensions(
+      fact: i.HashMap.type): ImmutableHashMapCompanionExtensions =
+    new ImmutableHashMapCompanionExtensions(fact)
 
-  implicit def toImmutableTreeMapExtensions(fact: i.TreeMap.type): ImmutableTreeMapExtensions =
-    new ImmutableTreeMapExtensions(fact)
+  implicit def toImmutableTreeMapCompanionExtensions(
+      fact: i.TreeMap.type): ImmutableTreeMapCompanionExtensions =
+    new ImmutableTreeMapCompanionExtensions(fact)
 
-  implicit def toImmutableIntMapExtensions(fact: i.IntMap.type): ImmutableIntMapExtensions =
-    new ImmutableIntMapExtensions(fact)
+  implicit def toImmutableIntMapCompanionExtensions(
+      fact: i.IntMap.type): ImmutableIntMapCompanionExtensions =
+    new ImmutableIntMapCompanionExtensions(fact)
 
-  implicit def toImmutableLongMapExtensions(fact: i.LongMap.type): ImmutableLongMapExtensions =
-    new ImmutableLongMapExtensions(fact)
+  implicit def toImmutableLongMapCompanionExtensions(
+      fact: i.LongMap.type): ImmutableLongMapCompanionExtensions =
+    new ImmutableLongMapCompanionExtensions(fact)
 
-  implicit def toMutableLongMapExtensions(fact: m.LongMap.type): MutableLongMapExtensions =
-    new MutableLongMapExtensions(fact)
+  implicit def toMutableLongMapCompanionExtensions(
+      fact: m.LongMap.type): MutableLongMapCompanionExtensions =
+    new MutableLongMapCompanionExtensions(fact)
 
-  implicit def toMutableHashMapExtensions(fact: m.HashMap.type): MutableHashMapExtensions =
-    new MutableHashMapExtensions(fact)
+  implicit def toMutableHashMapCompanionExtensions(
+      fact: m.HashMap.type): MutableHashMapCompanionExtensions =
+    new MutableHashMapCompanionExtensions(fact)
 
-  implicit def toMutableListMapExtensions(fact: m.ListMap.type): MutableListMapExtensions =
-    new MutableListMapExtensions(fact)
+  implicit def toMutableListMapCompanionExtensions(
+      fact: m.ListMap.type): MutableListMapCompanionExtensions =
+    new MutableListMapCompanionExtensions(fact)
 
-  implicit def toMutableMapExtensions(fact: m.Map.type): MutableMapExtensions =
-    new MutableMapExtensions(fact)
+  implicit def toMutableMapCompanionExtensions(fact: m.Map.type): MutableMapCompanionExtensions =
+    new MutableMapCompanionExtensions(fact)
 
   implicit def toStreamExtensionMethods[A](stream: Stream[A]): StreamExtensionMethods[A] =
     new StreamExtensionMethods[A](stream)
@@ -146,58 +154,97 @@ private[compat] trait PackageShared {
       self: TraversableOnce[A]): TraversableOnceExtensionMethods[A] =
     new TraversableOnceExtensionMethods[A](self)
 
+  implicit def toCollectionBitSetExtensions(self: c.BitSet): CollectionBitSetExtensions =
+    new CollectionBitSetExtensions(self)
+
+  implicit def toCollectionSortedMapExtensions[K, V](
+      self: c.SortedMap[K, V]): CollectionSortedMapExtensions[K, V] =
+    new CollectionSortedMapExtensions[K, V](self)
+
+  implicit def toCollectionSortedSetExtensions[A](
+      self: c.SortedSet[A]): CollectionSortedSetExtensions[A] =
+    new CollectionSortedSetExtensions[A](self)
+
+  implicit def toImmutableBitSetExtensions(self: i.BitSet): ImmutableBitSetExtensions =
+    new ImmutableBitSetExtensions(self)
+
+  implicit def toImmutableSortedMapExtensions[K, V](
+      self: i.SortedMap[K, V]): ImmutableSortedMapExtensions[K, V] =
+    new ImmutableSortedMapExtensions[K, V](self)
+
+  implicit def toImmutableSortedSetExtensions[A](
+      self: i.SortedSet[A]): ImmutableSortedSetExtensions[A] =
+    new ImmutableSortedSetExtensions[A](self)
+
+  implicit def toImmutableTreeMapExtensions[K, V](
+      self: i.TreeMap[K, V]): ImmutableTreeMapExtensions[K, V] =
+    new ImmutableTreeMapExtensions[K, V](self)
+
+  implicit def toImmutableTreeSetExtensions[A](self: i.TreeSet[A]): ImmutableTreeSetExtensions[A] =
+    new ImmutableTreeSetExtensions[A](self)
+
+  implicit def toMutableBitSetExtensions(self: m.BitSet): MutableBitSetExtensions =
+    new MutableBitSetExtensions(self)
+
+  implicit def toMutableSortedSetExtensions[A](
+      self: m.SortedSet[A]): MutableSortedSetExtensions[A] =
+    new MutableSortedSetExtensions[A](self)
+
+  implicit def toMutableTreeSetExtensions[A](self: m.TreeSet[A]): MutableTreeSetExtensions[A] =
+    new MutableTreeSetExtensions[A](self)
+
   // This really belongs into scala.collection but there's already a package object
   // in scala-library so we can't add to it
   type IterableOnce[+X] = c.TraversableOnce[X]
   val IterableOnce = c.TraversableOnce
 }
 
-class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
+class ImmutableSortedMapCompanionExtensions(private val fact: i.SortedMap.type) extends AnyVal {
   def from[K: Ordering, V](source: TraversableOnce[(K, V)]): i.SortedMap[K, V] =
     build(i.SortedMap.newBuilder[K, V], source)
 }
 
-class ImmutableListMapExtensions(private val fact: i.ListMap.type) extends AnyVal {
+class ImmutableListMapCompanionExtensions(private val fact: i.ListMap.type) extends AnyVal {
   def from[K, V](source: TraversableOnce[(K, V)]): i.ListMap[K, V] =
     build(i.ListMap.newBuilder[K, V], source)
 }
 
-class ImmutableHashMapExtensions(private val fact: i.HashMap.type) extends AnyVal {
+class ImmutableHashMapCompanionExtensions(private val fact: i.HashMap.type) extends AnyVal {
   def from[K, V](source: TraversableOnce[(K, V)]): i.HashMap[K, V] =
     build(i.HashMap.newBuilder[K, V], source)
 }
 
-class ImmutableTreeMapExtensions(private val fact: i.TreeMap.type) extends AnyVal {
+class ImmutableTreeMapCompanionExtensions(private val fact: i.TreeMap.type) extends AnyVal {
   def from[K: Ordering, V](source: TraversableOnce[(K, V)]): i.TreeMap[K, V] =
     build(i.TreeMap.newBuilder[K, V], source)
 }
 
-class ImmutableIntMapExtensions(private val fact: i.IntMap.type) extends AnyVal {
+class ImmutableIntMapCompanionExtensions(private val fact: i.IntMap.type) extends AnyVal {
   def from[V](source: TraversableOnce[(Int, V)]): i.IntMap[V] =
     build(i.IntMap.canBuildFrom[Int, V](), source)
 }
 
-class ImmutableLongMapExtensions(private val fact: i.LongMap.type) extends AnyVal {
+class ImmutableLongMapCompanionExtensions(private val fact: i.LongMap.type) extends AnyVal {
   def from[V](source: TraversableOnce[(Long, V)]): i.LongMap[V] =
     build(i.LongMap.canBuildFrom[Long, V](), source)
 }
 
-class MutableLongMapExtensions(private val fact: m.LongMap.type) extends AnyVal {
+class MutableLongMapCompanionExtensions(private val fact: m.LongMap.type) extends AnyVal {
   def from[V](source: TraversableOnce[(Long, V)]): m.LongMap[V] =
     build(m.LongMap.canBuildFrom[Long, V](), source)
 }
 
-class MutableHashMapExtensions(private val fact: m.HashMap.type) extends AnyVal {
+class MutableHashMapCompanionExtensions(private val fact: m.HashMap.type) extends AnyVal {
   def from[K, V](source: TraversableOnce[(K, V)]): m.HashMap[K, V] =
     build(m.HashMap.canBuildFrom[K, V](), source)
 }
 
-class MutableListMapExtensions(private val fact: m.ListMap.type) extends AnyVal {
+class MutableListMapCompanionExtensions(private val fact: m.ListMap.type) extends AnyVal {
   def from[K, V](source: TraversableOnce[(K, V)]): m.ListMap[K, V] =
     build(m.ListMap.canBuildFrom[K, V](), source)
 }
 
-class MutableMapExtensions(private val fact: m.Map.type) extends AnyVal {
+class MutableMapCompanionExtensions(private val fact: m.Map.type) extends AnyVal {
   def from[K, V](source: TraversableOnce[(K, V)]): m.Map[K, V] =
     build(m.Map.canBuildFrom[K, V](), source)
 }
@@ -225,4 +272,48 @@ class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A])
 
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
   def iterableFactory: GenericCompanion[Traversable] = self.companion
+}
+
+class CollectionBitSetExtensions(private val self: c.BitSet) extends AnyVal {
+  def unsorted: c.Set[Int] = self
+}
+
+class CollectionSortedMapExtensions[K, V](private val self: c.SortedMap[K, V]) extends AnyVal {
+  def unsorted: c.Map[K, V] = self
+}
+
+class CollectionSortedSetExtensions[A](private val self: c.SortedSet[A]) extends AnyVal {
+  def unsorted: c.Set[A] = self
+}
+
+class ImmutableBitSetExtensions(private val self: i.BitSet) extends AnyVal {
+  def unsorted: i.Set[Int] = self
+}
+
+class ImmutableSortedMapExtensions[K, V](private val self: i.SortedMap[K, V]) extends AnyVal {
+  def unsorted: i.Map[K, V] = self
+}
+
+class ImmutableSortedSetExtensions[A](private val self: i.SortedSet[A]) extends AnyVal {
+  def unsorted: i.Set[A] = self
+}
+
+class ImmutableTreeMapExtensions[K, V](private val self: i.TreeMap[K, V]) extends AnyVal {
+  def unsorted: i.Map[K, V] = self
+}
+
+class ImmutableTreeSetExtensions[A](private val self: i.TreeSet[A]) extends AnyVal {
+  def unsorted: i.Set[A] = self
+}
+
+class MutableBitSetExtensions(private val self: m.BitSet) extends AnyVal {
+  def unsorted: m.Set[Int] = self
+}
+
+class MutableSortedSetExtensions[A](private val self: m.SortedSet[A]) extends AnyVal {
+  def unsorted: m.Set[A] = self
+}
+
+class MutableTreeSetExtensions[A](private val self: m.TreeSet[A]) extends AnyVal {
+  def unsorted: m.Set[A] = self
 }
