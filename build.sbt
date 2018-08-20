@@ -200,16 +200,18 @@ val `scalafix-output` = MultiScalaProject(
     .disablePlugins(ScalafixPlugin)
 )
 
-val sources = Map( // scala211   scala212   scala213   scala213Pre
-  "BreakoutSrc212Plus" -> List(scala212, scala213, scala213Pre),
-  "CompanionSrc212"    -> List(scala212),
-  "RetainSrc213"       -> List(scala213, scala213Pre),
-  "RoughlySrc213"      -> List(scala213),
-  "SortedSrc212Plus"   -> List(scala212, scala213, scala213Pre),
-  "TupleNZippedSrc213" -> List(scala213, scala213Pre),
-  "UnsortedSrc212Plus" -> List(scala212, scala213Pre),
-  "UnsortedSrcPre"     -> List(scala211, scala212, scala213Pre)
+// format: off
+val sources = Map(          // scala211  scala212  scala213  scala213Pre
+  "BreakoutSrc212Plus" -> List(          scala212, scala213, scala213Pre),
+  "CompanionSrc212"    -> List(          scala212                       ),
+  "RetainSrc213"       -> List(                    scala213, scala213Pre),
+  "RoughlySrc213"      -> List(                    scala213             ),
+  "SortedSrc212Plus"   -> List(          scala212, scala213, scala213Pre),
+  "TupleNZippedSrc213" -> List(                    scala213, scala213Pre),
+  "UnsortedSrc212Plus" -> List(          scala212,           scala213Pre),
+  "UnsortedSrcPre"     -> List(scala211, scala212,           scala213Pre)
 )
+// format: on
 
 val reverseSources: Map[String, List[String]] =
   sources.toList
