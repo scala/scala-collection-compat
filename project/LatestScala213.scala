@@ -33,12 +33,14 @@ object LatestScala {
     val versionsAndDateRaw = pre.split("\n").drop(1).dropRight(1)
     val dateFormat         = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm")
     val versionsAndDate =
-      versionsAndDateRaw.map { line =>
-        val Array(version, dateRaw) = line.split("/")
-        val dateClean               = dateRaw.dropRight(1).trim
-        val date                    = DateTime.parse(dateClean, dateFormat)
-        (version, date)
-      }
+      versionsAndDateRaw
+        .map { line =>
+          val Array(version, dateRaw) = line.split("/")
+          val dateClean               = dateRaw.dropRight(1).trim
+          val date                    = DateTime.parse(dateClean, dateFormat)
+          (version, date)
+        }
+        .filter { case (version, _) => version.startsWith("2.13.0") }
 
     def Descending[T: Ordering] = implicitly[Ordering[T]].reverse
 
