@@ -1,6 +1,6 @@
 package fix
 
-import scalafix._
+import scalafix.v0._
 
 case class CrossCompat(index: SemanticdbIndex)
     extends SemanticRule(index, "CrossCompat")

@@ -1,7 +1,6 @@
 package fix
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 import metaconfig.{ConfDecoder, Conf, Configured}
@@ -25,17 +24,15 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
   def this(index: SemanticdbIndex) = this(index, RoughlyConfig.default)
 
   val mapValues =
-    SymbolMatcher.exact(
-      Symbol(
-        "_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;."),
-      Symbol("_root_.scala.collection.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/Map;.")
+    exact(
+      "scala/collection/immutable/MapLike#mapValues().",
+      "scala/collection/MapLike#filterKeys()."
     )
 
   val filterKeys =
-    SymbolMatcher.exact(
-      Symbol(
-        "_root_.scala.collection.immutable.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/immutable/Map;."),
-      Symbol("_root_.scala.collection.MapLike#mapValues(Lscala/Function1;)Lscala/collection/Map;.")
+    exact(
+      "scala/collection/immutable/MapLike#filterKeys().",
+      "scala/collection/MapLike#mapValues()."
     )
 
   // Not supported: SortedMap
@@ -44,8 +41,8 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
   // Symbol("_root_.scala.collection.immutable.SortedMap#filterKeys(Lscala/Function1;)Lscala/collection/immutable/SortedMap;.")
   // Symbol("_root_.scala.collection.SortedMapLike#filterKeys(Lscala/Function1;)Lscala/collection/SortedMap;.")
 
-  val streamAppend = SymbolMatcher.normalized(
-    Symbol("_root_.scala.collection.immutable.Stream.append.")
+  val streamAppend = exact(
+    "scala/collection/immutable/Stream#append()."
   )
 
   def replaceSymbols(ctx: RuleCtx): Patch = {
