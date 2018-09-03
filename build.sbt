@@ -340,7 +340,7 @@ inThisBuild(
             }
 
           val setPublishVersion =
-            releaseVersion.map("set every version := " + _).toList
+            releaseVersion.map("set every version := \"" + _ + "\"").toList
 
           val publishTask =
             if (releaseVersion.nonEmpty) {
