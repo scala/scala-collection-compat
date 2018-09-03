@@ -31,9 +31,9 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 
 lazy val scala211   = "2.11.12"
 lazy val scala212   = "2.12.6"
-lazy val scalaJs213 = "2.13.0-M4" // Scala.js does no have -pre
+lazy val scalaJs213 = "2.13.0-M5" // Scala.js does no have -pre
 
-lazy val scala213 = "2.13.0-M4"
+lazy val scala213 = "2.13.0-M5"
 // lazy val scala213 = "2.13.0-pre-3ae6282" // use the sbt command `latest-213` to fetch the latest version
 
 lazy val scala213Settings = Seq(

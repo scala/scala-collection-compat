@@ -48,6 +48,10 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
     Symbol("_root_.scala.collection.immutable.Stream.append.")
   )
 
+  val streamEmpty = SymbolMatcher.exact(
+    Symbol("_root_.scala.collection.immutable.Stream.Empty.")
+  )
+
   def replaceSymbols(ctx: RuleCtx): Patch = {
     if (config.withLazyList) {
       ctx.replaceSymbols(
@@ -85,6 +89,9 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
 
         case streamAppend(t: Name) if withLazyAppendedAll =>
           ctx.replaceTree(t, "lazyAppendedAll")
+
+        case streamEmpty(t: Name) if withLazyList =>
+          ctx.replaceTree(t, "empty")
 
       }.asPatch
 
