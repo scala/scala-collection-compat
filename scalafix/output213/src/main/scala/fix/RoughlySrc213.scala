@@ -6,9 +6,9 @@ package fix
 object RoughlySrc213 {
   val s = LazyList(1, 2, 3)
   s.lazyAppendedAll(List(4, 5, 6))
-  1 #:: 2 #:: 3 #:: LazyList.Empty
+  1 #:: 2 #:: 3 #:: LazyList.empty
   val isEmpty: LazyList[_] => Boolean = {
-    case LazyList.Empty => true
-    case x #:: xs     => false
+    case x #:: xs => false
+    case _        => true
   }
 }
