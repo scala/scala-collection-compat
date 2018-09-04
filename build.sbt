@@ -258,7 +258,7 @@ lazy val dontPublish = Seq(
 val preRelease         = "pre-release"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
-val isScalaJs          = sys.env.get("SCALAJS_VERSION").nonEmpty
+val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
 val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
 val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
@@ -316,6 +316,16 @@ inThisBuild(
         if (isScalafmt) {
           Seq("scalafmt-test")
         } else {
+          List(
+            "TRAVIS_SCALA_VERSION",
+            "TRAVIS_TAG",
+            "SCALAJS_VERSION",
+            "TEST_SCALAFIX",
+            "TEST_SCALAFMT",
+            "TEST_BINARY_COMPAT"
+          ).foreach(k =>
+            println(k.padTo(20, " ").mkString("") + " -> " + sys.env.get(k).getOrElse("None")))
+
           val platformSuffix = if (isScalaJs) "JS" else ""
 
           val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
