@@ -138,6 +138,7 @@ lazy val `scalafix-rules` = project
   .in(file("scalafix/rules"))
   .settings(
     organization := (organization in compat212JVM).value,
+    publishTo := (publishTo in compat212JVM).value,
     version := (version in compat212JVM).value,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
@@ -353,7 +354,7 @@ inThisBuild(
             releaseVersion.map("set every version := \"" + _ + "\"").toList
 
           val publishTask =
-            if (releaseVersion.nonEmpty) {
+            if (releaseVersion.nonEmpty && !isBinaryCompat) {
               List(
                 preRelease,
                 s"$projectPrefix/publish-signed"
