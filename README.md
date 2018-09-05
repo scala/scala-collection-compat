@@ -8,8 +8,10 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.1.1"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.0"
 ```
+
+Version 0.2.0 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
