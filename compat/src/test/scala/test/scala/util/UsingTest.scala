@@ -1,4 +1,4 @@
-package scala.util
+package scala.util.compat
 
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -310,7 +310,7 @@ class UsingTest {
     val group = new ResourceGroup
     val res = Using.resources(
       group.newResource(),
-      group.newResource(),
+      group.newResource()
     ) { (r1, r2) =>
       r1.identity(1) + r2.identity(1)
     }
@@ -323,7 +323,7 @@ class UsingTest {
     val res = Using.resources(
       group.newResource(),
       group.newResource(),
-      group.newResource(),
+      group.newResource()
     ) { (r1, r2, r3) =>
       r1.identity(1) +
         r2.identity(1) +
@@ -339,7 +339,7 @@ class UsingTest {
       group.newResource(),
       group.newResource(),
       group.newResource(),
-      group.newResource(),
+      group.newResource()
     ) { (r1, r2, r3, r4) =>
       r1.identity(1) +
         r2.identity(1) +

@@ -1,8 +1,9 @@
-package scala.util
+package scala.util.compat
 
 import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.util.control.{ControlThrowable, NonFatal}
+import scala.util._
 
 /** A utility for performing automatic resource management. It can be used to perform an
   * operation using resources, after which it will release the resources, in reverse order
@@ -281,7 +282,9 @@ object Using {
 
   object Resource {
     /** An implicit `Resource` for [[java.lang.AutoCloseable `AutoCloseable`s]]. */
-    implicit val autoCloseableResource: Resource[AutoCloseable] = (resource: AutoCloseable) => resource.close()
+    implicit val autoCloseableResource: Resource[AutoCloseable] = new Resource[AutoCloseable] {
+      def release(resource: AutoCloseable) = resource.close()
+    }
   }
 
 }
