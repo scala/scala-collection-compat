@@ -1,6 +1,6 @@
-package scala
+package scala.util
 
-package object util {
+package object compat {
   /**
    * Adds chaining methods `tap` and `pipe` to every type. See [[ChainingOps]].
    */

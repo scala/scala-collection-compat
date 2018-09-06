@@ -1,5 +1,4 @@
-package scala
-package util
+package scala.util.compat
 
 trait ChainingSyntax {
   implicit final def scalaUtilChainingOps[A](a: A): ChainingOps[A] = new ChainingOps(a)
@@ -20,7 +19,7 @@ final class ChainingOps[A](val self: A) extends AnyVal {
    *  @tparam U     the result type of the function `f`.
    *  @return       the original value `self`.
    */
-  def tap[U](f: A => U): self.type = {
+  def tap[U](f: A => U): A = {
     f(self)
     self
   }
