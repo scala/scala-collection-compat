@@ -16,7 +16,7 @@ private[compat] trait PackageShared {
    * @tparam A Type of elements (e.g. `Int`, `Boolean`, etc.)
    * @tparam C Type of collection (e.g. `List[Int]`, `TreeMap[Int, String]`, etc.)
    */
-  type Factory[-A, +C] <: CanBuildFrom[Nothing, A, C] // Ideally, this would be an opaque type
+  type Factory[-A, +C] = CanBuildFrom[Nothing, A, C] // Ideally, this would be an opaque type
 
   implicit class FactoryOps[-A, +C](private val factory: Factory[A, C]) {
 
