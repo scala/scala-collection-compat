@@ -8,10 +8,10 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1"
 ```
 
-Version 0.2.0 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
+Version 0.2.1 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
@@ -45,6 +45,10 @@ collection to use the strawman.
 To use it, add the [scalafix](https://scalacenter.github.io/scalafix/) sbt plugin
 to your build, as explained in
 [its documentation](https://scalacenter.github.io/scalafix/#Installation).
+
+```
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1"
+```
 
 The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
