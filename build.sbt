@@ -1,9 +1,6 @@
 import ScalaModulePlugin._
 import sbtcrossproject.{crossProject, CrossType}
-import _root_.scalafix.internal.sbtscalafix.BuildInfo.{
-  scalafixVersion,
-  scala212 => scalafixScala212
-}
+import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
 
 lazy val root = project
   .in(file("."))
