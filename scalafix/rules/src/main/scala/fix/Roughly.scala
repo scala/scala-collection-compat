@@ -46,7 +46,7 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
   )
 
   val streamEmpty = SymbolMatcher.exact(
-    Symbol("_root_.scala.collection.immutable.Stream.Empty.")
+    Symbol("scala/collection/immutable/Stream.Empty.")
   )
 
   def replaceSymbols(ctx: RuleCtx): Patch = {

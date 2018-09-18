@@ -98,9 +98,12 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     "scala.collection.immutable.Map" -> "toMap"
   )
 
+  val toSpecificCollectionFromSpecific = Set(
+    "scala.collection.BitSet"
+  )
+
   val toSpecificCollectionFrom = Set(
     "scala.collection.Map",
-    "scala.collection.BitSet",
     "scala.collection.immutable.SortedMap",
     "scala.collection.immutable.HashMap",
     "scala.collection.immutable.ListMap",
@@ -113,7 +116,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     "scala.collection.immutable.IntMap",
     "scala.collection.immutable.LongMap",
     "scala.collection.mutable.LongMap"
-  )
+  ) ++ toSpecificCollectionFromSpecific
 
   // == rule ==
   def apply(ctx: RuleCtx): Patch = {
@@ -146,7 +149,12 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
               case None =>
                 if (toSpecificCollectionFrom.contains(col)) {
                   requiresCompatImport = true
-                  ctx.addLeft(ap0, col + ".from(") +
+
+                  val convertMethod =
+                    if (toSpecificCollectionFromSpecific.contains(col)) "fromSpecific"
+                    else "from"
+
+                  ctx.addLeft(ap0, col + "." + convertMethod + "(") +
                     ctx.addRight(ap0, ")")
                 } else {
                   Patch.empty
