@@ -250,34 +250,6 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     } else Patch.empty
   }
 
-  def extractCollection(toCol: Tree): String = {
-    toCol match {
-      // case Term.ApplyType(q"scala.Predef.fallbackStringCanBuildFrom", _) =>
-      //   "scala.collection.immutable.IndexedSeq"
-      // case Term.ApplyType(Term.Select(coll, _), _) =>
-      //   coll.syntax
-      // case Term.Apply(Term.ApplyType(Term.Select(coll, _), _), _) =>
-      //   coll.syntax
-      // case Term.Select(coll, _) =>
-      //   coll.syntax
-      // case coll: Type.Name =>
-      //   coll.syntax
-      case _ => {
-        throw new Exception(
-          s"""|cannot extract collection from .to
-              |
-              |---------------------------------------------
-              |syntax:
-              |${toCol.syntax}
-              |
-              |---------------------------------------------
-              |structure:
-              |${toCol.structure}""".stripMargin
-        )
-      }
-    }
-  }
-
   def replaceTo(ctx: RuleCtx): Patch = {
     val syntheticsByEndPos: Map[Int, Seq[Synthetic]] =
       ctx.index.synthetics.groupBy(_.position.end)
@@ -585,9 +557,6 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   override def fix(ctx: RuleCtx): Patch = {
-    // println("-----")
-    // ctx.index.synthetics.sortBy(_.position.start).foreach(println)
-
     replaceTraversable(ctx) +
       replaceCanBuildFrom(ctx) +
       replaceTo(ctx) +
