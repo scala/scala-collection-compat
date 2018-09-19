@@ -99,7 +99,7 @@ object CanBuildFromNothing {
               tpe @ Type.Apply(
                 collectionCanBuildFrom(_),
                 List(
-                  nothing(_),
+                  not @ nothing(_),
                   t,
                   toT
                 )
@@ -107,7 +107,7 @@ object CanBuildFromNothing {
             ),
             _
             ) =>
-          new CanBuildFromNothing(param, tpe, t, toT, stats, ctx, toTpe, handledTo)
+          new CanBuildFromNothing(param, tpe, not, t, toT, stats, ctx, toTpe, handledTo)
       }
       .map(_.toFactory)
       .asPatch
@@ -124,6 +124,7 @@ object CanBuildFromNothing {
 // toT  : CC[Int]
 case class CanBuildFromNothing(param: Name,
                                tpe: Type.Apply,
+                               not: Type,
                                t: Type,
                                toT: Type,
                                stats: List[Tree],
@@ -197,11 +198,15 @@ case class CanBuildFromNothing(param: Name,
 
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
     // implicit cbf: Factory[Int, CC[Int]]
-    val parameterType =
-      ctx.replaceTree(
-        tpe,
-        Type.Apply(Type.Name("Factory"), List(t, toT)).syntax
-      )
+    val parameterType = {
+      val comma    = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
+      val spaceOpt = ctx.tokenList.trailing(comma).find(_.is[Token.Space])
+
+      ctx.removeTokens(not.tokens) +
+        ctx.removeToken(comma) +
+        spaceOpt.map(ctx.removeToken).getOrElse(Patch.empty) +
+        ctx.replaceTree(tpe.tpe, "Factory")
+    }
 
     parameterType + cbfCalls + toCalls
   }

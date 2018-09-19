@@ -5,8 +5,8 @@ package fix
 
 import scala.language.higherKinds
 
+import scala.collection.immutable
 import collection.generic.CanBuildFrom
-import collection.immutable
 
 object CanBuildFromSrc {
 
