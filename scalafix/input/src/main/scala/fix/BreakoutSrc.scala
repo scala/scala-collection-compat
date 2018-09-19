@@ -107,4 +107,5 @@ class BreakoutSrc(ts: Traversable[Int], vec: Vector[Int], list: List[Int], seq: 
 
 
   List(1).map(x => x)(collection.breakOut): Vector[Int]
+  List(1).map(x => x)(collection.breakOut): immutable.SortedSet[Int]
 }

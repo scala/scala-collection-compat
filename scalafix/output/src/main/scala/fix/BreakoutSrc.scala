@@ -108,4 +108,5 @@ class BreakoutSrc(ts: Iterable[Int], vec: Vector[Int], list: List[Int], seq: Seq
 
 
   List(1).iterator.map(x => x).to(scala.collection.immutable.Vector): Vector[Int]
+  List(1).iterator.map(x => x).to(scala.collection.immutable.SortedSet): immutable.SortedSet[Int]
 }
