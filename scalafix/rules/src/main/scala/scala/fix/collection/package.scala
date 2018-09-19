@@ -1,7 +1,9 @@
+package scala.fix
+
 import scalafix.v0._
 import scala.meta._
 
-package object fix {
+package object collection {
   def sym(tree: Tree)(implicit index: SemanticdbIndex): Patch = {
     println(index.symbol(tree))
     Patch.empty

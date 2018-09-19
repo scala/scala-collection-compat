@@ -1,4 +1,4 @@
-package fix
+package scala.fix.collection
 
 import scalafix._
 import scalafix.util._

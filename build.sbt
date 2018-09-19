@@ -157,10 +157,16 @@ lazy val sharedScalafixSettings = Seq(
 )
 
 // common part between input/output
-lazy val `scalafix-data` = MultiScalaProject("scalafix-data",
-                                             "scalafix/data",
-                                             _.settings(sharedScalafixSettings)
-                                               .settings(dontPublish))
+lazy val `scalafix-data` = MultiScalaProject(
+  "scalafix-data",
+  "scalafix/data",
+  _.settings(sharedScalafixSettings)
+    .settings(dontPublish)
+    .settings(
+      addCompilerPlugin(scalafixSemanticdb),
+      scalacOptions += "-P:semanticdb:synthetics:on"
+    )
+)
 
 val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
 val `scalafix-data212` = `scalafix-data`(scalafixScala212, _.dependsOn(compat212JVM))

@@ -1,5 +1,5 @@
 /*
-rule = "scala:fix.Experimental"
+rule = "Collection213Experimental"
  */
 package fix
 

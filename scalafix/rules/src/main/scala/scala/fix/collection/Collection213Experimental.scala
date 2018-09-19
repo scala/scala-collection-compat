@@ -1,10 +1,22 @@
-package fix
+package scala.fix.collection
 
 import scalafix.v0._
 import scala.meta._
 
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Experimental
+    extends LegacySemanticRule("Collection213Experimental",
+                               index => new Collection213ExperimentalV0(index)) {
+  override def isExperimental: Boolean = true
+
+  override def description: String =
+    "Upgrade to 2.13 collection (see https://github.com/scalameta/scalameta/issues/1212)"
+}
+
 // 2.12 Cross-Compatible
-case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Experimental") {
+case class Collection213ExperimentalV0(index: SemanticdbIndex)
+    extends SemanticRule(index, "Collection213Experimental") {
 
   val CollectionMap = TypeMatcher(
     Symbol("scala/collection/immutable/Map#"),

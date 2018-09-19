@@ -1,4 +1,4 @@
-package fix
+package scala.fix.collection
 
 import scalafix.v0._
 import scala.meta._

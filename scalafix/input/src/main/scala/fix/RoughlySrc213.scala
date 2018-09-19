@@ -1,6 +1,6 @@
 /*
-rule = "scala:fix.Roughly"
-Roughly = {
+rule = "Collection213Roughly"
+Collection213Roughly = {
   withLazyAppendedAll = true
   withLazyList = true
 }

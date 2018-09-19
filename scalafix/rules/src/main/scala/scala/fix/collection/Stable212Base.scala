@@ -1,7 +1,9 @@
-package fix
+package scala.fix.collection
 
+import scalafix.v1
 import scalafix.v0._
 import scala.meta._
+import metaconfig.Configured
 
 import scala.collection.mutable
 
@@ -9,6 +11,26 @@ import System.{lineSeparator => nl}
 
 trait CrossCompatibility {
   def isCrossCompatible: Boolean
+}
+
+trait Stable212BaseCheck { self: v1.SemanticRule =>
+  override def withConfiguration(config: v1.Configuration): Configured[v1.Rule] = {
+    // if (config.scalacOptions.contains("-P:semanticdb:synthetics:on")) {
+    //   Configured.ok(self)
+    // } else {
+
+    //   Configured.error(
+    //     s"""|The Scala compiler option "-P:semanticdb:synthetics:on" is required to use
+    //         |${self.name}. To fix this problem, update your build to include:
+    //         |
+    //         |  scalacOptions += "-P:semanticdb:synthetics:on"
+    //         |
+    //         |""".stripMargin
+    //   )
+    // }
+
+    Configured.ok(self)
+  }
 }
 
 // 2.12 Cross-Compatible

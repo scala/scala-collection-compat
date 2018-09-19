@@ -1,11 +1,20 @@
-package fix
+package scala.fix.collection
 
 import scalafix.v0._
 import scala.meta._
 
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Upgrade
+    extends LegacySemanticRule("Collection213Upgrade", index => new Collection213UpgradeV0(index))
+    with Stable212BaseCheck {
+  override def description: String =
+    "Upgrade to 2.13 collection (for Application)"
+}
+
 // Not 2.12 Cross-Compatible
-case class NewCollections(index: SemanticdbIndex)
-    extends SemanticRule(index, "NewCollections")
+case class Collection213UpgradeV0(index: SemanticdbIndex)
+    extends SemanticRule(index, "Upgrade213")
     with Stable212Base {
 
   def isCrossCompatible: Boolean = false

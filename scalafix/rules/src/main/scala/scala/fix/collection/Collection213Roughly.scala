@@ -1,4 +1,4 @@
-package fix
+package scala.fix.collection
 
 import scalafix.v0._
 import scala.meta._
@@ -8,6 +8,17 @@ import metaconfig.annotation.Description
 import metaconfig.annotation.ExampleValue
 import metaconfig.generic
 import metaconfig.generic.Surface
+
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Roughly
+    extends LegacySemanticRule("Collection213Roughly", index => new Collection213RoughlyV0(index)) {
+
+  override def description: String =
+    "Upgrade to 2.13 collection (Runtime semantic are different)"
+
+  override def isExperimental: Boolean = true
+}
 
 /* 2.12 Cross-Compatible
  *
@@ -19,8 +30,8 @@ import metaconfig.generic.Surface
  * LazyList has a lazy head, were Stream has a strict head
  *
  */
-final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
-    extends SemanticRule(index, "Roughly") {
+final case class Collection213RoughlyV0(index: SemanticdbIndex, config: RoughlyConfig)
+    extends SemanticRule(index, "Collection213Roughly") {
   def this(index: SemanticdbIndex) = this(index, RoughlyConfig.default)
 
   val mapValues =
@@ -62,8 +73,8 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
 
   override def init(config: Conf): Configured[Rule] =
     config
-      .getOrElse("roughly", "Roughly")(RoughlyConfig.default)
-      .map(Roughly(index, _))
+      .getOrElse("Collection213Roughly")(RoughlyConfig.default)
+      .map(Collection213RoughlyV0(index, _))
 
   override def fix(ctx: RuleCtx): Patch = {
     import config._
