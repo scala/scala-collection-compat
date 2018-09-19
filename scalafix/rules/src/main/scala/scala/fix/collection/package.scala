@@ -50,6 +50,7 @@ package object collection {
     "scala/collection/immutable/Set.canBuildFrom()."           -> "scala.collection.immutable.Set",
     "scala/collection/immutable/SortedMap.canBuildFrom()."     -> "scala.collection.immutable.SortedMap",
     "scala/collection/immutable/TreeMap.canBuildFrom()."       -> "scala.collection.immutable.TreeMap",
+    "scala/collection/immutable/Vector.canBuildFrom()."        -> "scala.collection.immutable.Vector",
     "scala/collection/Iterator.IteratorCanBuildFrom()."        -> "scala.collection.Iterator",
     "scala/collection/mutable/HashMap.canBuildFrom()."         -> "scala.collection.mutable.HashMap",
     "scala/collection/mutable/ListMap.canBuildFrom()."         -> "scala.collection.mutable.ListMap",
