@@ -5,6 +5,7 @@ package fix
 
 import scala.language.higherKinds
 
+import collection.immutable
 import scala.collection.compat._
 
 object CanBuildFromSrc {
@@ -35,6 +36,9 @@ object CanBuildFromSrc {
   }
 
   def f2[T, That](implicit cbf: Factory[T, That]): Foo[T, That] =
+    new Foo
+
+  def f3[T, That](implicit cbf: Factory[T, That with immutable.Iterable[_]]): Foo[T, That] =
     new Foo
 
   class Foo[T, That](implicit cbf: Factory[T, That]) {

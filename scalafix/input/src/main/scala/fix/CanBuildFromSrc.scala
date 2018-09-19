@@ -6,6 +6,7 @@ package fix
 import scala.language.higherKinds
 
 import collection.generic.CanBuildFrom
+import collection.immutable
 
 object CanBuildFromSrc {
 
@@ -35,6 +36,9 @@ object CanBuildFromSrc {
   }
 
   def f2[T, That](implicit cbf: CanBuildFrom[Nothing, T, That]): Foo[T, That] =
+    new Foo
+
+  def f3[T, That](implicit cbf: CanBuildFrom[Nothing, T, That with immutable.Traversable[_]]): Foo[T, That] =
     new Foo
 
   class Foo[T, That](implicit cbf: CanBuildFrom[Nothing, T, That]) {
