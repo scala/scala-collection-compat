@@ -139,7 +139,8 @@ object Using {
 
     @inline def safeAddSuppressed(t: Throwable, suppressed: Throwable): Unit = {
       // don't `addSuppressed` to something which is a `ControlThrowable`
-      if (!t.isInstanceOf[ControlThrowable]) t.addSuppressed(suppressed)
+      // nor to scalaJS
+      if (!t.isInstanceOf[ControlThrowable] && (1.0.toString == "1.0")) t.addSuppressed(suppressed)
     }
 
     var primary: Throwable = null
@@ -281,9 +282,10 @@ object Using {
   }
 
   object Resource {
-    /** An implicit `Resource` for [[java.lang.AutoCloseable `AutoCloseable`s]]. */
-    implicit val autoCloseableResource: Resource[AutoCloseable] = new Resource[AutoCloseable] {
-      def release(resource: AutoCloseable) = resource.close()
+    import java.io.Closeable
+    /** An implicit `Resource` for [[java.lang.Closeable `Closeable`s]]. */
+    implicit val closeableResource: Resource[Closeable] = new Resource[Closeable] {
+      def release(resource: Closeable) = resource.close()
     }
   }
 

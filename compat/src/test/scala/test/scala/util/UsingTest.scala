@@ -7,6 +7,7 @@ import org.junit.Assert._
 
 import scala.reflect.ClassTag
 import scala.util.control.ControlThrowable
+import java.io.Closeable
 
 @RunWith(classOf[JUnit4])
 class UsingTest {
@@ -380,19 +381,19 @@ class UsingTest {
 
   @Test
   def usingDisallowsNull(): Unit = {
-    val npe = catchThrowable(Using.resource(null: AutoCloseable)(_ => "test"))
+    val npe = catchThrowable(Using.resource(null: Closeable)(_ => "test"))
     assertThrowableClass[NullPointerException](npe)
   }
 
   @Test
   def safeUsingDisallowsNull(): Unit = {
-    val npe = Using(null: AutoCloseable)(_ => "test").failed.get
+    val npe = Using(null: Closeable)(_ => "test").failed.get
     assertThrowableClass[NullPointerException](npe)
   }
 
   @Test
   def safeUsingCatchesOpeningException(): Unit = {
-    val ex = Using({ throw new RuntimeException }: AutoCloseable)(_ => "test").failed.get
+    val ex = Using({ throw new RuntimeException }: Closeable)(_ => "test").failed.get
     assertThrowableClass[RuntimeException](ex)
   }
 }
@@ -405,7 +406,7 @@ object UsingTest {
   final class ClosingMarker(message: String) extends Throwable(message) with ControlThrowable
   final class UsingMarker(message: String) extends Throwable(message) with ControlThrowable
 
-  abstract class BaseResource extends AutoCloseable {
+  abstract class BaseResource extends Closeable {
     final def identity[A](a: A): A = a
   }
 
