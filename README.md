@@ -40,8 +40,8 @@ The library also adds backported versions of new collection types, currently `sc
 
 We created two migration rules: 
 
-* `Collection213Upgrade` For applications (like web server, etc)
-* `Collection213CrossCompat` For library that wants to cross compile to (2.11, 2.12 and 2.13)
+* `Collection213Upgrade` For upgrading applications (like web server, etc) from 2.11/2.12 to 2.13
+* `Collection213CrossCompat` For library that wants to cross compile to 2.11, 2.12 and 2.13
 
 ```scala
 // project/plugins.sbt
