@@ -1,10 +1,11 @@
 /*
-rule = "scala:fix.CrossCompat"
+rule = "Collection213CrossCompat"
  */
 package fix
 
 import scala.language.higherKinds
 
+import scala.collection.immutable
 import collection.generic.CanBuildFrom
 
 object CanBuildFromSrc {
@@ -35,6 +36,9 @@ object CanBuildFromSrc {
   }
 
   def f2[T, That](implicit cbf: CanBuildFrom[Nothing, T, That]): Foo[T, That] =
+    new Foo
+
+  def f3[T, That](implicit cbf: CanBuildFrom[Nothing, T, That with immutable.Traversable[_]]): Foo[T, That] =
     new Foo
 
   class Foo[T, That](implicit cbf: CanBuildFrom[Nothing, T, That]) {

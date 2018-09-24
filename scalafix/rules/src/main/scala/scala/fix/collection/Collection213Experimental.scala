@@ -1,27 +1,37 @@
-package fix
+package scala.fix.collection
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Experimental
+    extends LegacySemanticRule("Collection213Experimental",
+                               index => new Collection213ExperimentalV0(index)) {
+  override def isExperimental: Boolean = true
+
+  override def description: String =
+    "Upgrade to 2.13 collection (see https://github.com/scalameta/scalameta/issues/1212)"
+}
+
 // 2.12 Cross-Compatible
-case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Experimental") {
+case class Collection213ExperimentalV0(index: SemanticdbIndex)
+    extends SemanticRule(index, "Collection213Experimental") {
 
   val CollectionMap = TypeMatcher(
-    Symbol("_root_.scala.collection.immutable.Map#"),
-    Symbol("_root_.scala.collection.mutable.Map#"),
-    Symbol("_root_.scala.Predef.Map#")
+    Symbol("scala/collection/immutable/Map#"),
+    Symbol("scala/collection/mutable/Map#"),
+    Symbol("scala/Predef/Map#")
   )
-  val CollectionSet = TypeMatcher(Symbol("_root_.scala.collection.Set#"))
+  val CollectionSet = TypeMatcher(
+    Symbol("scala/collection/Set#")
+  )
 
   // == Symbols ==
-  val mapZip = exact(
-    "_root_.scala.collection.IterableLike#zip(Lscala/collection/GenIterable;Lscala/collection/generic/CanBuildFrom;)Ljava/lang/Object;.")
-  val mapPlus = exact("_root_.scala.collection.MapLike#`+`(Lscala/Tuple2;)Lscala/collection/Map;.")
-  val setPlus = exact(
-    "_root_.scala.collection.SetLike#`+`(Ljava/lang/Object;)Lscala/collection/Set;.")
-  val setMinus = exact(
-    "_root_.scala.collection.SetLike#`-`(Ljava/lang/Object;)Lscala/collection/Set;.")
+  val mapZip   = exact("scala/collection/IterableLike#zip().")
+  val mapPlus  = exact("scala/collection/MapLike#`+`().")
+  val setPlus  = exact("scala/collection/SetLike#`+`().")
+  val setMinus = exact("scala/collection/SetLike#`-`().")
 
   def replaceMapZip(ctx: RuleCtx): Patch = {
     ctx.tree.collect {
@@ -45,7 +55,7 @@ case class Experimental(index: SemanticdbIndex) extends SemanticRule(index, "Exp
     }
 
     ctx.tree.collect {
-      case Term.ApplyInfix(CollectionSet(), op @ setPlus(_), Nil, List(rhs)) =>
+      case ap @ Term.ApplyInfix(CollectionSet(), op @ setPlus(_), Nil, List(rhs)) =>
         rewriteOp(op, rhs, "+", "Set")
 
       case Term.ApplyInfix(CollectionSet(), op @ setMinus(_), Nil, List(rhs)) =>

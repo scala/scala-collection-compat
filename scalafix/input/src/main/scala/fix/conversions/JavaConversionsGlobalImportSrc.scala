@@ -1,5 +1,5 @@
 /*
-rule = "scala:fix.CrossCompat"
+rule = "Collection213CrossCompat"
  */
 package fix.conversions
 

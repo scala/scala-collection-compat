@@ -1,7 +1,6 @@
-package fix
+package scala.fix.collection
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 // WARNING: TOTAL HACK
@@ -13,6 +12,7 @@ object TypeMatcher {
     new TypeMatcher(symbols: _*)(index)
 }
 
+// Does not work anymore: https://github.com/scalacenter/scalafix/issues/792
 final class TypeMatcher(symbols: Symbol*)(implicit index: SemanticdbIndex) {
   def unapply(tree: Tree): Boolean = {
     index

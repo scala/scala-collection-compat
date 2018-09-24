@@ -1,7 +1,6 @@
-package fix
+package scala.fix.collection
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
 import metaconfig.{ConfDecoder, Conf, Configured}
@@ -9,6 +8,17 @@ import metaconfig.annotation.Description
 import metaconfig.annotation.ExampleValue
 import metaconfig.generic
 import metaconfig.generic.Surface
+
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Roughly
+    extends LegacySemanticRule("Collection213Roughly", index => new Collection213RoughlyV0(index)) {
+
+  override def description: String =
+    "Upgrade to 2.13 collection (Runtime semantic are different)"
+
+  override def isExperimental: Boolean = true
+}
 
 /* 2.12 Cross-Compatible
  *
@@ -20,22 +30,20 @@ import metaconfig.generic.Surface
  * LazyList has a lazy head, were Stream has a strict head
  *
  */
-final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
-    extends SemanticRule(index, "Roughly") {
+final case class Collection213RoughlyV0(index: SemanticdbIndex, config: RoughlyConfig)
+    extends SemanticRule(index, "Collection213Roughly") {
   def this(index: SemanticdbIndex) = this(index, RoughlyConfig.default)
 
   val mapValues =
-    SymbolMatcher.exact(
-      Symbol(
-        "_root_.scala.collection.immutable.MapLike#mapValues(Lscala/Function1;)Lscala/collection/immutable/Map;."),
-      Symbol("_root_.scala.collection.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/Map;.")
+    exact(
+      "scala/collection/immutable/MapLike#mapValues().",
+      "scala/collection/MapLike#filterKeys()."
     )
 
   val filterKeys =
-    SymbolMatcher.exact(
-      Symbol(
-        "_root_.scala.collection.immutable.MapLike#filterKeys(Lscala/Function1;)Lscala/collection/immutable/Map;."),
-      Symbol("_root_.scala.collection.MapLike#mapValues(Lscala/Function1;)Lscala/collection/Map;.")
+    exact(
+      "scala/collection/immutable/MapLike#filterKeys().",
+      "scala/collection/MapLike#mapValues()."
     )
 
   // Not supported: SortedMap
@@ -44,12 +52,12 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
   // Symbol("_root_.scala.collection.immutable.SortedMap#filterKeys(Lscala/Function1;)Lscala/collection/immutable/SortedMap;.")
   // Symbol("_root_.scala.collection.SortedMapLike#filterKeys(Lscala/Function1;)Lscala/collection/SortedMap;.")
 
-  val streamAppend = SymbolMatcher.normalized(
-    Symbol("_root_.scala.collection.immutable.Stream.append.")
+  val streamAppend = exact(
+    "scala/collection/immutable/Stream#append()."
   )
 
   val streamEmpty = SymbolMatcher.exact(
-    Symbol("_root_.scala.collection.immutable.Stream.Empty.")
+    Symbol("scala/collection/immutable/Stream.Empty.")
   )
 
   def replaceSymbols(ctx: RuleCtx): Patch = {
@@ -65,8 +73,8 @@ final case class Roughly(index: SemanticdbIndex, config: RoughlyConfig)
 
   override def init(config: Conf): Configured[Rule] =
     config
-      .getOrElse("roughly", "Roughly")(RoughlyConfig.default)
-      .map(Roughly(index, _))
+      .getOrElse("Collection213Roughly")(RoughlyConfig.default)
+      .map(Collection213RoughlyV0(index, _))
 
   override def fix(ctx: RuleCtx): Patch = {
     import config._

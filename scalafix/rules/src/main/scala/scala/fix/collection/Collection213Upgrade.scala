@@ -1,12 +1,20 @@
-package fix
+package scala.fix.collection
 
-import scalafix._
-import scalafix.util._
+import scalafix.v0._
 import scala.meta._
 
+import scalafix.internal.v0.LegacySemanticRule
+
+class Collection213Upgrade
+    extends LegacySemanticRule("Collection213Upgrade", index => new Collection213UpgradeV0(index))
+    with Stable212BaseCheck {
+  override def description: String =
+    "Upgrade to 2.13’s collections (for applications)"
+}
+
 // Not 2.12 Cross-Compatible
-case class NewCollections(index: SemanticdbIndex)
-    extends SemanticRule(index, "NewCollections")
+case class Collection213UpgradeV0(index: SemanticdbIndex)
+    extends SemanticRule(index, "Upgrade213")
     with Stable212Base {
 
   def isCrossCompatible: Boolean = false
@@ -14,11 +22,15 @@ case class NewCollections(index: SemanticdbIndex)
   //  == Symbols ==
 
   val tupleZipped = normalized(
-    "_root_.scala.runtime.Tuple2Zipped.Ops.zipped.",
-    "_root_.scala.runtime.Tuple3Zipped.Ops.zipped."
+    "scala/runtime/Tuple2Zipped.Ops#zipped().",
+    "scala/runtime/Tuple3Zipped.Ops#zipped()."
   )
-  val retainMap = normalized("_root_.scala.collection.mutable.MapLike.retain.")
-  val retainSet = normalized("_root_.scala.collection.mutable.SetLike.retain.")
+  val retainMap = normalized(
+    "scala/collection/mutable/MapLike#retain()."
+  )
+  val retainSet = normalized(
+    "scala/collection/mutable/SetLike#retain()."
+  )
 
   // == Rules ==
 

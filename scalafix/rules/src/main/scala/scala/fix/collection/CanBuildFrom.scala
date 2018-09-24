@@ -1,4 +1,4 @@
-package fix
+package scala.fix.collection
 
 import scalafix._
 import scalafix.util._
@@ -99,7 +99,7 @@ object CanBuildFromNothing {
               tpe @ Type.Apply(
                 collectionCanBuildFrom(_),
                 List(
-                  nothing(_),
+                  not @ nothing(_),
                   t,
                   toT
                 )
@@ -107,7 +107,7 @@ object CanBuildFromNothing {
             ),
             _
             ) =>
-          new CanBuildFromNothing(param, tpe, t, toT, stats, ctx, toTpe, handledTo)
+          new CanBuildFromNothing(param, tpe, not, t, toT, stats, ctx, toTpe, handledTo)
       }
       .map(_.toFactory)
       .asPatch
@@ -124,6 +124,7 @@ object CanBuildFromNothing {
 // toT  : CC[Int]
 case class CanBuildFromNothing(param: Name,
                                tpe: Type.Apply,
+                               not: Type,
                                t: Type,
                                toT: Type,
                                stats: List[Tree],
@@ -166,24 +167,29 @@ case class CanBuildFromNothing(param: Name,
         stats
           .map(_.collect {
             case ap @ Term.ApplyType(Term.Select(e, to @ toTpe(_)), List(cc2 @ matchCC(_))) =>
-              handledTo += to
-
               // e.to[CC](*cbf*) extract implicit parameter
-              val synth                            = ctx.index.synthetics.find(_.position.end == ap.pos.end).get
-              val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
+              ctx.index.synthetics
+                .find(_.position.end == ap.pos.end)
+                .map {
+                  synth =>
+                    handledTo += to
 
-              // This is a bit unsafe
-              // https://github.com/scalameta/scalameta/issues/1636
-              if (implicitCbf.syntax == param.syntax) {
+                    val Term.Apply(_, List(implicitCbf)) = synth.text.parse[Term].get
 
-                // .to[CC]
-                val apToRemove = ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
+                    // This is a bit unsafe
+                    // https://github.com/scalameta/scalameta/issues/1636
+                    if (implicitCbf.syntax == param.syntax) {
 
-                ctx.removeTokens(apToRemove) +
-                  ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
-                  ctx.addRight(e, ")")
-              } else Patch.empty
+                      // .to[CC]
+                      val apToRemove =
+                        ap.tokens.slice(e.tokens.end - ap.tokens.start, ap.tokens.size)
 
+                      ctx.removeTokens(apToRemove) +
+                        ctx.addLeft(e, implicitCbf.syntax + ".fromSpecific(") +
+                        ctx.addRight(e, ")")
+                    } else Patch.empty
+                }
+                .getOrElse(Patch.empty)
           }.asPatch)
           .asPatch
       }
@@ -192,11 +198,15 @@ case class CanBuildFromNothing(param: Name,
 
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
     // implicit cbf: Factory[Int, CC[Int]]
-    val parameterType =
-      ctx.replaceTree(
-        tpe,
-        Type.Apply(Type.Name("Factory"), List(t, toT)).syntax
-      )
+    val parameterType = {
+      val comma    = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
+      val spaceOpt = ctx.tokenList.trailing(comma).find(_.is[Token.Space])
+
+      ctx.removeTokens(not.tokens) +
+        ctx.removeToken(comma) +
+        spaceOpt.map(ctx.removeToken).getOrElse(Patch.empty) +
+        ctx.replaceTree(tpe.tpe, "Factory")
+    }
 
     parameterType + cbfCalls + toCalls
   }

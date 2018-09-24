@@ -1,5 +1,5 @@
 /*
-rule = "scala:fix.NewCollections"
+rule = "Collection213Upgrade"
  */
 package fix
 

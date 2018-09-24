@@ -8,10 +8,10 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1"
 ```
 
-Version 0.2.0 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
+Version 0.2.1 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
@@ -34,17 +34,48 @@ With this compatibility library you can also use the 2.13 syntax which uses a co
 The 2.13 version consists only of an empty `scala.collection.compat` package object that allows you to write `import scala.collection.compat._` in 2.13.
 The 2.11/2.12 version has the compatibility extensions in this package.
 
-
 The library also adds backported versions of new collection types, currently `scala.collection.compat.immutable.ArraySeq`. In 2.11/2.12, this type is a new collection implementation. In 2.13, it is an alias for `scala.collection.immutable.ArraySeq`.
 
 ## Migration Tool
 
-A tool is being developed to automatically migrate code that uses the standard
-collection to use the strawman.
+We created two migration rules: 
 
-To use it, add the [scalafix](https://scalacenter.github.io/scalafix/) sbt plugin
-to your build, as explained in
-[its documentation](https://scalacenter.github.io/scalafix/#Installation).
+* `Collection213Upgrade` For upgrading applications (like web server, etc) from 2.11/2.12 to 2.13
+* `Collection213CrossCompat` For library that wants to cross compile to 2.11, 2.12 and 2.13
+
+```scala
+// project/plugins.sbt
+
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.7.0-RC1")
+```
+
+```scala
+// build.sbt or project/Build.scala
+
+// If you are using project/Build.scala add the following imports:
+import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSemanticdb}
+
+val collectionCompatVersion = "0.2.1"
+val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % collectionCompatVersion
+
+libraryDependencies += collectionCompat // required for Collection213CrossCompat
+addCompilerPlugin(scalafixSemanticdb)
+scalacOptions ++= List(
+  "-Yrangepos",
+  "-Ywarn-unused-import",
+  "-P:semanticdb:synthetics:on"
+)
+
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % Dependencies.collectionCompatVersion
+```
+
+Then run:
+
+```bash
+> ;scalafix Collection213Upgrade ;test:scalafix Collection213Upgrade # For Applications
+# or
+> ;scalafix Collection213CrossCompat ;test:scalafix Collection213CrossCompat # For Libraries
+```
 
 The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
