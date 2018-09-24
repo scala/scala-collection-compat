@@ -43,6 +43,8 @@ We created two migration rules:
 * `Collection213Upgrade` For upgrading applications (like web server, etc) from 2.11/2.12 to 2.13
 * `Collection213CrossCompat` For library that wants to cross compile to 2.11, 2.12 and 2.13
 
+The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your exact Scala binary version is supported.
+
 ```scala
 // project/plugins.sbt
 
@@ -75,8 +77,6 @@ Then run:
 # or
 > ;scalafix Collection213CrossCompat ;test:scalafix Collection213CrossCompat # For Libraries
 ```
-
-The official documentation: https://scalacenter.github.io/scalafix/docs/users/installation.html
 
 The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
