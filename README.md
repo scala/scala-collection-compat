@@ -46,7 +46,7 @@ We created two migration rules:
 ```scala
 // project/plugins.sbt
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.7.0-RC1")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.0-RC1")
 ```
 
 ```scala
@@ -62,11 +62,10 @@ libraryDependencies += collectionCompat // required for Collection213CrossCompat
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List(
   "-Yrangepos",
-  "-Ywarn-unused-import",
-  "-P:semanticdb:synthetics:on"
+  "-P:semanticdb:synthetics:on" // Required by the collection rewrites
 )
 
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % Dependencies.collectionCompatVersion
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % collectionCompatVersion
 ```
 
 Then run:
@@ -76,6 +75,8 @@ Then run:
 # or
 > ;scalafix Collection213CrossCompat ;test:scalafix Collection213CrossCompat # For Libraries
 ```
+
+The official documentation: https://scalacenter.github.io/scalafix/docs/users/installation.html
 
 The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
