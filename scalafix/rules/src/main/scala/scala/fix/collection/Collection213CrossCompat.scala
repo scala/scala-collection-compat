@@ -9,7 +9,7 @@ class Collection213CrossCompat
                                index => new Collection213CrossCompatV0(index))
     with Stable212BaseCheck {
   override def description: String =
-    "Upgrade to 2.13 collection with cross compatibility for 2.11 and 2.12 (for Libraries)"
+    "Upgrade to 2.13’s collections with cross compatibility for 2.11 and 2.12 (for libraries)"
 }
 
 case class Collection213CrossCompatV0(index: SemanticdbIndex)
