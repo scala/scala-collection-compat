@@ -11,7 +11,7 @@ To use this library, add the following to your build.sbt:
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1"
 ```
 
-Version 0.2.1 is compatible with Scala 2.13.0-M5. For Scala 2.13.0-M4 you should use version 0.1.1.
+Version 0.2.1 is compatible with Scala 
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
@@ -48,25 +48,25 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.0-RC1")
 
 ### Collection213Upgrade
 
-The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for applications such as web servers that don't need to cross-compile against multiple Scala versions.
+The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for applications that don't need to cross-compile against multiple Scala versions.
 
 ```scala
 // build.sbt
-scalafixDependencies += "org.scala-lang.modules" ...
+scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.2.1"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
 ```bash
 // sbt shell
-> ;scalafix Collections213Upgrade;test:scalafix Collections213Upgrade
+> ;test:scalafix Collections213Upgrade ;scalafix Collections213Upgrade
 ```
 
 ### Collections213CrossCompat
 
 
-The `Collections213CrossCompat` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for libraries that are cross-published for multiple Scala versions.
+The `Collections213CrossCompat` rewrite upgrades to the 2.13 collections with the ability to compile the code-base with 2.12 or later. This rewrite is suitable for libraries that are cross-published for multiple Scala versions.
 
-To cross-build for 2.12 and 2.11, an additional module `scala-collection-compat` is required to provide missing extensions methods. This enables you to write your library using the latest 2.13 collections API while still supporting users on an older Scala version.
+To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on the scala-collection-compat module, which provides the syntax of 2.13 on 2.12 and 2.11. This enables you to write your library using the latest 2.13 collections API while still supporting users on an older Scala version.
 
 // build.sbt
 scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.2.1"
@@ -76,7 +76,7 @@ scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 
 ```bash
 // sbt shell
-> ;scalafix Collections213CrossCompat;test:scalafix Collections213CrossCompat
+> ;test:scalafix Collections213CrossCompat ;scalafix Collections213CrossCompat
 ```
 
 ### Build.scala
