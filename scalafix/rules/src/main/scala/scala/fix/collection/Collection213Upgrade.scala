@@ -9,7 +9,7 @@ class Collection213Upgrade
     extends LegacySemanticRule("Collection213Upgrade", index => new Collection213UpgradeV0(index))
     with Stable212BaseCheck {
   override def description: String =
-    "Upgrade to 2.13 collection (for Application)"
+    "Upgrade to 2.13’s collections (for applications)"
 }
 
 // Not 2.12 Cross-Compatible
