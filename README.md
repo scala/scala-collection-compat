@@ -38,12 +38,7 @@ The library also adds backported versions of new collection types, currently `sc
 
 ## Migration Tool
 
-We created two migration rules: 
-
-* `Collection213Upgrade` For upgrading applications (like web server, etc) from 2.11/2.12 to 2.13
-* `Collection213CrossCompat` For library that wants to cross compile to 2.11, 2.12 and 2.13
-
-The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your exact Scala version is supported.
+The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.6).
 
 ```scala
 // project/plugins.sbt
@@ -51,32 +46,47 @@ The migration rules use scalafix. Please see the [official installation instruct
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.0-RC1")
 ```
 
+### Collection213Upgrade
+
+The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for applications such as web servers that don't need to cross-compile against multiple Scala versions.
+
 ```scala
-// build.sbt or project/Build.scala
-
-// If you are using project/Build.scala add the following imports:
-import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSemanticdb}
-
-val collectionCompatVersion = "0.2.1"
-val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % collectionCompatVersion
-
-libraryDependencies += collectionCompat // required for Collection213CrossCompat
-addCompilerPlugin(scalafixSemanticdb)
-scalacOptions ++= List(
-  "-Yrangepos",
-  "-P:semanticdb:synthetics:on" // Required by the collection rewrites
-)
-
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % collectionCompatVersion
+// build.sbt
+scalafixDependencies += "org.scala-lang.modules" ...
+scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
-
-Then run:
 
 ```bash
-> ;scalafix Collection213Upgrade ;test:scalafix Collection213Upgrade # For Applications
-# or
-> ;scalafix Collection213CrossCompat ;test:scalafix Collection213CrossCompat # For Libraries
+// sbt shell
+> ;scalafix Collections213Upgrade;test:scalafix Collections213Upgrade
 ```
+
+### Collections213CrossCompat
+
+
+The `Collections213CrossCompat` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for libraries that are cross-published for multiple Scala versions.
+
+To cross-build for 2.12 and 2.11, an additional module `scala-collection-compat` is required to provide missing extensions methods. This enables you to write your library using the latest 2.13 collections API while still supporting users on an older Scala version.
+
+// build.sbt
+scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.2.1"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1"
+scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
+
+
+```bash
+// sbt shell
+> ;scalafix Collections213CrossCompat;test:scalafix Collections213CrossCompat
+```
+
+### Build.scala
+
+```scala
+// If you are using project/Build.scala add the following imports:
+import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSemanticdb}
+```
+
+### Contributing
 
 The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
