@@ -48,7 +48,7 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.0-RC1")
 
 ### Collection213Upgrade
 
-The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or later. This rewrite is suitable for applications that don't need to cross-compile against multiple Scala versions.
+The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the ability to compile the code-base with 2.12 or 2.11. This rewrite is suitable for applications that don't need to cross-compile against multiple Scala versions.
 
 ```scala
 // build.sbt
