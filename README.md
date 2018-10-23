@@ -78,7 +78,7 @@ scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 
 ```bash
 // sbt shell
-> ;test:scalafix Collections213CrossCompat ;scalafix Collections213CrossCompat
+> ;test:scalafix Collection213CrossCompat ;scalafix Collection213CrossCompat
 ```
 
 ### Build.scala
