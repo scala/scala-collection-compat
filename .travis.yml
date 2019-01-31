@@ -1,12 +1,12 @@
-# slower instance startup, but needed to work around https://github.com/travis-ci/travis-ci/issues/9713
-sudo: true
+# Needed for openjdk6
+dist: precise
+addons:
+  hosts:
+    - localhost
+  hostname: localhost.local
 
 language: scala
 
-addons:
-  apt:
-    packages:
-      - openjdk-6-jdk
 scala:
   - 2.11.12
   - 2.12.8
@@ -16,9 +16,6 @@ jdk:
   - oraclejdk8
 env:
   global:
-    # force jdk 8 for sbt due to sonatype droping support for jdk6 on https (TLS 1.0)
-    # https://stackoverflow.com/questions/50824789/why-am-i-getting-received-fatal-alert-protocol-version-or-peer-not-authentic/50824799#50824799
-    - JAVA_HOME: /usr/lib/jvm/java-8-oracle
 
     # PGP_PASSPHRASE
     - secure: "rjetmX9HXoN/scxTCBFCHIUDFryY0Yd29sR6EBrW/2tCOILO09RTCcJB0kPn2YMZ9en8ChTtOpqGF9133f6wZ7/ZINSUt1tNwnbgDlhGbwJW2WFTUEmL7ScdqmgRGa294aVuAfrvJnr+dN92it6ibAB8nThgsjq0LnZREJsKwQ77vvEeATEKutuPLGlrHrmqL7/XCjb2uYz9Xh0sSpyQlKOGt5EN7JzM/Bzyju+RYS9BvnLVV86fey/UWO1DNDa4MU5835akevqvtwN7CpCFxFKgbfc+40bAh7Xc59UnkxP+Lcs2KxJx9heS6RJJiNEx99r59LL2JALyN++yOAS97HEfii4Yc3OK9VRZCNQFW4gNm3VtGNW4EC+LOX/9cUiUNg2J65nY0UF2d6R3vsqiCKaK6C0cm+jIs3fgDHFlB+MiHC/ZECaoPvwzm1AxQMIWyoFFqXuHQk3Ef137G0x1ejneUoGD/PqMbiEAX64+VVvOxgOI2/jyt4hFTEk6JiWVahmk+7oFAsLH1n9J1Y3csMvmo9S0S/Ey9D3bR07hggc8pj/CJPj9gFSfpGEVhroc37T/VlP23EVJgpteovERyeJGC3P7wVWvi1pNNW6iOVENzY1GkHlHkJUI7Q4B+eIW2mh5wi6JyC/DM2lO4z3M2KQkNqQgzIBdm5p/4hezkkA="
@@ -77,11 +74,17 @@ matrix:
 # |  oraclejdk8 | 2.12.8    | jvm          |                      |   true        |
 
 before_script:
+  - nvm install 8
+  - nvm use 8
   - admin/checkCLA.sh
 
 script:
+  # work around https://github.com/travis-ci/travis-ci/issues/9713
+  - if [[ $JAVA_HOME = *java-6* ]]; then jdk_switcher use openjdk6; fi
   - java -version
-  - sbt ci
+  - node -v
+  - if [[ "$TRAVIS_JDK_VERSION" == "openjdk6" ]]; then SBTOPTS="-Dsbt.override.build.repos=true -Dsbt.repository.config=./.sbtrepos"; fi
+  - sbt $SBTOPTS ci
 
 cache:
   directories:
