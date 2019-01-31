@@ -29,17 +29,9 @@ lazy val root = project
 
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
-lazy val scala211   = "2.11.12"
-lazy val scala212   = "2.12.8"
-lazy val scalaJs213 = "2.13.0-M5" // Scala.js does no have -pre
-
+lazy val scala211 = "2.11.12"
+lazy val scala212 = "2.12.8"
 lazy val scala213 = "2.13.0-M5"
-// lazy val scala213 = "2.13.0-pre-3ae6282" // use the sbt command `latest-213` to fetch the latest version
-
-lazy val scala213Settings = Seq(
-  resolvers += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  scalaVersion := scala213
-)
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
   "compat",
@@ -77,7 +69,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
 
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
-val compat213 = compat(scala213, scalaJs213, _.jvmSettings(scala213Settings))
+val compat213 = compat(scala213)
 
 lazy val compat211JVM = compat211.jvm
 lazy val compat211JS  = compat211.js
@@ -150,8 +142,7 @@ lazy val `scalafix-data` = MultiScalaProject(
 
 val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
 val `scalafix-data212` = `scalafix-data`(scalafixScala212, _.dependsOn(compat212JVM))
-val `scalafix-data213` =
-  `scalafix-data`(scala213, _.settings(scala213Settings).dependsOn(compat213JVM))
+val `scalafix-data213` = `scalafix-data`(scala213, _.dependsOn(compat213JVM))
 
 lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
@@ -204,14 +195,12 @@ lazy val `scalafix-output213` = `scalafix-output`(
   scala213,
   _.settings(addOutput213)
     .settings(addOutput212Plus)
-    .settings(scala213Settings)
     .dependsOn(`scalafix-data213`)
 )
 
 lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
   .settings(sharedScalafixSettings)
-  .settings(scala213Settings)
   .settings(dontPublish)
 
 lazy val `scalafix-tests` = project
@@ -270,10 +259,6 @@ inThisBuild(releaseCredentials)
 inThisBuild(
   Seq(
     crossScalaVersions := Seq(scala211, scala212, scala213),
-    commands += Command.command("latest-213") { state =>
-      LatestScala.printLatestScala213()
-      state
-    },
     commands += Command.command(preRelease) { state =>
       // Show Compat version, Scala version, and Java Version
       val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
