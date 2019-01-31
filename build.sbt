@@ -30,7 +30,7 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211   = "2.11.12"
-lazy val scala212   = "2.12.6"
+lazy val scala212   = "2.12.8"
 lazy val scalaJs213 = "2.13.0-M5" // Scala.js does no have -pre
 
 lazy val scala213 = "2.13.0-M5"
