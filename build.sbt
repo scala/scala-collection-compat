@@ -58,23 +58,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
     )
     .jvmSettings(
       OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
-      junit,
-      javaHome in Compile := {
-        val oldValue = (javaHome in Compile).value
-        val isOnCi   = sys.env.get("CI").isDefined
-
-        if (isOnCi) {
-          // switch back to the jdk set by the build matrix
-          val ciJavaHome =
-            sys.env("TRAVIS_JDK_VERSION") match {
-              case "openjdk6"   => "/usr/lib/jvm/java-6-openjdk-amd64"
-              case "oraclejdk8" => "/usr/lib/jvm/java-8-oracle"
-            }
-          println(s"using JAVA_HOME: $ciJavaHome")
-          Some(file(ciJavaHome))
-        } else oldValue
-      },
-      javaHome in Test := (javaHome in Compile).value
+      junit
     )
     .jsSettings(
       scalacOptions += {
