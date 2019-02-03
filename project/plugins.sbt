@@ -15,6 +15,6 @@ addSbtPlugin("com.eed3si9n"           % "sbt-buildinfo"            % "0.7.0")
 addSbtPlugin("com.typesafe.sbt"       % "sbt-pgp"                  % "0.8.3")
 
 libraryDependencies ++= Seq(
-  "com.github.nscala-time" %% "nscala-time" % "2.20.0",
+  "com.github.nscala-time" %% "nscala-time" % "2.22.0",
   "org.jsoup"              % "jsoup"        % "1.11.3"
 )
