@@ -40,7 +40,6 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
     .settings(
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
-      version := "0.2.0-SNAPSHOT",
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       unmanagedSourceDirectories in Compile += {
         val sharedSourceDir = (baseDirectory in ThisBuild).value / "compat/src/main"
@@ -112,10 +111,10 @@ lazy val `binary-compat` = project
 
 lazy val `scalafix-rules` = project
   .in(file("scalafix/rules"))
+  .settings(scalaModuleSettings)
   .settings(
     organization := (organization in compat212JVM).value,
     publishTo := (publishTo in compat212JVM).value,
-    version := (version in compat212JVM).value,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
