@@ -1,7 +1,7 @@
 if (System.getProperty("java.version").startsWith("1."))
   Seq()
 else
-  // override to version that works on Java 9,
+  // override to version that works on Java 11,
   // see https://github.com/scala/sbt-scala-module/issues/35
   Seq(addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.3"))
 
