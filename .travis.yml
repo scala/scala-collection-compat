@@ -6,6 +6,7 @@ scala:
   - 2.13.0-M5
 jdk:
   - oraclejdk8
+  - openjdk11
 env:
   global:
 
