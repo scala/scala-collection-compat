@@ -292,7 +292,6 @@ inThisBuild(releaseCredentials)
 // required by sbt-scala-module
 inThisBuild(
   Seq(
-    crossScalaVersions := Seq(scala211, scala212, scala213),
     commands += Command.command(preRelease) { state =>
       // Show Compat version, Scala version, and Java Version
       val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
