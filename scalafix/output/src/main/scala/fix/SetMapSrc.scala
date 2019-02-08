@@ -1,6 +1,3 @@
-
-
-
 package fix
 
 class SetMapSrc(set: Set[Int], map: Map[Int, Int]) {

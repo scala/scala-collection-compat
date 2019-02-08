@@ -1,6 +1,3 @@
-
-
-
 package fix.conversions
 
 import scala.collection.{immutable => i, mutable => m, concurrent => conc}

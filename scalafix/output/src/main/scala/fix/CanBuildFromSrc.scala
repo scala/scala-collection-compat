@@ -1,6 +1,3 @@
-
-
-
 package fix
 
 import scala.language.higherKinds
