@@ -2,8 +2,24 @@ import ScalaModulePlugin._
 import sbtcrossproject.{crossProject, CrossType}
 import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
 
+lazy val commonSettings = Seq(
+  // this line could be removed after https://github.com/scala/sbt-scala-module/issues/48 is fixed
+  licenses := Seq(("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))),
+  headerLicense := Some(HeaderLicense.Custom(
+      s"""|Scala (https://www.scala-lang.org)
+          |
+          |Copyright EPFL and Lightbend, Inc.
+          |
+          |Licensed under Apache License 2.0
+          |(http://www.apache.org/licenses/LICENSE-2.0).
+          |
+          |See the NOTICE file distributed with this work for
+          |additional information regarding copyright ownership.
+          |""".stripMargin)))
+
 lazy val root = project
   .in(file("."))
+  .settings(commonSettings)
   .settings(dontPublish)
   .aggregate(
     compat211JVM,
@@ -36,6 +52,7 @@ lazy val scala213 = "2.13.0-M5"
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
   "compat",
   _.settings(scalaModuleSettings)
+    .settings(commonSettings)
     .jvmSettings(scalaModuleSettingsJVM)
     .settings(
       name := "scala-collection-compat",
@@ -79,17 +96,20 @@ lazy val compat213JS  = compat213.js
 
 lazy val `binary-compat-old` = project
   .in(file("binary-compat/old"))
+  .settings(commonSettings)
   .settings(scalaVersion := scala212)
   .disablePlugins(ScalafixPlugin)
 
 lazy val `binary-compat-new` = project
   .in(file("binary-compat/new"))
+  .settings(commonSettings)
   .settings(scalaVersion := scala212)
   .dependsOn(compat212JVM)
   .disablePlugins(ScalafixPlugin)
 
 lazy val `binary-compat` = project
   .in(file("binary-compat/test"))
+  .settings(commonSettings)
   .settings(
     scalaVersion := scala212,
     libraryDependencies += "com.typesafe" %% "mima-reporter" % "0.3.0" % Test,
@@ -111,6 +131,7 @@ lazy val `binary-compat` = project
 
 lazy val `scalafix-rules` = project
   .in(file("scalafix/rules"))
+  .settings(commonSettings)
   .settings(scalaModuleSettings)
   .settings(
     organization := (organization in compat212JVM).value,
@@ -136,6 +157,7 @@ lazy val `scalafix-data` = MultiScalaProject(
   "scalafix-data",
   "scalafix/data",
   _.settings(sharedScalafixSettings)
+    .settings(commonSettings)
     .settings(dontPublish)
 )
 
@@ -145,6 +167,7 @@ val `scalafix-data213` = `scalafix-data`(scala213, _.dependsOn(compat213JVM))
 
 lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
+  .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(dontPublish)
   .settings(
@@ -160,6 +183,7 @@ lazy val `scalafix-input` = project
 val `scalafix-output` = MultiScalaProject("scalafix-output",
                                           "scalafix/output",
                                           _.settings(sharedScalafixSettings)
+                                            .settings(commonSettings)
                                             .settings(dontPublish)
                                             .disablePlugins(ScalafixPlugin))
 
@@ -199,11 +223,13 @@ lazy val `scalafix-output213` = `scalafix-output`(
 
 lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
+  .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(dontPublish)
 
 lazy val `scalafix-tests` = project
   .in(file("scalafix/tests"))
+  .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(dontPublish)
   .settings(
