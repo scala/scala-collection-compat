@@ -22,10 +22,6 @@ env:
     - SCALAJS_VERSION=1.0.0-M6
 
 matrix:
-  exclude:
-    # ?
-    - jdk: oraclejdk8
-      scala: 2.11.12
 
   include:
 

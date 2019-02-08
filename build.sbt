@@ -252,7 +252,7 @@ lazy val dontPublish = Seq(
   publishLocal := {}
 )
 
-val preRelease         = "pre-release"
+val preRelease         = "preRelease"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
@@ -287,13 +287,14 @@ inThisBuild(
     commands += Command.command(preRelease) { state =>
       // Show Compat version, Scala version, and Java Version
       val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
-      val tagVersion = releaseVersion.get
-      println(
-        s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
-
-      // Copy pgp stuff
-      "admin/pre-release.sh" ! state.globalLogging.full
-
+      releaseVersion match {
+        case Some(tagVersion) =>
+          println(
+            s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
+          // Copy pgp stuff
+          "admin/pre-release.sh" ! state.globalLogging.full
+        case None =>
+      }
       state
     },
     commands += Command.command("scalafmt-test") { state =>
