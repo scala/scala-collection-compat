@@ -287,13 +287,14 @@ inThisBuild(
     commands += Command.command(preRelease) { state =>
       // Show Compat version, Scala version, and Java Version
       val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
-      val tagVersion = releaseVersion.get
-      println(
-        s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
-
-      // Copy pgp stuff
-      "admin/pre-release.sh" ! state.globalLogging.full
-
+      releaseVersion match {
+        case Some(tagVersion) =>
+          println(
+            s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
+          // Copy pgp stuff
+          "admin/pre-release.sh" ! state.globalLogging.full
+        case None =>
+      }
       state
     },
     commands += Command.command("scalafmt-test") { state =>
