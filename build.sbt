@@ -49,6 +49,15 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.8"
 lazy val scala213 = "2.13.0-M5"
 
+scalaVersionsByJvm in ThisBuild := {
+  val all = List(scala211, scala212, scala213)
+  // Map[JvmMajorVersion, List[(ScalaVersion, UseForPublishing)]]
+  Map(
+    8 -> all.map(_ -> true),
+    11 -> all.map(_ -> false)
+  )
+}
+
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
   "compat",
   _.settings(scalaModuleSettings)
