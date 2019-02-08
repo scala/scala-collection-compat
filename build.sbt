@@ -252,7 +252,7 @@ lazy val dontPublish = Seq(
   publishLocal := {}
 )
 
-val preRelease         = "pre-release"
+val preRelease         = "preRelease"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
