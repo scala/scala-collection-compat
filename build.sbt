@@ -54,7 +54,8 @@ scalaVersionsByJvm in ThisBuild := {
   // Map[JvmMajorVersion, List[(ScalaVersion, UseForPublishing)]]
   Map(
     8 -> all.map(_ -> true),
-    11 -> all.map(_ -> false)
+    11 -> all.map(_ -> false),
+    12 -> all.map(_ -> false)
   )
 }
 
