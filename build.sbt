@@ -1,10 +1,9 @@
 import ScalaModulePlugin._
 import sbtcrossproject.{crossProject, CrossType}
 import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
+import sys.process._
 
 lazy val commonSettings = Seq(
-  // this line could be removed after https://github.com/scala/sbt-scala-module/issues/48 is fixed
-  licenses := Seq(("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))),
   headerLicense := Some(HeaderLicense.Custom(
       s"""|Scala (https://www.scala-lang.org)
           |
@@ -83,7 +82,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
         val x = (baseDirectory in LocalRootProject).value.toURI.toString
         val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
           .Process("git rev-parse HEAD")
-          .lines_!
+          .lineStream_!
           .head
         s"-P:scalajs:mapSourceURI:$x->$y/"
       },
@@ -315,7 +314,7 @@ inThisBuild(
       state
     },
     commands += Command.command("ci") { state =>
-      val toRun =
+      val toRun: Seq[String] =
         if (isScalafmt) {
           Seq("scalafmt-test")
         } else {
@@ -359,7 +358,7 @@ inThisBuild(
             if (releaseVersion.nonEmpty && !isBinaryCompat) {
               List(
                 preRelease,
-                s"$projectPrefix/publish-signed"
+                s"$projectPrefix/publishSigned"
               )
             } else {
               Nil
@@ -379,6 +378,7 @@ inThisBuild(
       toRun.foreach(println)
       println("---------")
 
-      toRun ::: state
+      val newCommands = toRun.toList.map(Exec(_, None))
+      state.copy(remainingCommands = newCommands ::: state.remainingCommands)
     }
   ))
