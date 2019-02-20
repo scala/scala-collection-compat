@@ -4,17 +4,16 @@ import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala
 import sys.process._
 
 lazy val commonSettings = Seq(
-  headerLicense := Some(HeaderLicense.Custom(
-      s"""|Scala (https://www.scala-lang.org)
-          |
-          |Copyright EPFL and Lightbend, Inc.
-          |
-          |Licensed under Apache License 2.0
-          |(http://www.apache.org/licenses/LICENSE-2.0).
-          |
-          |See the NOTICE file distributed with this work for
-          |additional information regarding copyright ownership.
-          |""".stripMargin)))
+  headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
+                                                 |
+                                                 |Copyright EPFL and Lightbend, Inc.
+                                                 |
+                                                 |Licensed under Apache License 2.0
+                                                 |(http://www.apache.org/licenses/LICENSE-2.0).
+                                                 |
+                                                 |See the NOTICE file distributed with this work for
+                                                 |additional information regarding copyright ownership.
+                                                 |""".stripMargin)))
 
 lazy val root = project
   .in(file("."))
@@ -52,7 +51,7 @@ scalaVersionsByJvm in ThisBuild := {
   val all = List(scala211, scala212, scala213)
   // Map[JvmMajorVersion, List[(ScalaVersion, UseForPublishing)]]
   Map(
-    8 -> all.map(_ -> true),
+    8  -> all.map(_ -> true),
     11 -> all.map(_ -> false),
     12 -> all.map(_ -> false)
   )
