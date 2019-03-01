@@ -43,6 +43,9 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
   val retainSet = normalized(
     "scala/collection/mutable/SetLike#retain()."
   )
+  val lengthCompareSeq = normalized(
+    "scala/collection/SeqLike#lengthCompare()."
+  )
 
   // == Rules ==
 
@@ -51,6 +54,13 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
       "scala.TraversableOnce"            -> "scala.IterableOnce",
       "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
     )
+  }
+
+  def replaceCollectionSeq(ctx: RuleCtx): Patch = {
+    ctx.tree.collect {
+      case lengthCompareSeq(n: Name) =>
+        ctx.replaceTree(n, "sizeCompare")
+    }.asPatch
   }
 
   def replaceMutableSet(ctx: RuleCtx): Patch = {
@@ -121,6 +131,7 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
       replaceSymbols(ctx) +
       replaceTupleZipped(ctx) +
       replaceMutableMap(ctx) +
-      replaceMutableSet(ctx)
+      replaceMutableSet(ctx) +
+      replaceCollectionSeq(ctx)
   }
 }
