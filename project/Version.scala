@@ -5,7 +5,7 @@ case class Version(major: Int, minor: Int, patch: Int) {
 
 object Version {
   private val versionRegex0 = "v?([0-9]+)\\.([0-9]+)\\.([0-9]+)".r
-  private val versionRegex1 = "v?([0-9]+)\\.([0-9]+)\\.([0-9]+)-M([0-9]+)".r
+  private val versionRegex1 = "v?([0-9]+)\\.([0-9]+)\\.([0-9]+)-(.+)".r
   private val versionRegex2 = "([0-9]+)\\.([0-9]+)".r
   private val versionRegex3 = "([0-9]+)".r
   def parse(raw: String): Option[Version] = {
