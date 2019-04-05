@@ -24,6 +24,9 @@ class FactoryTest {
   implicitly[Factory[Int, collection.BitSet]]
   implicitly[Factory[Int, mutable.BitSet]]
   implicitly[Factory[Int, immutable.BitSet]]
+  implicitly[Factory[Nothing, Seq[Nothing]]]
+
+  def f[A] = implicitly[Factory[A, Stream[A]]]
 
   BitSet: Factory[Int, BitSet]
   Iterable: Factory[Int, Iterable[Int]]
