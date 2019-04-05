@@ -62,7 +62,7 @@ without generating a new key.
   1. The release will be published using the Scala and JVM version combinations specified
      in the travis build matrix where `[ "$RELEASE_COMBO" = "true" ]`.
      - If you need to release against a different Scala version, create a new commit that modifies
-       `.travis.yml` and push a new tag, e.g., `v1.2.3#2.13.0-M5`. The suffix after `#` is ignored.
+       `.travis.yml` and push a new tag, e.g., `v1.2.3#2.13.0-RC1`. The suffix after `#` is ignored.
   1. Travis CI will schedule a build for this release. Review the build logs.
   1. Log into https://oss.sonatype.org/ and identify the staging repository.
   1. Sanity check its contents.
