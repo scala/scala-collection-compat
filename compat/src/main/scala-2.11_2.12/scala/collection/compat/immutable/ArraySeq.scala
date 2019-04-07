@@ -113,8 +113,8 @@ object ArraySeq {
     override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofRef[_] =>
-        Arrays.equals(unsafeArray.asInstanceOf[Array[AnyRef]],
-                      that.unsafeArray.asInstanceOf[Array[AnyRef]])
+        arrayEquals(unsafeArray.asInstanceOf[Array[AnyRef]],
+                    that.unsafeArray.asInstanceOf[Array[AnyRef]])
       case _ => super.equals(that)
     }
   }
@@ -125,7 +125,7 @@ object ArraySeq {
     def length: Int             = unsafeArray.length
     def apply(index: Int): Byte = unsafeArray(index)
     def update(index: Int, elem: Byte) { unsafeArray(index) = elem }
-    override def hashCode = MurmurHash3.bytesHash(unsafeArray, MurmurHash3.seqSeed)
+    override def hashCode = MurmurHash3.arrayHash(unsafeArray, MurmurHash3.seqSeed)
     override def equals(that: Any) = that match {
       case that: ofByte => Arrays.equals(unsafeArray, that.unsafeArray)
       case _            => super.equals(that)
@@ -236,5 +236,21 @@ object ArraySeq {
       case that: ofUnit => unsafeArray.length == that.unsafeArray.length
       case _            => super.equals(that)
     }
+  }
+
+  private[this] def arrayEquals(xs: Array[AnyRef], ys: Array[AnyRef]): Boolean = {
+    if (xs eq ys)
+      return true
+    if (xs.length != ys.length)
+      return false
+
+    val len = xs.length
+    var i = 0
+    while (i < len) {
+      if (xs(i) != ys(i))
+        return false
+      i += 1
+    }
+    true
   }
 }
