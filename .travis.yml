@@ -50,7 +50,7 @@ script:
 cache:
   directories:
   - "$HOME/.sbt/preloaded"
-  - "$HOME/.sbt/0.13/dependency"
+  - "$HOME/.sbt/1.0/dependency"
   - "$HOME/.sbt/boot/scala*"
   - "$HOME/.sbt/launchers"
   - "$HOME/.ivy2/cache"
