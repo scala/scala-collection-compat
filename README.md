@@ -8,15 +8,16 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "1.0.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.3.0"
 ```
 
-Version 1.0.0 is compatible with Scala 2.13.0-RC1, 2.12 and 2.11.
+Version 0.3.0 is compatible with Scala 2.13.0-M5, 2.12 and 2.11.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
-Starting with version 1.0.0 backwards binary compatibility is enforced within each major version (i.e. anything prior to 2.0.0 will be compatible).
+**Note**: Please do not release any artifacts against version 1.0.0. Due to [#195](https://github.com/scala/scala-collection-compat/issues/195) we are planning on releasing 2.0.0 that is neither source nor binary compatible with 1.0.0.
 
+Starting with version 1.0.0 backwards binary compatibility will be enforced within each major version (i.e. anything prior to 2.0.0 will be compatible).
 
 The 2.13 collections are mostly backwards compatible, but there are some exceptions. For example, the `to` method is used with a type parameter in 2.12:
 
@@ -52,7 +53,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "1.0.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.3.0"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
@@ -70,8 +71,8 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "1.0.0"
-libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "1.0.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.3.0"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "0.3.0"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
