@@ -158,4 +158,10 @@ class BuildFromTest {
   Map: BuildFrom[_, (Int, String), Map[Int, String]]
   SortedSet: BuildFrom[_, Int, SortedSet[Int]]
   SortedMap: BuildFrom[_, (Int, String), SortedMap[Int, String]]
+
+  // Implement BuildFrom
+  class MyBuildFrom[From, A, C] extends BuildFrom[From, A, C] {
+    def fromSpecific(from: From)(it: IterableOnce[A]): C = ???
+    def newBuilder(from: From): Builder[A, C] = ???
+  }
 }
