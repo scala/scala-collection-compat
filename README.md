@@ -8,10 +8,10 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "0.3.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.0.0"
 ```
 
-Version 0.3.0 is compatible with Scala 2.13.0-M5, 2.12 and 2.11.
+Version 2.0.0 is compatible with Scala 2.13.0-RC2, 2.12 and 2.11.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
@@ -53,7 +53,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.3.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.0.0"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
@@ -71,8 +71,8 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.3.0"
-libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "0.3.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.0.0"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.0.0"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
