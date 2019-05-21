@@ -15,11 +15,11 @@ Version 2.0.0 is compatible with Scala 2.13.0-RC2, 2.12 and 2.11.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
-**Note**: Please do not release any artifacts against version 1.0.0. Due to [#195](https://github.com/scala/scala-collection-compat/issues/195) we are planning on releasing 2.0.0 that is neither source nor binary compatible with 1.0.0.
+**Note**: Please do not release any artifacts against version 1.0.0, due to [#195](https://github.com/scala/scala-collection-compat/issues/195).
 
-Starting with version 1.0.0 backwards binary compatibility will be enforced within each major version (i.e. anything prior to 2.0.0 will be compatible).
+Backwards binary compatibility will be enforced within each major version (i.e. all 1.x.y releases will be binary compatible).
 
-The 2.13 collections are mostly backwards compatible, but there are some exceptions. For example, the `to` method is used with a type parameter in 2.12:
+The 2.13 collections are mostly backwards source-compatible, but there are some exceptions. For example, the `to` method is used with a type parameter in 2.12:
 
 ```scala
   xs.to[List]
