@@ -44,7 +44,7 @@ The migration rules use scalafix. Please see the [official installation instruct
 ```scala
 // project/plugins.sbt
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.0")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.5")
 ```
 
 ### Collection213Upgrade
@@ -59,13 +59,13 @@ scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 
 ```bash
 // sbt shell
-> ;test:scalafix Collections213Upgrade ;scalafix Collections213Upgrade
+> ;test:scalafix Collection213Upgrade ;scalafix Collection213Upgrade
 ```
 
-### Collections213CrossCompat
+### Collection213CrossCompat
 
 
-The `Collections213CrossCompat` rewrite upgrades to the 2.13 collections with the ability to compile the code-base with 2.12 or later. This rewrite is suitable for libraries that are cross-published for multiple Scala versions.
+The `Collection213CrossCompat` rewrite upgrades to the 2.13 collections with the ability to compile the code-base with 2.12 or later. This rewrite is suitable for libraries that are cross-published for multiple Scala versions.
 
 To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on the scala-collection-compat module, which provides the syntax of 2.13 on 2.12 and 2.11. This enables you to write your library using the latest 2.13 collections API while still supporting users on an older Scala version.
 
