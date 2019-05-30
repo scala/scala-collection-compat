@@ -11,7 +11,7 @@ To use this library, add the following to your build.sbt:
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.0.0"
 ```
 
-Version 2.0.0 is compatible with Scala 2.13.0-RC2, 2.12 and 2.11.
+Version 2.0.0 is compatible with Scala 2.13, 2.12, and 2.11.
 
 Note that there are multiple ways to cross-build projects, see https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213.
 
