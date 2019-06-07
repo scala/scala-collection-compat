@@ -1,12 +1,9 @@
 language: scala
 
 scala:
-  - 2.11.12
-  - 2.12.8
   - 2.13.0
 jdk:
   - oraclejdk8
-  - openjdk11
 env:
   global:
 
@@ -20,25 +17,6 @@ env:
     - SCALAJS_VERSION=
     - SCALAJS_VERSION=0.6.28
     - SCALAJS_VERSION=1.0.0-M8
-
-matrix:
-
-  include:
-
-    # run migration test
-    - jdk: oraclejdk8
-      scala: 2.12.8
-      env: TEST_SCALAFIX=true
-
-    # run binary compatibility test
-    - jdk: oraclejdk8
-      scala: 2.12.8
-      env: TEST_BINARY_COMPAT=true
-
-    # run scalafmt
-    - jdk: oraclejdk8
-      scala: 2.12.8
-      env: TEST_SCALAFMT=true
 
 before_script:
   - admin/checkCLA.sh
