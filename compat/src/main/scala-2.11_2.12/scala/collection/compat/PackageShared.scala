@@ -14,7 +14,7 @@ package scala.collection.compat
 
 import scala.collection.generic._
 import scala.reflect.ClassTag
-import scala.collection.{MapLike, GenTraversable, BitSet}
+import scala.collection.{MapLike, GenTraversable, BitSet, IterableView}
 import scala.collection.{immutable => i, mutable => m}
 import scala.{collection => c}
 
@@ -155,6 +155,9 @@ private[compat] trait PackageShared {
   // in scala-library so we can't add to it
   type IterableOnce[+X] = c.TraversableOnce[X]
   val IterableOnce = c.TraversableOnce
+
+  implicit def toMapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
+    new MapViewExtensionMethods[K, V, C](self)
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
@@ -230,4 +233,9 @@ class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A])
 
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
   def iterableFactory: GenericCompanion[Traversable] = self.companion
+}
+
+class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](private val self: IterableView[(K, V), C]) extends AnyVal {
+  def mapValues[W, That](f: V => W)(implicit bf: CanBuildFrom[IterableView[(K, V), C], (K, W), That]): That =
+    self.map[(K, W), That] { case (k, v) => (k, f(v)) }
 }
