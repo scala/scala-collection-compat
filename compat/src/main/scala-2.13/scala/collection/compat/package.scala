@@ -21,4 +21,7 @@ package object compat {
 
   type IterableOnce[+X] = scala.collection.IterableOnce[X]
   val IterableOnce = scala.collection.IterableOnce
+
+  type AbstractBuilder[-Elem, +To] = mutable.Builder[Elem, To]
+  type AbstractFactory[-A, +C] = Factory[A, C]
 }
