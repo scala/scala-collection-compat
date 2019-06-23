@@ -73,7 +73,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
       }
     )
     .jvmSettings(
-      OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;version=${version.value}"),
+      OsgiKeys.exportPackage := Seq(s"scala.collection.compat.*;scala.jdk.*;version=${version.value}"),
       junit
     )
     .jsSettings(
