@@ -58,7 +58,7 @@ abstract class ArraySeq[+T] extends AbstractSeq[T] with IndexedSeq[T] {
   /** Creates new builder for this collection ==> move to subclasses
    */
   override protected[this] def newBuilder: Builder[T, ArraySeq[T]] =
-    new WrappedArrayBuilder[T](elemTag).mapResult(w => ArraySeq.unsafeWrapArray(w.array))
+    ArraySeq.newBuilder[T](elemTag)
 
 }
 
@@ -68,6 +68,17 @@ object ArraySeq {
   // This is reused for all calls to empty.
   private val EmptyArraySeq           = new ofRef[AnyRef](new Array[AnyRef](0))
   def empty[T <: AnyRef]: ArraySeq[T] = EmptyArraySeq.asInstanceOf[ArraySeq[T]]
+
+  def newBuilder[T](implicit elemTag: ClassTag[T]): Builder[T, ArraySeq[T]] =
+    new WrappedArrayBuilder[T](elemTag).mapResult(w => unsafeWrapArray(w.array))
+
+  def apply[T](elems: T*)(implicit elemTag: ClassTag[T]): ArraySeq[T] = {
+    val b = newBuilder[T]
+    b ++= elems
+    b.result()
+  }
+
+  def unapplySeq[T](seq: ArraySeq[T]): Some[ArraySeq[T]] = Some(seq)
 
   /**
    * Wrap an existing `Array` into an `ArraySeq` of the proper primitive specialization type
