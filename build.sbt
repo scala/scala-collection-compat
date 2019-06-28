@@ -13,7 +13,9 @@ lazy val commonSettings = Seq(
                                                  |
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
-                                                 |""".stripMargin)))
+                                                 |""".stripMargin)),
+  mimaPreviousVersion := Some("2.1.1"),
+)
 
 lazy val root = project
   .in(file("."))
@@ -157,8 +159,8 @@ lazy val `binary-compat` = project
 
 lazy val `scalafix-rules` = project
   .in(file("scalafix/rules"))
-  .settings(commonSettings)
   .settings(scalaModuleSettings)
+  .settings(commonSettings)
   .settings(
     organization := (organization in compat212JVM).value,
     publishTo := (publishTo in compat212JVM).value,
@@ -275,7 +277,8 @@ lazy val dontPublish = Seq(
   publishArtifact := false,
   packagedArtifacts := Map.empty,
   publish := {},
-  publishLocal := {}
+  publishLocal := {},
+  mimaPreviousVersion := None,
 )
 
 val preRelease         = "preRelease"
