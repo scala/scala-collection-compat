@@ -44,6 +44,8 @@ private[compat] trait PackageShared {
     def newBuilder: m.Builder[A, C] = factory()
   }
 
+  implicit def SeqCBF[A](seq: Seq.type): CanBuildFrom[Any, A, Seq[A]] = simpleCBF(new IdentityPreservingSeqBuilder[A, Seq[A]](Seq.newBuilder[A]))
+
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
     simpleCBF(fact.newBuilder[A])

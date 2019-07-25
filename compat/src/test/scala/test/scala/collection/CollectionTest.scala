@@ -40,6 +40,10 @@ class CollectionTest {
     //val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
     assertTrue(m.isInstanceOf[Map[_, _]])
+
+    // Stream.to(Seq) doesn't evaluate the stream
+    val strm = 1 #:: {throw new Exception("not lazy")} #:: Stream.empty[Int]
+    val strmsq: Seq[Int] = strm.to(Seq)
   }
 
   @Test
