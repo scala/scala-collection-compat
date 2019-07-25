@@ -17,6 +17,7 @@ import org.junit.Test
 
 import scala.collection.compat._
 import scala.collection.immutable.BitSet
+import scala.collection.LinearSeq
 
 class CollectionTest {
   @Test
@@ -44,6 +45,7 @@ class CollectionTest {
     // Stream.to(Seq) doesn't evaluate the stream
     val strm = 1 #:: {throw new Exception("not lazy")} #:: Stream.empty[Int]
     val strmsq: Seq[Int] = strm.to(Seq)
+    var strmln: LinearSeq[Int] = strm.to(LinearSeq)
   }
 
   @Test

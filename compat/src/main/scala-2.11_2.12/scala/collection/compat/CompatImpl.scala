@@ -12,6 +12,7 @@
 
 package scala.collection.compat
 
+import scala.collection.LinearSeq
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Builder
 import scala.collection.{immutable => i, mutable => m}
@@ -19,7 +20,7 @@ import scala.collection.{immutable => i, mutable => m}
 /* builder optimized for a single ++= call, which returns identity on result if possible
  * and defers to the underlying builder if not.
  */
-private final class IdentityPreservingSeqBuilder[A, C <: Seq[A]](that: Builder[A, C])
+private final class IdentityPreservingSeqBuilder[A](that: Builder[A, Seq[A]])
     extends Builder[A, Seq[A]] {
   var collection: Seq[A] = null
   var ruined = false
@@ -48,6 +49,36 @@ private final class IdentityPreservingSeqBuilder[A, C <: Seq[A]](that: Builder[A
     if (ruined) that.clear()
   }
   final def result(): Seq[A] = if(ruined) that.result() else if (collection eq null) Nil else collection
+}
+
+private final class IdentityPreservingLinearSeqBuilder[A](that: Builder[A, LinearSeq[A]]) extends Builder[A, LinearSeq[A]] {
+  var collection: LinearSeq[A] = null
+  var ruined = false
+
+  final override def ++=(elems: TraversableOnce[A]): this.type =
+      if(!ruined && collection == null && elems.isInstanceOf[LinearSeq[_]]) {
+        collection = elems.asInstanceOf[LinearSeq[A]]
+        this
+      }
+      else {
+        ruined = true
+        if (collection != null) that ++= collection
+        that ++= elems
+        collection = null
+        this
+      }
+
+  final def +=(elem: A): this.type = {
+    collection = null
+    ruined = true
+    that += elem
+    this
+  }
+  final def clear(): Unit = {
+    collection = null
+    if (ruined) that.clear()
+  }
+  final def result(): LinearSeq[A] = if(ruined) that.result() else if (collection eq null) Nil else collection
 }
 
 private[compat] object CompatImpl {
