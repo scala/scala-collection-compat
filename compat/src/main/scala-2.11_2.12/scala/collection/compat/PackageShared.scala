@@ -44,11 +44,12 @@ private[compat] trait PackageShared {
     def newBuilder: m.Builder[A, C] = factory()
   }
 
-  implicit def SeqCBF[A](seq: Seq.type): CanBuildFrom[Any, A, Seq[A]] = simpleCBF(new IdentityPreservingSeqBuilder[A, Seq[A]](Seq.newBuilder[A]))
-
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
-      fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] =
-    simpleCBF(fact.newBuilder[A])
+      fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
+    val builder = if (fact == Seq) new IdentityPreservingSeqBuilder[A, Seq[A]](Seq.newBuilder[A]).asInstanceOf[m.Builder[A, CC[A]]]
+                  else fact.newBuilder[A]
+    simpleCBF(builder)
+  }
 
   implicit def sortedSetCompanionToCBF[A: Ordering,
                                        CC[X] <: c.SortedSet[X] with c.SortedSetLike[X, CC[X]]](
