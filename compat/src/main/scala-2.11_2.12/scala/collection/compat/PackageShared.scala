@@ -46,10 +46,10 @@ private[compat] trait PackageShared {
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
-    val builder = if (fact == Seq) new IdentityPreservingSeqBuilder[A](Seq.newBuilder[A]).asInstanceOf[m.Builder[A, CC[A]]]
-                  else if (fact == LinearSeq) new IdentityPreservingLinearSeqBuilder[A](LinearSeq.newBuilder[A]).asInstanceOf[m.Builder[A, CC[A]]]
+    val builder = if (fact == Seq) new IdentityPreservingBuilder[A, Seq](Seq.newBuilder[A])
+                  else if (fact == LinearSeq) new IdentityPreservingBuilder[A, LinearSeq](LinearSeq.newBuilder[A])
                   else fact.newBuilder[A]
-    simpleCBF(builder)
+    simpleCBF(builder.asInstanceOf[m.Builder[A, CC[A]]])
   }
 
   implicit def sortedSetCompanionToCBF[A: Ordering,
