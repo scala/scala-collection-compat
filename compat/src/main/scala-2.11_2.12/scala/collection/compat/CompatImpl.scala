@@ -22,35 +22,43 @@ import scala.collection.{immutable => i, mutable => m}
  */
 private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](that: Builder[A, CC[A]])(implicit ct: ClassTag[CC[A]])
     extends Builder[A, CC[A]] {
+
+  //invariant: ruined => (collection == null)
   var collection: CC[A] = null.asInstanceOf[CC[A]]
   var ruined = false
 
-  final override def ++=(elems: TraversableOnce[A]): this.type =
-      elems match {
-        case ct(ca) if (collection == null && !ruined) =>  {
-          collection = ca
-          this
-        }
-        case _ => {
-          ruined = true
-          if (collection != null) that ++= collection
-          that ++= elems
-          collection = null.asInstanceOf[CC[A]]
-          this
-        }
-      }
-
-  final def +=(elem: A): this.type = {
+  private[this] def ruin(): Unit = {
+    if(collection != null) that ++= collection
     collection = null.asInstanceOf[CC[A]]
     ruined = true
+  }
+
+  final override def ++=(elems: TraversableOnce[A]): this.type =
+    elems match {
+      case ct(ca) if (collection == null && !ruined) =>  {
+        collection = ca
+        this
+      }
+      case _ => {
+        ruin()
+        that ++= elems
+        this
+      }
+    }
+
+  final def +=(elem: A): this.type = {
+    ruin()
     that += elem
     this
   }
+
   final def clear(): Unit = {
     collection = null.asInstanceOf[CC[A]]
     if (ruined) that.clear()
+    ruined = false
   }
-  final def result(): CC[A] = if(ruined || (collection == null)) that.result() else collection
+
+  final def result(): CC[A] = if(collection == null) that.result() else collection
 }
 
 private[compat] object CompatImpl {
