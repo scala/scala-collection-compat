@@ -14,7 +14,7 @@ package scala.collection.compat
 
 import scala.collection.generic._
 import scala.reflect.ClassTag
-import scala.collection.{LinearSeq, MapLike, GenTraversable, BitSet, IterableView}
+import scala.collection.{MapLike, GenTraversable, BitSet, IterableView}
 import scala.collection.{immutable => i, mutable => m}
 import scala.{collection => c}
 
@@ -46,10 +46,13 @@ private[compat] trait PackageShared {
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
-    val builder = if (fact == Seq) new IdentityPreservingBuilder[A, Seq](Seq.newBuilder[A])
-                  else if (fact == LinearSeq) new IdentityPreservingBuilder[A, LinearSeq](LinearSeq.newBuilder[A])
-                  else fact.newBuilder[A]
-    simpleCBF(builder.asInstanceOf[m.Builder[A, CC[A]]])
+    val builder: m.Builder[A, CC[A]] = fact match {
+      case c.Seq | i.Seq => new IdentityPreservingBuilder[A, i.Seq](i.Seq.newBuilder[A])
+      case c.LinearSeq | i.LinearSeq =>
+        new IdentityPreservingBuilder[A, i.LinearSeq](i.LinearSeq.newBuilder[A])
+      case _ => fact.newBuilder[A]
+    }
+    simpleCBF(builder)
   }
 
   implicit def sortedSetCompanionToCBF[A: Ordering,
