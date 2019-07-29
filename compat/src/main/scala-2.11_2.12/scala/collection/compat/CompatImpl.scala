@@ -34,7 +34,7 @@ private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](th
 
   override def ++=(elems: TraversableOnce[A]): this.type =
     elems match {
-      case ct(ca) if (collection == null && !ruined) =>  {
+      case ct(ca) if collection == null && !ruined => {
         collection = ca
         this
       }
