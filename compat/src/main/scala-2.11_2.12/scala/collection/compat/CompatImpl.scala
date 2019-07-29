@@ -33,7 +33,7 @@ private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](th
     ruined = true
   }
 
-  final override def ++=(elems: TraversableOnce[A]): this.type =
+  override def ++=(elems: TraversableOnce[A]): this.type =
     elems match {
       case ct(ca) if (collection == null && !ruined) =>  {
         collection = ca
@@ -46,19 +46,19 @@ private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](th
       }
     }
 
-  final def +=(elem: A): this.type = {
+  def +=(elem: A): this.type = {
     ruin()
     that += elem
     this
   }
 
-  final def clear(): Unit = {
+  def clear(): Unit = {
     collection = null.asInstanceOf[CC[A]]
     if (ruined) that.clear()
     ruined = false
   }
 
-  final def result(): CC[A] = if(collection == null) that.result() else collection
+  def result(): CC[A] = if(collection == null) that.result() else collection
 }
 
 private[compat] object CompatImpl {
