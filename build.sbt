@@ -115,7 +115,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       crossScalaVersions := List(scala211),
       scalaVersion := scala211, // allows to compile if scalaVersion set not 2.11
       nativeLinkStubs := true,
-      Test / test := false
+      Test / test := {}
     )
 )
 
