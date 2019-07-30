@@ -21,9 +21,9 @@ class ViewTest {
 
   @Test
   def mapValues: Unit = {
-    val m = Map("a" -> 1, "b" -> 2, "c" -> 3)
-    val oldStyle = m.mapValues(x => x*x)
-    val newStyle = m.view.mapValues(x => x*x)
+    val m        = Map("a" -> 1, "b" -> 2, "c" -> 3)
+    val oldStyle = m.mapValues(x => x * x)
+    val newStyle = m.view.mapValues(x => x * x)
     assertEquals(oldStyle.toMap, newStyle.toMap)
   }
 

@@ -60,10 +60,10 @@ scalaVersionsByJvm in ThisBuild := {
 }
 
 /** Create an OSGi version range for standard Scala versioning
-  * schemes that describes binary compatible versions. */
+ * schemes that describes binary compatible versions. */
 def osgiVersionRange(version: String, requireMicro: Boolean = false): String =
-  if(version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
-  else if(requireMicro) "${range;[===,=+)}" // At least the same micro version
+  if (version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
+  else if (requireMicro) "${range;[===,=+)}" // At least the same micro version
   else "${range;[==,=+)}" // Any binary compatible version
 
 /** Create an OSGi Import-Package version specification. */
@@ -90,7 +90,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
         if (scalaVersion.value.startsWith("2.13."))
           Seq(s"scala.collection.compat.*;version=${version.value}")
         else
-          Seq(s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
+          Seq(
+            s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
       },
       OsgiKeys.importPackage := Seq(osgiImport("*", scalaBinaryVersion.value)),
       OsgiKeys.privatePackage := Nil,

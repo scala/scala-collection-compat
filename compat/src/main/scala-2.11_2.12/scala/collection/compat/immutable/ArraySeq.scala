@@ -256,7 +256,7 @@ object ArraySeq {
       return false
 
     val len = xs.length
-    var i = 0
+    var i   = 0
     while (i < len) {
       if (xs(i) != ys(i))
         return false

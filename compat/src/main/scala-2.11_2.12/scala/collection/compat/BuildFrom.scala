@@ -26,7 +26,7 @@ trait BuildFrom[-From, -A, +C] extends Any {
   def fromSpecific(from: From)(it: IterableOnce[A]): C
 
   /** Get a Builder for the collection. For non-strict collection types this will use an intermediate buffer.
-    * Building collections with `fromSpecific` is preferred because it can be lazy for lazy collections. */
+   * Building collections with `fromSpecific` is preferred because it can be lazy for lazy collections. */
   def newBuilder(from: From): mutable.Builder[A, C]
 
   @deprecated("Use newBuilder() instead of apply()", "2.13.0")
@@ -40,7 +40,7 @@ object BuildFrom {
       implicit cbf: CanBuildFrom[From, A, C]): BuildFrom[From, A, C] =
     new BuildFrom[From, A, C] {
       def fromSpecific(from: From)(it: IterableOnce[A]): C = (cbf(from) ++= it).result()
-      def newBuilder(from: From): mutable.Builder[A, C]        = cbf(from)
+      def newBuilder(from: From): mutable.Builder[A, C]    = cbf(from)
     }
 
   // Implicit conversion derived from an implicit conversion to CanBuildFrom
