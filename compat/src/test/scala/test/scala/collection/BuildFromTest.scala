@@ -162,6 +162,6 @@ class BuildFromTest {
   // Implement BuildFrom
   class MyBuildFrom[From, A, C] extends BuildFrom[From, A, C] {
     def fromSpecific(from: From)(it: IterableOnce[A]): C = ???
-    def newBuilder(from: From): Builder[A, C] = ???
+    def newBuilder(from: From): Builder[A, C]            = ???
   }
 }

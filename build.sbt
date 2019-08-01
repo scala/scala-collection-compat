@@ -24,6 +24,7 @@ lazy val root = project
   .aggregate(
     compat211JVM,
     compat211JS,
+    compat211Native,
     compat212JVM,
     compat212JS,
     compat213JVM,
@@ -60,17 +61,17 @@ scalaVersionsByJvm in ThisBuild := {
 }
 
 /** Create an OSGi version range for standard Scala versioning
-  * schemes that describes binary compatible versions. */
+ * schemes that describes binary compatible versions. */
 def osgiVersionRange(version: String, requireMicro: Boolean = false): String =
-  if(version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
-  else if(requireMicro) "${range;[===,=+)}" // At least the same micro version
+  if (version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
+  else if (requireMicro) "${range;[===,=+)}" // At least the same micro version
   else "${range;[==,=+)}" // Any binary compatible version
 
 /** Create an OSGi Import-Package version specification. */
 def osgiImport(pattern: String, version: String, requireMicro: Boolean = false): String =
   pattern + ";version=\"" + osgiVersionRange(version, requireMicro) + "\""
 
-lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
+lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
   _.settings(scalaModuleSettings)
     .settings(commonSettings)
@@ -90,7 +91,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
         if (scalaVersion.value.startsWith("2.13."))
           Seq(s"scala.collection.compat.*;version=${version.value}")
         else
-          Seq(s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
+          Seq(
+            s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
       },
       OsgiKeys.importPackage := Seq(osgiImport("*", scalaBinaryVersion.value)),
       OsgiKeys.privatePackage := Nil,
@@ -109,18 +111,25 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform)(
     )
     .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
     .disablePlugins(ScalafixPlugin)
+    .nativeSettings(
+      crossScalaVersions := List(scala211),
+      scalaVersion := scala211, // allows to compile if scalaVersion set not 2.11
+      nativeLinkStubs := true,
+      Test / test := {}
+    )
 )
 
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
 val compat213 = compat(scala213)
 
-lazy val compat211JVM = compat211.jvm
-lazy val compat211JS  = compat211.js
-lazy val compat212JVM = compat212.jvm
-lazy val compat212JS  = compat212.js
-lazy val compat213JVM = compat213.jvm
-lazy val compat213JS  = compat213.js
+lazy val compat211JVM    = compat211.jvm
+lazy val compat211JS     = compat211.js
+lazy val compat211Native = compat211.native
+lazy val compat212JVM    = compat212.jvm
+lazy val compat212JS     = compat212.js
+lazy val compat213JVM    = compat213.jvm
+lazy val compat213JS     = compat213.js
 
 lazy val `binary-compat-old` = project
   .in(file("binary-compat/old"))
@@ -285,6 +294,7 @@ val preRelease         = "preRelease"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
+val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").map(_.nonEmpty).getOrElse(false)
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
 val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
 val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
@@ -342,13 +352,14 @@ inThisBuild(
             "TRAVIS_SCALA_VERSION",
             "TRAVIS_TAG",
             "SCALAJS_VERSION",
+            "SCALANATIVE_VERSION",
             "TEST_SCALAFIX",
             "TEST_SCALAFMT",
             "TEST_BINARY_COMPAT"
           ).foreach(k =>
             println(k.padTo(20, " ").mkString("") + " -> " + sys.env.get(k).getOrElse("None")))
 
-          val platformSuffix = if (isScalaJs) "JS" else ""
+          val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
 
           val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
           val binaryCompatProject = "binary-compat"
@@ -387,7 +398,7 @@ inThisBuild(
           Seq(
             setPublishVersion,
             List(s"$projectPrefix/clean"),
-            List(s"$testProjectPrefix/test"),
+            if (isScalaNative) List() else List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
             publishTask
           ).flatten
