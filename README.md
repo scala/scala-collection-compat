@@ -8,7 +8,7 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.1"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
 ```
 
 Version 2.0.0+ is compatible with Scala 2.13, 2.12, and 2.11.
@@ -53,7 +53,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.1"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.2"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
@@ -71,8 +71,8 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.1"
-libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.1"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.2"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
