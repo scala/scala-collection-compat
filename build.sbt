@@ -17,6 +17,8 @@ lazy val commonSettings = Seq(
   mimaPreviousVersion := Some("2.1.1"),
 )
 
+version in ThisBuild := "2.1.3-SNAPSHOT"
+
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
