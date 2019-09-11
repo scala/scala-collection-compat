@@ -17,6 +17,7 @@ import org.junit.Test
 
 import scala.collection.compat._
 import scala.collection.immutable.BitSet
+import scala.collection.mutable.PriorityQueue
 import scala.collection.LinearSeq
 
 class CollectionTest {
@@ -34,6 +35,10 @@ class CollectionTest {
     val b          = xs.to(BitSet) // we can fake a type constructor for the 2 standard BitSet types
     val bT: BitSet = b
     assertEquals(BitSet(1, 2, 3), b)
+
+    val c          = xs.to(PriorityQueue)
+    val cT: PriorityQueue[Int]  = c
+    assert(PriorityQueue(1, 2, 3) sameElements c)
 
     val ys = List(1 -> "a", 2 -> "b")
     val m  = ys.to(Map)
