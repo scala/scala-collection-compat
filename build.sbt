@@ -1,7 +1,7 @@
-import ScalaModulePlugin._
-import sbtcrossproject.{crossProject, CrossType}
 import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
-import sys.process._
+import com.lightbend.tools.scalamoduleplugin.ScalaModulePlugin._
+
+import scala.sys.process._
 
 lazy val commonSettings = Seq(
   headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
@@ -14,10 +14,8 @@ lazy val commonSettings = Seq(
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
                                                  |""".stripMargin)),
-  mimaPreviousVersion := Some("2.1.1"),
+  scalaModuleMimaPreviousVersion := Some("2.1.1"),
 )
-
-version in ThisBuild := "2.1.3-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -51,16 +49,6 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.8"
 lazy val scala213 = "2.13.0"
-
-scalaVersionsByJvm in ThisBuild := {
-  val all = List(scala211, scala212, scala213)
-  // Map[JvmMajorVersion, List[(ScalaVersion, UseForPublishing)]]
-  Map(
-    8  -> all.map(_ -> true),
-    11 -> all.map(_ -> false),
-    12 -> all.map(_ -> false)
-  )
-}
 
 /** Create an OSGi version range for standard Scala versioning
  * schemes that describes binary compatible versions. */
@@ -289,10 +277,9 @@ lazy val dontPublish = Seq(
   packagedArtifacts := Map.empty,
   publish := {},
   publishLocal := {},
-  mimaPreviousVersion := None,
+  scalaModuleMimaPreviousVersion := None,
 )
 
-val preRelease         = "preRelease"
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
@@ -300,43 +287,11 @@ val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").map(_.nonEmpty).getO
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
 val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
 val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
-val isRelease          = releaseVersion.nonEmpty
-
-val releaseCredentials =
-  if (isRelease) {
-    def env(key: String): String = Option(System.getenv(key)).getOrElse("")
-
-    Seq(
-      pgpPassphrase := Some(env("PGP_PASSPHRASE").toArray),
-      pgpPublicRing := file("admin/pubring.asc"),
-      pgpSecretRing := file("admin/secring.asc"),
-      credentials += Credentials("Sonatype Nexus Repository Manager",
-                                 "oss.sonatype.org",
-                                 env("SONA_USER"),
-                                 env("SONA_PASS"))
-    )
-  } else {
-    Seq()
-  }
-
-inThisBuild(releaseCredentials)
+val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
 
 // required by sbt-scala-module
 inThisBuild(
   Seq(
-    commands += Command.command(preRelease) { state =>
-      // Show Compat version, Scala version, and Java Version
-      val jvmVersion = Version.parse(sys.props("java.specification.version")).get.minor
-      releaseVersion match {
-        case Some(tagVersion) =>
-          println(
-            s"Releasing $tagVersion with Scala ${travisScalaVersion.get} on Java version $jvmVersion.")
-          // Copy pgp stuff
-          "admin/pre-release.sh" ! state.globalLogging.full
-        case None =>
-      }
-      state
-    },
     commands += Command.command("scalafmt-test") { state =>
       Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
       state
@@ -388,10 +343,18 @@ inThisBuild(
             releaseVersion.map("set every version := \"" + _ + "\"").toList
 
           val publishTask =
-            if (releaseVersion.nonEmpty && !isBinaryCompat) {
+            if (releaseVersion.nonEmpty && !isBinaryCompat && jdkVersion == Some(8)) {
+              // we cannot run "ci-release" because that reads the `CI_RELEASE` / `CI_SONATYPE_RELEASE`
+              // env vars, which we cannot modify from java (easily). so we inline what this command does.
+              CiReleasePlugin.setupGpg()
               List(
-                preRelease,
-                s"$projectPrefix/publishSigned"
+                // work around https://github.com/olafurpg/sbt-ci-release/issues/64
+                "set pgpSecretRing := pgpSecretRing.value",
+                "set pgpPublicRing := pgpPublicRing.value",
+                s"$projectPrefix/publishSigned",
+                "sonatypePrepare",
+                "sonatypeBundleUpload",
+                "sonatypeClose",
               )
             } else {
               Nil
