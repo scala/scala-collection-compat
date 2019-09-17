@@ -281,7 +281,7 @@ lazy val dontPublish = Seq(
 )
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
-val releaseVersion     = sys.env.get("TRAVIS_TAG").flatMap(Version.parse)
+val isTravisTag        = sys.env.get("TRAVIS_TAG").map(_.nonEmpty).getOrElse(false)
 val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
 val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").map(_.nonEmpty).getOrElse(false)
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
@@ -339,18 +339,12 @@ inThisBuild(
               compatProject
             }
 
-          val setPublishVersion =
-            releaseVersion.map("set every version := \"" + _ + "\"").toList
-
           val publishTask =
-            if (releaseVersion.nonEmpty && !isBinaryCompat && jdkVersion == Some(8)) {
+            if (isTravisTag && !isBinaryCompat && jdkVersion == Some(8)) {
               // we cannot run "ci-release" because that reads the `CI_RELEASE` / `CI_SONATYPE_RELEASE`
               // env vars, which we cannot modify from java (easily). so we inline what this command does.
               CiReleasePlugin.setupGpg()
               List(
-                // work around https://github.com/olafurpg/sbt-ci-release/issues/64
-                "set pgpSecretRing := pgpSecretRing.value",
-                "set pgpPublicRing := pgpPublicRing.value",
                 s"$projectPrefix/publishSigned",
                 "sonatypePrepare",
                 "sonatypeBundleUpload",
@@ -361,7 +355,6 @@ inThisBuild(
             }
 
           Seq(
-            setPublishVersion,
             List(s"$projectPrefix/clean"),
             if (isScalaNative) List() else List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
