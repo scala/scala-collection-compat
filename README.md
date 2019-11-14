@@ -44,7 +44,7 @@ The migration rules use scalafix. Please see the [official installation instruct
 ```scala
 // project/plugins.sbt
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.5")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.8")
 ```
 
 ### Collection213Upgrade
@@ -53,7 +53,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.2"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.1.1"
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
 
