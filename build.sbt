@@ -14,7 +14,12 @@ lazy val commonSettings = Seq(
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
                                                  |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := Some("2.1.1"),
+  scalaModuleMimaPreviousVersion := {
+    if(sys.env.get("SCALAJS_VERSION").exists(_.startsWith("1.0.0-M")))
+      None
+    else
+      Some("2.1.1")
+  }
 )
 
 lazy val root = project
