@@ -16,7 +16,7 @@ lazy val commonSettings = Seq(
                                                  |""".stripMargin)),
   scalaModuleMimaPreviousVersion := {
     // We need to create a release version first to use MiMa
-    if(sys.env.get("SCALAJS_VERSION").exists(_.startsWith("1.0.0-M")))
+    if(sys.env.get("SCALAJS_VERSION").forall(_.startsWith("1.0.0-")))
       None
     else
       Some("2.1.1")
