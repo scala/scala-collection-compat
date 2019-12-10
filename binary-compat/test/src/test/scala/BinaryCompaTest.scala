@@ -23,9 +23,16 @@ class BinaryCompaTest {
     Config.setup("foo", Array(oldClasspath, newClasspath))
     val mima        = new MiMaLib(Config.baseClassPath)
     val allProblems = mima.collectProblems(oldClasspath, newClasspath)
-    val msg = allProblems.iterator
+    val unexpectedDescriptions =
+      allProblems.iterator
         .map(_.description("new"))
-        .mkString(s"The following ${allProblems.size} problems were reported but not expected:\n  - ", "\n  - ", "\n")
-    Assert.assertEquals(msg, Nil, allProblems)
+        .map{x => println(x); x}
+        .filterNot(_ == "static method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in class org.example.Lib has a different signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;")
+        .filterNot(_ == "method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in object org.example.Lib has a different signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;")
+        .toList
+    val msg =
+      unexpectedDescriptions.mkString(
+        s"The following ${allProblems.size} problems were reported but not expected:\n  - ", "\n  - ", "\n")
+    Assert.assertEquals(msg, Nil, unexpectedDescriptions)
   }
 }

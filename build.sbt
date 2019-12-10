@@ -139,7 +139,7 @@ lazy val `binary-compat` = project
   .settings(commonSettings)
   .settings(
     scalaVersion := scala212,
-    libraryDependencies += "com.typesafe" %% "mima-reporter" % "0.3.0" % Test,
+    libraryDependencies += "com.typesafe" %% "mima-core" % "0.6.1" % Test,
     junit,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
