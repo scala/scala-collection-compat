@@ -351,6 +351,10 @@ inThisBuild(
               // env vars, which we cannot modify from java (easily). so we inline what this command does.
               CiReleasePlugin.setupGpg()
               List(
+                // same fix as https://github.com/olafurpg/sbt-ci-release/pull/66
+                // need to replicate it here since we're not using the `ci-release` command
+                "set pgpSecretRing := pgpSecretRing.value",
+                "set pgpPublicRing := pgpPublicRing.value",
                 s"$projectPrefix/publishSigned",
                 "sonatypePrepare",
                 "sonatypeBundleUpload",
