@@ -23,6 +23,9 @@ class BinaryCompaTest {
     Config.setup("foo", Array(oldClasspath, newClasspath))
     val mima        = new MiMaLib(Config.baseClassPath)
     val allProblems = mima.collectProblems(oldClasspath, newClasspath)
-    Assert.assertEquals(Nil, allProblems)
+    val msg = allProblems.iterator
+        .map(_.description("new"))
+        .mkString(s"The following ${allProblems.size} problems were reported but not expected:\n  - ", "\n  - ", "\n")
+    Assert.assertEquals(msg, Nil, allProblems)
   }
 }
