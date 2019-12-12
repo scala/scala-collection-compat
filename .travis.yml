@@ -23,15 +23,15 @@ matrix:
 
     # run migration test
     - scala: 2.12.8
-      env: TEST_SCALAFIX=true           ADOPTOPENJDK=11
+      env: TEST_SCALAFIX=true           ADOPTOPENJDK=8
 
     # run binary compatibility test
     - scala: 2.12.8
-      env: TEST_BINARY_COMPAT=true      ADOPTOPENJDK=11
+      env: TEST_BINARY_COMPAT=true      ADOPTOPENJDK=8
 
     # run scalafmt
     - scala: 2.12.8
-      env: TEST_SCALAFMT=true           ADOPTOPENJDK=11
+      env: TEST_SCALAFMT=true           ADOPTOPENJDK=8
 
     # Scala Native includes
     - scala: 2.11.12
