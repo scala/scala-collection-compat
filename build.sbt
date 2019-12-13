@@ -47,8 +47,8 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.8"
-lazy val scala213 = "2.13.0"
+lazy val scala212 = "2.12.10"
+lazy val scala213 = "2.13.1"
 
 /** Create an OSGi version range for standard Scala versioning
  * schemes that describes binary compatible versions. */
@@ -139,7 +139,7 @@ lazy val `binary-compat` = project
   .settings(commonSettings)
   .settings(
     scalaVersion := scala212,
-    libraryDependencies += "com.typesafe" %% "mima-reporter" % "0.3.0" % Test,
+    libraryDependencies += "com.typesafe" %% "mima-core" % "0.6.1" % Test,
     junit,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](

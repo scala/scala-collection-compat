@@ -6,8 +6,8 @@ language: scala
 
 scala:
   - 2.11.12
-  - 2.12.8
-  - 2.13.0
+  - 2.12.10
+  - 2.13.1
 
 env:
   - SCALAJS_VERSION=          ADOPTOPENJDK=8
@@ -22,15 +22,15 @@ matrix:
   include:
 
     # run migration test
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: TEST_SCALAFIX=true           ADOPTOPENJDK=8
 
     # run binary compatibility test
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: TEST_BINARY_COMPAT=true      ADOPTOPENJDK=8
 
     # run scalafmt
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: TEST_SCALAFMT=true           ADOPTOPENJDK=8
 
     # Scala Native includes
