@@ -246,7 +246,12 @@ class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends
 class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
     private val self: IterableView[(K, V), C])
     extends AnyVal {
+
   def mapValues[W, That](f: V => W)(
       implicit bf: CanBuildFrom[IterableView[(K, V), C], (K, W), That]): That =
     self.map[(K, W), That] { case (k, v) => (k, f(v)) }
+
+  def filterKeys[That](p: K => Boolean)(
+      implicit bf: CanBuildFrom[IterableView[(K, V), C], (K, V), That]): That =
+    self.collect[(K, V), That] { case (k, v) if p(k) => (k, v) }
 }
