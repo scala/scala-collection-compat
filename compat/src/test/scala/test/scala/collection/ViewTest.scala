@@ -27,4 +27,12 @@ class ViewTest {
     assertEquals(oldStyle.toMap, newStyle.toMap)
   }
 
+  @Test
+  def filterKeys: Unit = {
+    val m        = Map("a" -> 1, "b" -> 2, "c" -> 3)
+    val oldStyle = m.filterKeys(_ > "a")
+    val newStyle = m.view.filterKeys(_ > "a")
+    assertEquals(oldStyle.toMap, newStyle.toMap)
+  }
+
 }
