@@ -12,6 +12,7 @@
 
 package scala.collection
 
+import scala.collection.generic.IsTraversableLike
 import scala.collection.{mutable => m}
 
 package object compat extends compat.PackageShared {
@@ -24,4 +25,9 @@ package object compat extends compat.PackageShared {
     def from[K: Ordering, V](source: TraversableOnce[(K, V)]): m.SortedMap[K, V] =
       build(m.SortedMap.newBuilder[K, V], source)
   }
+
+  implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
+    implicit traversable: IsTraversableLike[Repr])
+  : TraversableLikeExtensionMethods[traversable.A, Repr] =
+    new TraversableLikeExtensionMethods[traversable.A, Repr](traversable.conversion(self))
 }

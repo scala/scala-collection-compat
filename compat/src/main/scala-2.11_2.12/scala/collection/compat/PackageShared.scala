@@ -243,6 +243,36 @@ class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends
   def iterableFactory: GenericCompanion[Traversable] = self.companion
 }
 
+class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversableLike[A, Repr])
+    extends AnyVal {
+
+  def groupMap[K, B, That](key: A => K)(f: A => B)(
+      implicit bf: CanBuildFrom[Repr, B, That]): Map[K, That] = {
+    val map = m.Map.empty[K, m.Builder[B, That]]
+    for (elem <- self) {
+      val k    = key(elem)
+      val bldr = map.getOrElseUpdate(k, bf(self.repr))
+      bldr += f(elem)
+    }
+    val res = Map.newBuilder[K, That]
+    for ((k, bldr) <- map) res += ((k, bldr.result()))
+    res.result()
+  }
+
+  def groupMapReduce[K, B](key: A => K)(f: A => B)(reduce: (B, B) => B): Map[K, B] = {
+    val map = m.Map.empty[K, B]
+    for (elem <- self) {
+      val k = key(elem)
+      val v = map.get(k) match {
+        case Some(b) => reduce(b, f(elem))
+        case None => f(elem)
+      }
+      map.put(k, v)
+    }
+    map.toMap
+  }
+}
+
 class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
     private val self: IterableView[(K, V), C])
     extends AnyVal {
