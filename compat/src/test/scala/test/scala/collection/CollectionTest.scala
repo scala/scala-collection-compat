@@ -110,4 +110,54 @@ class CollectionTest {
     stream.force
     assertEquals(18, count)
   }
+
+  @Test
+  def sizeCompare(): Unit = {
+    assertTrue(Set(1, 2, 3).sizeCompare(4) < 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(2) > 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(3) == 0)
+
+    assertTrue(List(1, 2, 3).sizeCompare(4) < 0)
+    assertTrue(List(1, 2, 3).sizeCompare(2) > 0)
+    assertTrue(List(1, 2, 3).sizeCompare(3) == 0)
+
+    assertTrue(Set(1, 2, 3).sizeCompare(List(1, 2, 3, 4)) < 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(List(1, 2)) > 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(List(1, 2, 3)) == 0)
+
+    assertTrue(Set(1, 2, 3).sizeCompare(Vector(1, 2, 3, 4)) < 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(Vector(1, 2)) > 0)
+    assertTrue(Set(1, 2, 3).sizeCompare(Vector(1, 2, 3)) == 0)
+
+    assertTrue(Vector(1, 2, 3).sizeCompare(Set(1, 2, 3, 4)) < 0)
+    assertTrue(Vector(1, 2, 3).sizeCompare(Set(1, 2)) > 0)
+    assertTrue(Vector(1, 2, 3).sizeCompare(Set(1, 2, 3)) == 0)
+  }
+
+  @Test
+  def sizeIsLengthIs(): Unit = {
+    assertTrue(Set(1, 2, 3).sizeIs < 4)
+    assertTrue(Set(1, 2, 3).sizeIs <= 4)
+    assertTrue(Set(1, 2, 3).sizeIs <= 3)
+    assertTrue(Set(1, 2, 3).sizeIs == 3)
+    assertTrue(Set(1, 2, 3).sizeIs >= 3)
+    assertTrue(Set(1, 2, 3).sizeIs >= 2)
+    assertTrue(Set(1, 2, 3).sizeIs > 2)
+
+    assertTrue(List(1, 2, 3).sizeIs < 4)
+    assertTrue(List(1, 2, 3).sizeIs <= 4)
+    assertTrue(List(1, 2, 3).sizeIs <= 3)
+    assertTrue(List(1, 2, 3).sizeIs == 3)
+    assertTrue(List(1, 2, 3).sizeIs >= 3)
+    assertTrue(List(1, 2, 3).sizeIs >= 2)
+    assertTrue(List(1, 2, 3).sizeIs > 2)
+
+    assertTrue(List(1, 2, 3).lengthIs < 4)
+    assertTrue(List(1, 2, 3).lengthIs <= 4)
+    assertTrue(List(1, 2, 3).lengthIs <= 3)
+    assertTrue(List(1, 2, 3).lengthIs == 3)
+    assertTrue(List(1, 2, 3).lengthIs >= 3)
+    assertTrue(List(1, 2, 3).lengthIs >= 2)
+    assertTrue(List(1, 2, 3).lengthIs > 2)
+  }
 }
