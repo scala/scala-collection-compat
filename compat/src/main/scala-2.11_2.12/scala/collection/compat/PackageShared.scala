@@ -19,7 +19,7 @@ import scala.collection.{immutable => i, mutable => m}
 import scala.{collection => c}
 
 /** The collection compatibility API */
-private[compat] trait PackageShared {
+private[compat] class PackageShared {
   import CompatImpl._
 
   /**
