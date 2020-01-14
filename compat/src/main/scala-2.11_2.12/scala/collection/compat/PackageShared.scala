@@ -233,6 +233,7 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
     self.sameElements(that.iterator)
   }
   def concat[B >: A](that: c.TraversableOnce[B]): c.TraversableOnce[B] = self ++ that
+  def tapEach[U](f: A => U): c.Iterator[A] = self.map(a => { f(a); a })
 }
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
@@ -245,6 +246,8 @@ class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends
 
 class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversableLike[A, Repr])
     extends AnyVal {
+  def tapEach[U](f: A => U)(implicit bf: CanBuildFrom[Repr, A, Repr]): Repr =
+    self.map(a => { f(a); a })
 
   def groupMap[K, B, That](key: A => K)(f: A => B)(
       implicit bf: CanBuildFrom[Repr, B, That]): Map[K, That] = {

@@ -95,4 +95,19 @@ class CollectionTest {
       .groupMapReduce(_.length)(_ => 1)(_ + _)
     assertEquals(Map(3 -> 3, 4 -> 1), res)
   }
+
+  @Test
+  def tapEach(): Unit = {
+    var count = 0
+    val it = Iterator(1, 2, 3).tapEach(count += _)
+    assertEquals(0, count)
+    it.foreach(_ => ())
+    assertEquals(6, count)
+    List(1, 2, 3).tapEach(count += _)
+    assertEquals(12, count)
+    val stream = Stream(1, 2, 3).tapEach(count += _)
+    assertEquals(13, count)
+    stream.force
+    assertEquals(18, count)
+  }
 }
