@@ -81,4 +81,18 @@ class CollectionTest {
     assertFalse(it1.iterator.sameElements(it2))
     assertTrue(it2.iterator.sameElements(it3))
   }
+
+  @Test
+  def groupMap(): Unit = {
+    val res = Seq("foo", "test", "bar", "baz")
+      .groupMap(_.length)(_.toUpperCase())
+    assertEquals(Map(3 -> Seq("FOO", "BAR", "BAZ"), 4 -> Seq("TEST")), res)
+  }
+
+  @Test
+  def groupMapReduce(): Unit = {
+    val res = Seq("foo", "test", "bar", "baz")
+      .groupMapReduce(_.length)(_ => 1)(_ + _)
+    assertEquals(Map(3 -> 3, 4 -> 1), res)
+  }
 }

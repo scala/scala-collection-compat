@@ -12,4 +12,11 @@
 
 package scala.collection
 
-package object compat extends compat.PackageShared
+import scala.collection.generic.IsTraversableLike
+
+package object compat extends compat.PackageShared {
+  implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
+    implicit traversable: IsTraversableLike[Repr])
+  : TraversableLikeExtensionMethods[traversable.A, Repr] =
+    new TraversableLikeExtensionMethods[traversable.A, Repr](traversable.conversion(self))
+}
