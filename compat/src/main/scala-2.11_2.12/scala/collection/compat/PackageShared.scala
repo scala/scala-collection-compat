@@ -354,7 +354,15 @@ class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
       implicit bf: CanBuildFrom[IterableView[(K, V), C], (K, W), That]): That =
     self.map[(K, W), That] { case (k, v) => (k, f(v)) }
 
-  def filterKeys[That](p: K => Boolean)(
-      implicit bf: CanBuildFrom[IterableView[(K, V), C], (K, V), That]): That =
-    self.collect[(K, V), That] { case (k, v) if p(k) => (k, v) }
+  // TODO: Replace the current implementation of `mapValues` with this
+  //       after major version bump when bincompat can be broken.
+  //       At the same time, remove `canBuildFromIterableViewMapLike`
+  /*
+  def mapValues[W](f: V => W): IterableView[(K, W), C] =
+    // the implementation of `self.map` also casts the result
+    self.map({ case (k, v) => (k, f(v)) }).asInstanceOf[IterableView[(K, W), C]]
+   */
+
+  def filterKeys(p: K => Boolean): IterableView[(K, V), C] =
+    self.filter { case (k, _) => p(k) }
 }
