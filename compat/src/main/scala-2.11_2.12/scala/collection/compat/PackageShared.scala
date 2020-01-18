@@ -242,6 +242,76 @@ class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A])
 
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
   def iterableFactory: GenericCompanion[Traversable] = self.companion
+
+  def sizeCompare(otherSize: Int): Int         = SizeCompareImpl.sizeCompareInt(self)(otherSize)
+  def sizeIs: SizeCompareOps                   = new SizeCompareOps(self)
+  def sizeCompare(that: c.Traversable[_]): Int = SizeCompareImpl.sizeCompareColl(self)(that)
+}
+
+class SeqExtensionMethods[A](private val self: c.Seq[A]) extends AnyVal {
+  def lengthIs: SizeCompareOps = new SizeCompareOps(self)
+}
+
+class SizeCompareOps private[compat] (private val it: c.Traversable[_]) extends AnyVal {
+  import SizeCompareImpl._
+
+  /** Tests if the size of the collection is less than some value. */
+  @inline def <(size: Int): Boolean = sizeCompareInt(it)(size) < 0
+
+  /** Tests if the size of the collection is less than or equal to some value. */
+  @inline def <=(size: Int): Boolean = sizeCompareInt(it)(size) <= 0
+
+  /** Tests if the size of the collection is equal to some value. */
+  @inline def ==(size: Int): Boolean = sizeCompareInt(it)(size) == 0
+
+  /** Tests if the size of the collection is not equal to some value. */
+  @inline def !=(size: Int): Boolean = sizeCompareInt(it)(size) != 0
+
+  /** Tests if the size of the collection is greater than or equal to some value. */
+  @inline def >=(size: Int): Boolean = sizeCompareInt(it)(size) >= 0
+
+  /** Tests if the size of the collection is greater than some value. */
+  @inline def >(size: Int): Boolean = sizeCompareInt(it)(size) > 0
+}
+
+private object SizeCompareImpl {
+  def sizeCompareInt(self: c.Traversable[_])(otherSize: Int): Int =
+    self match {
+      case self: c.SeqLike[_, _] => self.lengthCompare(otherSize)
+      case _ =>
+        if (otherSize < 0) 1
+        else {
+          var i  = 0
+          val it = self.toIterator
+          while (it.hasNext) {
+            if (i == otherSize) return 1
+            it.next()
+            i += 1
+          }
+          i - otherSize
+        }
+    }
+
+  // `IndexedSeq` is the only thing that we can safely say has a known size
+  def sizeCompareColl(self: c.Traversable[_])(that: c.Traversable[_]): Int =
+    that match {
+      case that: c.IndexedSeq[_] => sizeCompareInt(self)(that.length)
+      case _ =>
+        self match {
+          case self: c.IndexedSeq[_] =>
+            val res = sizeCompareInt(that)(self.length)
+            // can't just invert the result, because `-Int.MinValue == Int.MinValue`
+            if (res == Int.MinValue) 1 else -res
+          case _ =>
+            val thisIt = self.toIterator
+            val thatIt = that.toIterator
+            while (thisIt.hasNext && thatIt.hasNext) {
+              thisIt.next()
+              thatIt.next()
+            }
+            java.lang.Boolean.compare(thisIt.hasNext, thatIt.hasNext)
+        }
+    }
 }
 
 class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversableLike[A, Repr])

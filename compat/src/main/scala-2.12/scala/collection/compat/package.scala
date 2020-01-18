@@ -13,6 +13,7 @@
 package scala.collection
 
 import scala.collection.generic.IsTraversableLike
+import scala.{collection => c}
 import scala.collection.{mutable => m}
 
 package object compat extends compat.PackageShared {
@@ -27,7 +28,10 @@ package object compat extends compat.PackageShared {
   }
 
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
-    implicit traversable: IsTraversableLike[Repr])
-  : TraversableLikeExtensionMethods[traversable.A, Repr] =
+      implicit traversable: IsTraversableLike[Repr])
+    : TraversableLikeExtensionMethods[traversable.A, Repr] =
     new TraversableLikeExtensionMethods[traversable.A, Repr](traversable.conversion(self))
+
+  implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
+    new SeqExtensionMethods[A](self)
 }
