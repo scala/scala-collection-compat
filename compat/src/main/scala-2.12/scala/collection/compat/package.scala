@@ -12,7 +12,7 @@
 
 package scala.collection
 
-import scala.collection.generic.IsTraversableLike
+import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
 import scala.{collection => c}
 import scala.collection.{mutable => m}
 
@@ -26,6 +26,11 @@ package object compat extends compat.PackageShared {
     def from[K: Ordering, V](source: TraversableOnce[(K, V)]): m.SortedMap[K, V] =
       build(m.SortedMap.newBuilder[K, V], source)
   }
+
+  implicit def genericOrderedCompanionToCBF[A, CC[X] <: Traversable[X]](
+      fact: GenericOrderedCompanion[CC])(
+      implicit ordering: Ordering[A]): CanBuildFrom[Any, A, CC[A]] =
+    CompatImpl.simpleCBF(fact.newBuilder[A])
 
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
       implicit traversable: IsTraversableLike[Repr])

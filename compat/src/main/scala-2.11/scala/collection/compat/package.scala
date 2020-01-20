@@ -12,10 +12,15 @@
 
 package scala.collection
 
-import scala.collection.generic.IsTraversableLike
+import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
 import scala.{collection => c}
 
 package object compat extends compat.PackageShared {
+  implicit def genericOrderedCompanionToCBF[A, CC[X] <: Traversable[X]](
+      fact: GenericOrderedCompanion[CC])(
+      implicit ordering: Ordering[A]): CanBuildFrom[Any, A, CC[A]] =
+    CompatImpl.simpleCBF(fact.newBuilder[A])
+
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
       implicit traversable: IsTraversableLike[Repr])
     : TraversableLikeExtensionMethods[traversable.A, Repr] =
