@@ -1,7 +1,7 @@
 package test.scala.collection
 
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
 import scala.collection.compat.immutable.LazyList
 import scala.ref.WeakReference
@@ -9,6 +9,7 @@ import scala.util.Try
 
 // TODO: fill this out with all relevant LazyList methods
 class LazyListGCTest {
+
   /** Test helper to verify that the given LazyList operation allows
    * GC of the head during processing of the tail.
    */
@@ -19,19 +20,19 @@ class LazyListGCTest {
     // A LazyList of 500 elements at most. We will test that the head can be collected
     // while processing the tail. After each element we will GC and wait 10 ms, so a
     // failure to collect will take roughly 5 seconds.
-    val ref = WeakReference( LazyList.from(1).take(500) )
+    val ref = WeakReference(LazyList.from(1).take(500))
 
     def gcAndThrowIfCollected(n: Int): Unit = {
-      System.gc()                                                   // try to GC
-      Thread.sleep(10)                                              // give it 10 ms
+      System.gc()      // try to GC
+      Thread.sleep(10) // give it 10 ms
       if (ref.get.isEmpty) throw new RuntimeException(msgSuccessGC) // we're done if head collected
       f(n)
     }
 
-    val res = Try { op(ref(), gcAndThrowIfCollected) }.failed       // success is indicated by an
-    val msg = res.map(_.getMessage).getOrElse(msgFailureGC)         // exception with expected message
+    val res = Try { op(ref(), gcAndThrowIfCollected) }.failed // success is indicated by an
+    val msg = res.map(_.getMessage).getOrElse(msgFailureGC) // exception with expected message
     // failure is indicated by no
-    assertTrue(msg == msgSuccessGC)                                 // exception, or one with different message
+    assertTrue(msg == msgSuccessGC) // exception, or one with different message
   }
 
   @Test
@@ -66,12 +67,15 @@ class LazyListGCTest {
 
   @Test
   def collect_headOption_allowsGC(): Unit = {
-    assertLazyListOpAllowsGC((ll, check) => ll.collect({ case i if { check(i); false } => i }).headOption, _ => ())
+    assertLazyListOpAllowsGC(
+      (ll, check) => ll.collect({ case i if { check(i); false } => i }).headOption,
+      _ => ())
   }
 
   @Test // scala/bug#11443
   def collectFirst_allowsGC(): Unit = {
-    assertLazyListOpAllowsGC((ll, check) => ll.collectFirst({ case i if { check(i); false } => i }), _ => ())
+    assertLazyListOpAllowsGC((ll, check) => ll.collectFirst({ case i if { check(i); false } => i }),
+                             _ => ())
   }
 
   @Test
@@ -101,7 +105,8 @@ class LazyListGCTest {
 
   @Test
   def dropWhile_headOption_allowsGC(): Unit = {
-    assertLazyListOpAllowsGC((ll, check) => ll.dropWhile(i => {check(i); i < 1000000}).headOption, _ => ())
+    assertLazyListOpAllowsGC((ll, check) => ll.dropWhile(i => { check(i); i < 1000000 }).headOption,
+                             _ => ())
   }
 
   @Test
