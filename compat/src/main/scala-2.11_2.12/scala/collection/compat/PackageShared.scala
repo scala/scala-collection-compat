@@ -329,6 +329,21 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
   def tapEach[U](f: A => U)(implicit bf: CanBuildFrom[Repr, A, Repr]): Repr =
     self.map(a => { f(a); a })
 
+  def partitionMap[A1, A2, That, Repr1, Repr2](f: A => Either[A1, A2])(
+      implicit bf1: CanBuildFrom[Repr, A1, Repr1],
+      bf2: CanBuildFrom[Repr, A2, Repr2]
+  ): (Repr1, Repr2) = {
+    val l = bf1()
+    val r = bf2()
+    self.foreach { x =>
+      f(x) match {
+        case Left(x1)  => l += x1
+        case Right(x2) => r += x2
+      }
+    }
+    (l.result(), r.result())
+  }
+
   def groupMap[K, B, That](key: A => K)(f: A => B)(
       implicit bf: CanBuildFrom[Repr, B, That]): Map[K, That] = {
     val map = m.Map.empty[K, m.Builder[B, That]]
@@ -391,4 +406,9 @@ class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
 
   def filterKeys(p: K => Boolean): IterableView[(K, V), C] =
     self.filter { case (k, _) => p(k) }
+}
+
+class ImmutableQueueExtensionMethods[A](private val self: i.Queue[A]) extends AnyVal {
+  def enqueueAll[B >: A](iter: c.Iterable[B]): i.Queue[B] =
+    self.enqueue(iter.to[i.Iterable])
 }

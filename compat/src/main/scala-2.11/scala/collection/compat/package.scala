@@ -13,7 +13,9 @@
 package scala.collection
 
 import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
+
 import scala.runtime.Tuple2Zipped
+import scala.collection.{immutable => i}
 import scala.{collection => c}
 
 package object compat extends compat.PackageShared {
@@ -49,4 +51,8 @@ package object compat extends compat.PackageShared {
 	implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self: Tuple2Zipped[El1, Repr1, El2, Repr2])
 	: Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
 		new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
+  implicit def toImmutableQueueExtensionMethods[A](
+      self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
+    new ImmutableQueueExtensionMethods[A](self)
+
 }
