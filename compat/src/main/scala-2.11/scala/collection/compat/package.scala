@@ -32,7 +32,7 @@ package object compat extends compat.PackageShared {
       // `CanBuildFrom` parameters are used as type constraints, they are not used
       // at run-time, hence the dummy builder implementations
       def apply(from: IterableView[(K, V), CC[K, V]]) = new TraversableView.NoBuilder
-      def apply() = new TraversableView.NoBuilder
+      def apply()                                     = new TraversableView.NoBuilder
     }
 
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
@@ -43,14 +43,16 @@ package object compat extends compat.PackageShared {
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
     new SeqExtensionMethods[A](self)
 
-	implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
-		implicit w1: T1 => TraversableLike[El1, Repr1])
-	: TrulyTraversableLikeExtensionMethods[T1, El1, Repr1] =
-		new TrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self)
+  implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
+      implicit w1: T1 => TraversableLike[El1, Repr1]
+  ): TrulyTraversableLikeExtensionMethods[El1, Repr1] =
+    new TrulyTraversableLikeExtensionMethods[El1, Repr1](w1(self))
 
-	implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self: Tuple2Zipped[El1, Repr1, El2, Repr2])
-	: Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
-		new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
+  implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](
+      self: Tuple2Zipped[El1, Repr1, El2, Repr2]
+  ): Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
+    new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
+
   implicit def toImmutableQueueExtensionMethods[A](
       self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
     new ImmutableQueueExtensionMethods[A](self)
