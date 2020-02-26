@@ -233,7 +233,7 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
     self.sameElements(that.iterator)
   }
   def concat[B >: A](that: c.TraversableOnce[B]): c.TraversableOnce[B] = self ++ that
-  def tapEach[U](f: A => U): c.Iterator[A] = self.map(a => { f(a); a })
+  def tapEach[U](f: A => U): c.Iterator[A]                             = self.map(a => { f(a); a })
 }
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
@@ -319,6 +319,21 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
   def tapEach[U](f: A => U)(implicit bf: CanBuildFrom[Repr, A, Repr]): Repr =
     self.map(a => { f(a); a })
 
+  def partitionMap[A1, A2, That, Repr1, Repr2](f: A => Either[A1, A2])(
+      implicit bf1: CanBuildFrom[Repr, A1, Repr1],
+      bf2: CanBuildFrom[Repr, A2, Repr2]
+  ): (Repr1, Repr2) = {
+    val l = bf1()
+    val r = bf2()
+    self.foreach { x =>
+      f(x) match {
+        case Left(x1)  => l += x1
+        case Right(x2) => r += x2
+      }
+    }
+    (l.result(), r.result())
+  }
+
   def groupMap[K, B, That](key: A => K)(f: A => B)(
       implicit bf: CanBuildFrom[Repr, B, That]): Map[K, That] = {
     val map = m.Map.empty[K, m.Builder[B, That]]
@@ -338,7 +353,7 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
       val k = key(elem)
       val v = map.get(k) match {
         case Some(b) => reduce(b, f(elem))
-        case None => f(elem)
+        case None    => f(elem)
       }
       map.put(k, v)
     }
