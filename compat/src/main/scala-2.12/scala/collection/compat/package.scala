@@ -18,7 +18,6 @@ import scala.collection.{mutable => m}
 import scala.runtime.Tuple2Zipped
 import scala.collection.{immutable => i, mutable => m}
 
-
 package object compat extends compat.PackageShared {
   implicit class MutableTreeMapExtensions2(private val fact: m.TreeMap.type) extends AnyVal {
     def from[K: Ordering, V](source: TraversableOnce[(K, V)]): m.TreeMap[K, V] =
@@ -38,12 +37,13 @@ package object compat extends compat.PackageShared {
   // CanBuildFrom instances for `IterableView[(K, V), Map[K, V]]` that preserve
   // the strict type of the view to be `Map` instead of `Iterable`
   // Instances produced by this method are used to chain `filterKeys` after `mapValues`
-  implicit def canBuildFromIterableViewMapLike[K, V, L, W, CC[X, Y] <: Map[X, Y]]: CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] =
+  implicit def canBuildFromIterableViewMapLike[K, V, L, W, CC[X, Y] <: Map[X, Y]]
+    : CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] =
     new CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] {
       // `CanBuildFrom` parameters are used as type constraints, they are not used
       // at run-time, hence the dummy builder implementations
       def apply(from: IterableView[(K, V), CC[K, V]]) = new TraversableView.NoBuilder
-      def apply() = new TraversableView.NoBuilder
+      def apply()                                     = new TraversableView.NoBuilder
     }
 
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
@@ -54,17 +54,17 @@ package object compat extends compat.PackageShared {
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
     new SeqExtensionMethods[A](self)
 
-	implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
-		implicit w1: T1 => TraversableLike[El1, Repr1])
-	: TrulyTraversableLikeExtensionMethods[T1, El1, Repr1] =
-		new TrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self)
+  implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
+      implicit w1: T1 => TraversableLike[El1, Repr1]
+  ): TrulyTraversableLikeExtensionMethods[El1, Repr1] =
+    new TrulyTraversableLikeExtensionMethods[El1, Repr1](w1(self))
 
-	implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self: Tuple2Zipped[El1, Repr1, El2, Repr2])
-	: Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
-		new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
+  implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](
+      self: Tuple2Zipped[El1, Repr1, El2, Repr2])
+    : Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
+    new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
 
   implicit def toImmutableQueueExtensionMethods[A](
       self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
     new ImmutableQueueExtensionMethods[A](self)
 }
-
