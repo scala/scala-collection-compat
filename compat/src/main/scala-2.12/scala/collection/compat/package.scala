@@ -15,6 +15,7 @@ package scala.collection
 import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
 import scala.{collection => c}
 import scala.collection.{mutable => m}
+import scala.runtime.Tuple2Zipped
 
 package object compat extends compat.PackageShared {
   implicit class MutableTreeMapExtensions2(private val fact: m.TreeMap.type) extends AnyVal {
@@ -50,4 +51,14 @@ package object compat extends compat.PackageShared {
 
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
     new SeqExtensionMethods[A](self)
+
+	implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
+		implicit w1: T1 => TraversableLike[El1, Repr1])
+	: TrulyTraversableLikeExtensionMethods[T1, El1, Repr1] =
+		new TrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self)
+
+	implicit def toTuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self: Tuple2Zipped[El1, Repr1, El2, Repr2])
+	: Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2] =
+		new Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](self)
 }
+
