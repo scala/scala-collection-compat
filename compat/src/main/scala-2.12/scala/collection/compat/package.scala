@@ -14,7 +14,7 @@ package scala.collection
 
 import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
 import scala.{collection => c}
-import scala.collection.{mutable => m}
+import scala.collection.{immutable => i, mutable => m}
 
 package object compat extends compat.PackageShared {
   implicit class MutableTreeMapExtensions2(private val fact: m.TreeMap.type) extends AnyVal {
@@ -50,4 +50,8 @@ package object compat extends compat.PackageShared {
 
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
     new SeqExtensionMethods[A](self)
+
+  implicit def toImmutableQueueExtensionMethods[A](
+      self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
+    new ImmutableQueueExtensionMethods[A](self)
 }
