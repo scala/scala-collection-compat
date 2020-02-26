@@ -36,8 +36,8 @@ class CollectionTest {
     val bT: BitSet = b
     assertEquals(BitSet(1, 2, 3), b)
 
-    val c          = xs.to(PriorityQueue)
-    val cT: PriorityQueue[Int]  = c
+    val c                      = xs.to(PriorityQueue)
+    val cT: PriorityQueue[Int] = c
     assert(PriorityQueue(1, 2, 3) sameElements c)
 
     val ys = List(1 -> "a", 2 -> "b")
@@ -48,8 +48,8 @@ class CollectionTest {
     assertTrue(m.isInstanceOf[Map[_, _]])
 
     // Stream.to(Seq) doesn't evaluate the stream
-    val strm = 1 #:: {throw new Exception("not lazy")} #:: Stream.empty[Int]
-    val strmsq: Seq[Int] = strm.to(Seq)
+    val strm                   = 1 #:: { throw new Exception("not lazy") } #:: Stream.empty[Int]
+    val strmsq: Seq[Int]       = strm.to(Seq)
     var strmln: LinearSeq[Int] = strm.to(LinearSeq)
   }
 
@@ -102,9 +102,22 @@ class CollectionTest {
   }
 
   @Test
+  def partitionMapTest(): Unit = {
+    val empty = Seq.empty[Int].partitionMap(Right(_))
+    assertEquals((Seq(), Seq()), empty)
+
+    val res = Seq("foo", "test", "bar", "baz")
+      .partitionMap {
+        case s if s.contains("a") => Left(s)
+        case s                    => Right(s.length)
+      }
+    assertEquals((Seq("bar", "baz"), Seq("foo".length, "test".length)), res)
+  }
+
+  @Test
   def tapEach(): Unit = {
     var count = 0
-    val it = Iterator(1, 2, 3).tapEach(count += _)
+    val it    = Iterator(1, 2, 3).tapEach(count += _)
     assertEquals(0, count)
     it.foreach(_ => ())
     assertEquals(6, count)
