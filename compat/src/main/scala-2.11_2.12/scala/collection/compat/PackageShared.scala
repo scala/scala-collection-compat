@@ -14,8 +14,17 @@ package scala.collection.compat
 
 import scala.collection.generic._
 import scala.reflect.ClassTag
-import scala.collection.{MapLike, GenTraversable, BitSet, IterableView}
-import scala.collection.{immutable => i, mutable => m}
+import scala.collection.{
+  BitSet,
+  GenTraversable,
+  IterableLike,
+  IterableView,
+  MapLike,
+  TraversableLike,
+  immutable => i,
+  mutable => m
+}
+import scala.runtime.{Tuple2Zipped, Tuple3Zipped}
 import scala.{collection => c}
 
 /** The collection compatibility API */
@@ -246,6 +255,7 @@ class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends
   def sizeCompare(otherSize: Int): Int         = SizeCompareImpl.sizeCompareInt(self)(otherSize)
   def sizeIs: SizeCompareOps                   = new SizeCompareOps(self)
   def sizeCompare(that: c.Traversable[_]): Int = SizeCompareImpl.sizeCompareColl(self)(that)
+
 }
 
 class SeqExtensionMethods[A](private val self: c.Seq[A]) extends AnyVal {
@@ -359,6 +369,22 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
     }
     map.toMap
   }
+}
+
+class TrulyTraversableLikeExtensionMethods[T1, El1, Repr1](private val self: T1) extends AnyVal {
+  def lazyZip[El2, Repr2, T2](t2: T2)(
+      implicit w: T1 => TraversableLike[El1, Repr1],
+      w2: T2 => IterableLike[El2, Repr2]): Tuple2Zipped[El1, Repr1, El2, Repr2] =
+    new Tuple2Zipped((w(self), t2))
+
+}
+
+class Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](private val self: Tuple2Zipped[El1, Repr1, El2, Repr2]) {
+  def lazyZip[El3, Repr3, T3](t3: T3)(implicit w3: T3 => IterableLike[El3, Repr3])
+    : Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] = {
+
+		new Tuple3Zipped((self.colls._1, self.colls._2, t3))
+	}
 }
 
 class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
