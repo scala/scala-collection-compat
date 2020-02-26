@@ -381,3 +381,8 @@ class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
   def filterKeys(p: K => Boolean): IterableView[(K, V), C] =
     self.filter { case (k, _) => p(k) }
 }
+
+class ImmutableQueueExtensionMethods[A](private val self: i.Queue[A]) extends AnyVal {
+  def enqueueAll[B >: A](iter: c.Iterable[B]): i.Queue[B] =
+    self.enqueue(iter.to[i.Iterable])
+}

@@ -13,6 +13,7 @@
 package scala.collection
 
 import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
+import scala.collection.{immutable => i}
 import scala.{collection => c}
 
 package object compat extends compat.PackageShared {
@@ -39,4 +40,8 @@ package object compat extends compat.PackageShared {
 
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
     new SeqExtensionMethods[A](self)
+
+  implicit def toImmutableQueueExtensionMethods[A](
+      self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
+    new ImmutableQueueExtensionMethods[A](self)
 }
