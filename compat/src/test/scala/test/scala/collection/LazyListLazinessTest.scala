@@ -869,7 +869,7 @@ class LazyListLazinessTest {
     }
     object CustomLong {
       import scala.language.implicitConversions
-      def apply(value: Long): CustomLong = new CustomLong(value)
+      def apply(value: Long): CustomLong                   = new CustomLong(value)
       implicit def long2CustomLong(long: Long): CustomLong = apply(long)
 
       implicit val customIntegralIsIntegral: Integral[CustomLong] = new Integral[CustomLong] {

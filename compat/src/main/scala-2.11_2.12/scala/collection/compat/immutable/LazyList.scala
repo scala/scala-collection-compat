@@ -16,8 +16,22 @@ import java.io.{ObjectInputStream, ObjectOutputStream}
 
 import scala.annotation.tailrec
 import scala.annotation.unchecked.{uncheckedVariance => uV}
-import scala.collection.{AbstractIterator, AbstractSeq, GenIterable, GenSeq, GenTraversableOnce, LinearSeqOptimized, mutable}
-import scala.collection.generic.{CanBuildFrom, FilterMonadic, GenericCompanion, GenericTraversableTemplate, SeqFactory}
+import scala.collection.{
+  AbstractIterator,
+  AbstractSeq,
+  GenIterable,
+  GenSeq,
+  GenTraversableOnce,
+  LinearSeqOptimized,
+  mutable
+}
+import scala.collection.generic.{
+  CanBuildFrom,
+  FilterMonadic,
+  GenericCompanion,
+  GenericTraversableTemplate,
+  SeqFactory
+}
 import scala.collection.immutable.{LinearSeq, NumericRange}
 import scala.collection.mutable.{ArrayBuffer, Builder, StringBuilder}
 import scala.language.implicitConversions
@@ -513,7 +527,9 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
    *
    * $preservesLaziness
    */
-  def tapEach[U](f: A => U): LazyList[A] = mapToLL { a => f(a); a }
+  def tapEach[U](f: A => U): LazyList[A] = mapToLL { a =>
+    f(a); a
+  }
 
   private def mapImpl[B](f: A => B): LazyList[B] =
     newLL {
@@ -754,7 +770,6 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     occ
   }
 
-
   /** @inheritdoc
    *
    * $preservesLaziness
@@ -765,7 +780,7 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
       val occ = occCounts0(that.seq)
       LazyList.from {
         iterator.filter { x =>
-          val ox = occ(x)  // Avoid multiple map lookups
+          val ox = occ(x) // Avoid multiple map lookups
           if (ox == 0) true
           else {
             occ(x) = ox - 1
@@ -785,7 +800,7 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
       val occ = occCounts0(that.seq)
       LazyList.from {
         iterator.filter { x =>
-          val ox = occ(x)  // Avoid multiple map lookups
+          val ox = occ(x) // Avoid multiple map lookups
           if (ox > 0) {
             occ(x) = ox - 1
             true
@@ -1034,32 +1049,33 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
 
   def distinctBy[B](f: A => B): LazyList[A] =
     if (knownIsEmpty) LazyList.empty
-    else LazyList.from {
-      val outer = iterator
-      new AbstractIterator[A] {
-        private[this] val traversedValues = mutable.HashSet.empty[B]
-        private[this] var nextElementDefined: Boolean = false
-        private[this] var nextElement: A = _
+    else
+      LazyList.from {
+        val outer = iterator
+        new AbstractIterator[A] {
+          private[this] val traversedValues             = mutable.HashSet.empty[B]
+          private[this] var nextElementDefined: Boolean = false
+          private[this] var nextElement: A              = _
 
-        def hasNext: Boolean = nextElementDefined || (outer.hasNext && {
-          val a = outer.next()
-          if (traversedValues.add(f(a))) {
-            nextElement = a
-            nextElementDefined = true
-            true
-          }
-          else hasNext
-        })
+          def hasNext: Boolean =
+            nextElementDefined || (outer.hasNext && {
+              val a = outer.next()
+              if (traversedValues.add(f(a))) {
+                nextElement = a
+                nextElementDefined = true
+                true
+              } else hasNext
+            })
 
-        def next(): A =
-          if (hasNext) {
-            nextElementDefined = false
-            nextElement
-          } else {
-            Iterator.empty.next()
-          }
+          def next(): A =
+            if (hasNext) {
+              nextElementDefined = false
+              nextElement
+            } else {
+              Iterator.empty.next()
+            }
+        }
       }
-    }
 
   override def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV] =
     if (cbf().isInstanceOf[LazyList.LazyBuilder[_]]) asThat(this)
@@ -1503,9 +1519,9 @@ object LazyList extends SeqFactory[LazyList] {
   override def iterate[A](start: A, len: Int)(f: A => A): LazyList[A] =
     iterate(start)(f).take(len)
 
-  override def range[A : Integral](start: A, end: A): LazyList[A] =
+  override def range[A: Integral](start: A, end: A): LazyList[A] =
     from(NumericRange(start, end, implicitly[Integral[A]].one))
 
-  override def range[A : Integral](start: A, end: A, step: A): LazyList[A] =
+  override def range[A: Integral](start: A, end: A, step: A): LazyList[A] =
     from(NumericRange(start, end, step))
 }
