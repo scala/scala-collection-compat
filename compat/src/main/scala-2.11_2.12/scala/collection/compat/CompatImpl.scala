@@ -19,15 +19,16 @@ import scala.collection.{immutable => i, mutable => m}
 /* builder optimized for a single ++= call, which returns identity on result if possible
  * and defers to the underlying builder if not.
  */
-private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](that: m.Builder[A, CC[A]])(implicit ct: ClassTag[CC[A]])
+private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](
+    that: m.Builder[A, CC[A]])(implicit ct: ClassTag[CC[A]])
     extends m.Builder[A, CC[A]] {
 
   //invariant: ruined => (collection == null)
   var collection: CC[A] = null.asInstanceOf[CC[A]]
-  var ruined = false
+  var ruined            = false
 
   private[this] def ruin(): Unit = {
-    if(collection != null) that ++= collection
+    if (collection != null) that ++= collection
     collection = null.asInstanceOf[CC[A]]
     ruined = true
   }
@@ -57,14 +58,15 @@ private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](th
     ruined = false
   }
 
-  def result(): CC[A] = if(collection == null) that.result() else collection
+  def result(): CC[A] = if (collection == null) that.result() else collection
 }
 
 private[compat] object CompatImpl {
-  def simpleCBF[A, C](f: => m.Builder[A, C]): CanBuildFrom[Any, A, C] = new CanBuildFrom[Any, A, C] {
-    def apply(from: Any): m.Builder[A, C] = apply()
-    def apply(): m.Builder[A, C]          = f
-  }
+  def simpleCBF[A, C](f: => m.Builder[A, C]): CanBuildFrom[Any, A, C] =
+    new CanBuildFrom[Any, A, C] {
+      def apply(from: Any): m.Builder[A, C] = apply()
+      def apply(): m.Builder[A, C]          = f
+    }
 
   type ImmutableBitSetCC[X] = ({ type L[_] = i.BitSet })#L[X]
   type MutableBitSetCC[X]   = ({ type L[_] = m.BitSet })#L[X]

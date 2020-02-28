@@ -282,9 +282,9 @@ lazy val dontPublish = Seq(
 )
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
-val isTravisTag        = sys.env.get("TRAVIS_TAG").map(_.nonEmpty).getOrElse(false)
-val isScalaJs          = sys.env.get("SCALAJS_VERSION").map(_.nonEmpty).getOrElse(false)
-val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").map(_.nonEmpty).getOrElse(false)
+val isTravisTag        = sys.env.get("TRAVIS_TAG").exists(_.nonEmpty)
+val isScalaJs          = sys.env.get("SCALAJS_VERSION").exists(_.nonEmpty)
+val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").exists(_.nonEmpty)
 val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
 val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
 val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
@@ -294,8 +294,8 @@ val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
 inThisBuild(
   Seq(
     commands += Command.command("scalafmt-test") { state =>
-      Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
-      state
+      val exitCode = Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
+      if (exitCode == 0) state else state.fail
     },
     commands += Command.command("scalafmt") { state =>
       Seq("admin/scalafmt.sh") ! state.globalLogging.full
@@ -315,7 +315,7 @@ inThisBuild(
             "TEST_SCALAFMT",
             "TEST_BINARY_COMPAT"
           ).foreach(k =>
-            println(k.padTo(20, " ").mkString("") + " -> " + sys.env.get(k).getOrElse("None")))
+            println(k.padTo(20, " ").mkString("") + " -> " + sys.env.getOrElse(k, "None")))
 
           val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
 

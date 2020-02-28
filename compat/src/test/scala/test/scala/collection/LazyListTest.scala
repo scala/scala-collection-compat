@@ -14,10 +14,10 @@ class LazyListTest {
   def t6727_and_t6440_and_8627(): Unit = {
     assertTrue(LazyList.continually(()).filter(_ => true).take(2) == Seq((), ()))
     assertTrue(LazyList.continually(()).filterNot(_ => false).take(2) == Seq((), ()))
-    assertTrue(LazyList(1,2,3,4,5).filter(_ < 4) == Seq(1,2,3))
-    assertTrue(LazyList(1,2,3,4,5).filterNot(_ > 4) == Seq(1,2,3,4))
-    assertTrue(LazyList.from(1).filter(_ > 4).take(3) == Seq(5,6,7))
-    assertTrue(LazyList.from(1).filterNot(_ <= 4).take(3) == Seq(5,6,7))
+    assertTrue(LazyList(1, 2, 3, 4, 5).filter(_ < 4) == Seq(1, 2, 3))
+    assertTrue(LazyList(1, 2, 3, 4, 5).filterNot(_ > 4) == Seq(1, 2, 3, 4))
+    assertTrue(LazyList.from(1).filter(_ > 4).take(3) == Seq(5, 6, 7))
+    assertTrue(LazyList.from(1).filterNot(_ <= 4).take(3) == Seq(5, 6, 7))
   }
 
   @Test // scala/bug#8990
@@ -31,9 +31,9 @@ class LazyListTest {
 
     assertEquals(true, Try { wf.map(identity).length }.isFailure) // throws on n == 5
 
-    shouldThrow = false                              // won't throw next time
+    shouldThrow = false // won't throw next time
 
-    assertEquals(5,  wf.map(identity).length)       // success instead of NPE
+    assertEquals(5, wf.map(identity).length) // success instead of NPE
   }
 
   @Test(timeout = 10000) // scala/bug#6881
@@ -42,8 +42,10 @@ class LazyListTest {
     val s = LazyList.from(0)
     assert(s == s, "Referentially identical LazyLists should be equal (==)")
     assert(s equals s, "Referentially identical LazyLists should be equal (equals)")
-    assert((0 #:: 1 #:: s) == (0 #:: 1 #:: s), "Cons of referentially identical LazyLists should be equal (==)")
-    assert((0 #:: 1 #:: s) equals (0 #:: 1 #:: s), "Cons of referentially identical LazyLists should be equal (equals)")
+    assert((0 #:: 1 #:: s) == (0 #:: 1 #:: s),
+           "Cons of referentially identical LazyLists should be equal (==)")
+    assert((0 #:: 1 #:: s) equals (0 #:: 1 #:: s),
+           "Cons of referentially identical LazyLists should be equal (equals)")
   }
 
   @Test
@@ -52,13 +54,13 @@ class LazyListTest {
     assertEquals(LazyList(None, Some(1)), LazyList(None) #::: LazyList(Some(1)))
   }
 
-   @Test
-   def testLazyListDoesNotForceHead: Unit = {
-    var i = 0
+  @Test
+  def testLazyListDoesNotForceHead: Unit = {
+    var i      = 0
     def f: Int = { i += 1; i }
-    val s = LazyList.empty.#::(f).#::(f).#::(f)
+    val s      = LazyList.empty.#::(f).#::(f).#::(f)
     assertEquals(0, i)
-   }
+  }
 
   @Test
   def testEmptyLazyListToString(): Unit = {
@@ -174,27 +176,27 @@ class LazyListTest {
   }
 
   @Test
-  def testForceReturnsEvaluatedLazyList() : Unit = {
-    var i = 0
+  def testForceReturnsEvaluatedLazyList(): Unit = {
+    var i      = 0
     def f: Int = { i += 1; i }
-    val xs = LazyList.from(Iterator.fill(3)(f))
+    val xs     = LazyList.from(Iterator.fill(3)(f))
     assertEquals(0, i)
     xs.force
     assertEquals(3, i)
     // it's possible to implement `force` with incorrect string representation
     // (to forget about `tlEvaluated` update)
-    assertEquals( "LazyList(1, 2, 3)", xs.toString())
+    assertEquals("LazyList(1, 2, 3)", xs.toString())
   }
 
   val cycle1: LazyList[Int] = 1 #:: 2 #:: cycle1
   val cycle2: LazyList[Int] = 1 #:: 2 #:: 3 #:: cycle2
-  @Test(timeout=10000)
+  @Test(timeout = 10000)
   def testSameElements(): Unit = {
     assert(LazyList().sameElements(LazyList()))
     assert(!LazyList().sameElements(LazyList(1)))
-    assert(LazyList(1,2).sameElements(LazyList(1,2)))
-    assert(!LazyList(1,2).sameElements(LazyList(1)))
-    assert(!LazyList(1).sameElements(LazyList(1,2)))
+    assert(LazyList(1, 2).sameElements(LazyList(1, 2)))
+    assert(!LazyList(1, 2).sameElements(LazyList(1)))
+    assert(!LazyList(1).sameElements(LazyList(1, 2)))
     assert(!LazyList(1).sameElements(LazyList(2)))
     assert(cycle1.sameElements(cycle1))
     assert(!cycle1.sameElements(cycle2))
@@ -210,10 +212,12 @@ class LazyListTest {
 
   @Test
   def laziness(): Unit = {
-    lazy val fibs: LazyList[Int] = 0 #:: 1 #:: fibs.zip(fibs.tail).map { n => n._1 + n._2 }
+    lazy val fibs: LazyList[Int] = 0 #:: 1 #:: fibs.zip(fibs.tail).map { n =>
+      n._1 + n._2
+    }
     assert(List(0, 1, 1, 2) == fibs.take(4).to(List))
 
-    var lazeCount = 0
+    var lazeCount     = 0
     def lazeL(i: Int) = { lazeCount += 1; i }
     // val xs21 = lazeL(1) #:: lazeL(2) #:: lazeL(3) #:: LazyList.empty
     val xs21 = LazyList.empty #::: lazeL(1) #:: lazeL(2) #:: lazeL(3) #:: LazyList.empty
@@ -221,10 +225,10 @@ class LazyListTest {
     assertEquals(0, lazeCount)
   }
 
-  @Test  // Strawman issue #529
+  @Test // Strawman issue #529
   def testLazyListMustComputeHeadOnlyOnce(): Unit = {
     var seedCounter = 0
-    var fCounter = 0
+    var fCounter    = 0
     def seed(): Int = {
       seedCounter += 1
       1
@@ -278,34 +282,34 @@ class LazyListTest {
     // Check un-forced cyclic and non-cyclic streams
     assertEquals("LazyList(<not computed>)", pre(2).toString)
     assertEquals("LazyList(<not computed>)", cyc(2).toString)
-    assertEquals("LazyList(<not computed>)", precyc(2,2).toString)
+    assertEquals("LazyList(<not computed>)", precyc(2, 2).toString)
 
     // Check forced cyclic and non-cyclic streams
     assertEquals("LazyList(-2, -1)", pre(2).force.toString)
     assertEquals("LazyList(0, 1, <cycle>)", cyc(2).force.toString)
-    assertEquals("LazyList(-2, -1, 0, 1, <cycle>)", precyc(2,2).force.toString)
+    assertEquals("LazyList(-2, -1, 0, 1, <cycle>)", precyc(2, 2).force.toString)
 
     // Special cases
     assertEquals("LazyList(0, <cycle>)", cyc(1).force.toString)
-    assertEquals("LazyList(-1, 0, 1, 2, 3, 4, 5, <cycle>)", precyc(1,6).force.toString)
-    assertEquals("LazyList(-6, -5, -4, -3, -2, -1, 0, <cycle>)", precyc(6,1).force.toString)
+    assertEquals("LazyList(-1, 0, 1, 2, 3, 4, 5, <cycle>)", precyc(1, 6).force.toString)
+    assertEquals("LazyList(-6, -5, -4, -3, -2, -1, 0, <cycle>)", precyc(6, 1).force.toString)
 
     // Make sure there are no odd/even problems
     for (n <- 3 to 4; m <- 3 to 4) {
-      assertEquals(s"mkString $n $m", precyc(n,m).mkString, goal(n,m))
+      assertEquals(s"mkString $n $m", precyc(n, m).mkString, goal(n, m))
     }
 
     // Make sure there are no cycle/prefix modulus problems
     for (i <- 6 to 8) {
-      assertEquals(s"mkString $i 3", goal(i,3), precyc(i,3).mkString)
-      assertEquals(s"mkString 3 $i", goal(3,i), precyc(3,i).mkString)
+      assertEquals(s"mkString $i 3", goal(i, 3), precyc(i, 3).mkString)
+      assertEquals(s"mkString 3 $i", goal(3, i), precyc(3, i).mkString)
     }
   }
 
   @Test(expected = classOf[IndexOutOfBoundsException])
   def updated(): Unit = {
     val lazyList = LazyList from 0 take 4
-    val list = lazyList.toList
+    val list     = lazyList.toList
     for (i <- lazyList.indices) {
       assertEquals(list.updated(i, -1), lazyList.updated(i, -1))
     }
@@ -316,6 +320,7 @@ class LazyListTest {
 
   @Test
   def tapEach(): Unit = {
+
     /** @param makeLL must make a lazylist that evaluates to Seq(1,2,3,4,5) */
     def check(makeLL: => LazyList[Int]): Unit = {
       val lb = ListBuffer[Int]()
