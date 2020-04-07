@@ -47,7 +47,7 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.10"
+lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.1"
 
 /** Create an OSGi version range for standard Scala versioning
