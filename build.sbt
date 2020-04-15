@@ -20,6 +20,7 @@ lazy val commonSettings = Seq(
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
+  .settings(name := "scala-collection-compat")
   .settings(dontPublish)
   .aggregate(
     compat211JVM,
