@@ -51,22 +51,10 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.1"
 
-/** Create an OSGi version range for standard Scala versioning
- * schemes that describes binary compatible versions. */
-def osgiVersionRange(version: String, requireMicro: Boolean = false): String =
-  if (version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
-  else if (requireMicro) "${range;[===,=+)}" // At least the same micro version
-  else "${range;[==,=+)}" // Any binary compatible version
-
-/** Create an OSGi Import-Package version specification. */
-def osgiImport(pattern: String, version: String, requireMicro: Boolean = false): String =
-  pattern + ";version=\"" + osgiVersionRange(version, requireMicro) + "\""
-
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
   _.settings(scalaModuleSettings)
     .settings(commonSettings)
-    .jvmSettings(scalaModuleSettingsJVM)
     .settings(
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
@@ -79,15 +67,6 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       Test / sourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm"
     )
     .jvmSettings(
-      OsgiKeys.exportPackage := {
-        if (scalaVersion.value.startsWith("2.13."))
-          Seq(s"scala.collection.compat.*;version=${version.value}")
-        else
-          Seq(
-            s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
-      },
-      OsgiKeys.importPackage := Seq(osgiImport("*", scalaBinaryVersion.value)),
-      OsgiKeys.privatePackage := Nil,
       junit
     )
     .jsSettings(
