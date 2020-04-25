@@ -17,6 +17,6 @@ package scala.annotation
  * `@nowarn`.
  *
  * For documentation on how to use the annotation in 2.13 see
- * https://www.scala-lang.org/files/archive/api/2.13.2/scala/annotation/nowarn.html
+ * https://www.scala-lang.org/api/current/scala/annotation/nowarn.html
  */
 class nowarn(value: String = "") extends StaticAnnotation
