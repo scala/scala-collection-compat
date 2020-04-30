@@ -14,7 +14,7 @@ lazy val commonSettings = Seq(
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
                                                  |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := None  // TODO: change to `Some("3.0.0") once we publish
+  scalaModuleMimaPreviousVersion := None // TODO: change to `Some("3.0.0") once we publish
 )
 
 lazy val root = project
@@ -188,12 +188,14 @@ lazy val `scalafix-input` = project
   )
   .dependsOn(`scalafix-data212`)
 
-val `scalafix-output` = MultiScalaProject("scalafix-output",
-                                          "scalafix/output",
-                                          _.settings(sharedScalafixSettings)
-                                            .settings(commonSettings)
-                                            .settings(dontPublish)
-                                            .disablePlugins(ScalafixPlugin))
+val `scalafix-output` = MultiScalaProject(
+  "scalafix-output",
+  "scalafix/output",
+  _.settings(sharedScalafixSettings)
+    .settings(commonSettings)
+    .settings(dontPublish)
+    .disablePlugins(ScalafixPlugin)
+)
 
 lazy val outputCross =
   Def.setting((baseDirectory in ThisBuild).value / "scalafix/output/src/main/scala")
@@ -243,10 +245,12 @@ lazy val `scalafix-tests` = project
   .settings(
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    scalafixTestkitOutputSourceDirectories := Seq(outputCross.value,
-                                                  output212.value,
-                                                  output212Plus.value,
-                                                  output213.value),
+    scalafixTestkitOutputSourceDirectories := Seq(
+      outputCross.value,
+      output212.value,
+      output212Plus.value,
+      output213.value
+    ),
     scalafixTestkitInputSourceDirectories := sourceDirectories.in(`scalafix-input`, Compile).value,
     scalafixTestkitInputClasspath := fullClasspath.in(`scalafix-input`, Compile).value
   )
@@ -258,7 +262,7 @@ lazy val dontPublish = Seq(
   packagedArtifacts := Map.empty,
   publish := {},
   publishLocal := {},
-  scalaModuleMimaPreviousVersion := None,
+  scalaModuleMimaPreviousVersion := None
 )
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
@@ -333,7 +337,7 @@ inThisBuild(
                 s"$projectPrefix/publishSigned",
                 "sonatypePrepare",
                 "sonatypeBundleUpload",
-                "sonatypeClose",
+                "sonatypeClose"
               )
             } else {
               Nil
@@ -355,4 +359,5 @@ inThisBuild(
       val newCommands = toRun.toList.map(Exec(_, None))
       state.copy(remainingCommands = newCommands ::: state.remainingCommands)
     }
-  ))
+  )
+)
