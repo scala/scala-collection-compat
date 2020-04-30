@@ -14,13 +14,13 @@ lazy val commonSettings = Seq(
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
                                                  |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := Some("2.1.4")
+  scalaModuleMimaPreviousVersion := None  // TODO: change to `Some("3.0.0") once we publish
 )
 
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
-  .settings(name := "scala-collection-compat")
+  .settings(name := "scala-library-compat")
   .settings(dontPublish)
   .aggregate(
     compat211JVM,
@@ -56,8 +56,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
   _.settings(scalaModuleSettings)
     .settings(commonSettings)
     .settings(
-      name := "scala-collection-compat",
-      moduleName := "scala-collection-compat",
+      name := "scala-library-compat",
+      moduleName := "scala-library-compat",
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       unmanagedSourceDirectories in Compile += {
         val sharedSourceDir = (baseDirectory in ThisBuild).value / "compat/src/main"
@@ -72,7 +72,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .jsSettings(
       scalacOptions += {
         val x = (baseDirectory in LocalRootProject).value.toURI.toString
-        val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
+        val y = "https://raw.githubusercontent.com/scala/scala-library-compat/" + sys.process
           .Process("git rev-parse HEAD")
           .lineStream_!
           .head

@@ -92,7 +92,5 @@ import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSem
 
 ### Contributing
 
-The migration tool is not exhaustive and we will continue to improve
-it over time. If you encounter a use case that’s not supported, please
-report it as described in the
-[contributing documentation](CONTRIBUTING.md#migration-tool).
+The migration tool is not exhaustive. Contributions of additional rewrites are welcome.  If you encounter a use case that’s not supported, please report it as described in the [contributing
+documentation](CONTRIBUTING.md#migration-tool).

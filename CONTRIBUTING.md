@@ -14,7 +14,7 @@ Several levels of contribution are possible!
 
 ### Report a missing case
 
-Create an issue [scala-collection-compat/issues](https://github.com/scala/scala-collection-compat/issues).
+Create an issue [scala-library-compat/issues](https://github.com/scala/scala-library-compat/issues).
 Embrace `diff`s to describe differences between the standard collections and
 the new collection:
 
