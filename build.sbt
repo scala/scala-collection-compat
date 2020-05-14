@@ -14,12 +14,13 @@ lazy val commonSettings = Seq(
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
                                                  |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := Some("2.1.4")
+  scalaModuleMimaPreviousVersion := None // TODO: change to `Some("3.0.0") once we publish
 )
 
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
+  .settings(name := "scala-library-compat")
   .settings(dontPublish)
   .aggregate(
     compat211JVM,
@@ -47,28 +48,16 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.10"
+lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.1"
-
-/** Create an OSGi version range for standard Scala versioning
- * schemes that describes binary compatible versions. */
-def osgiVersionRange(version: String, requireMicro: Boolean = false): String =
-  if (version contains '-') "${@}" // M, RC or SNAPSHOT -> exact version
-  else if (requireMicro) "${range;[===,=+)}" // At least the same micro version
-  else "${range;[==,=+)}" // Any binary compatible version
-
-/** Create an OSGi Import-Package version specification. */
-def osgiImport(pattern: String, version: String, requireMicro: Boolean = false): String =
-  pattern + ";version=\"" + osgiVersionRange(version, requireMicro) + "\""
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
   _.settings(scalaModuleSettings)
     .settings(commonSettings)
-    .jvmSettings(scalaModuleSettingsJVM)
     .settings(
-      name := "scala-collection-compat",
-      moduleName := "scala-collection-compat",
+      name := "scala-library-compat",
+      moduleName := "scala-library-compat",
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       unmanagedSourceDirectories in Compile += {
         val sharedSourceDir = (baseDirectory in ThisBuild).value / "compat/src/main"
@@ -78,21 +67,12 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       Test / sourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm"
     )
     .jvmSettings(
-      OsgiKeys.exportPackage := {
-        if (scalaVersion.value.startsWith("2.13."))
-          Seq(s"scala.collection.compat.*;version=${version.value}")
-        else
-          Seq(
-            s"scala.collection.compat.*;version=${version.value},scala.jdk.*;version=${version.value}")
-      },
-      OsgiKeys.importPackage := Seq(osgiImport("*", scalaBinaryVersion.value)),
-      OsgiKeys.privatePackage := Nil,
       junit
     )
     .jsSettings(
       scalacOptions += {
         val x = (baseDirectory in LocalRootProject).value.toURI.toString
-        val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
+        val y = "https://raw.githubusercontent.com/scala/scala-library-compat/" + sys.process
           .Process("git rev-parse HEAD")
           .lineStream_!
           .head
@@ -208,12 +188,14 @@ lazy val `scalafix-input` = project
   )
   .dependsOn(`scalafix-data212`)
 
-val `scalafix-output` = MultiScalaProject("scalafix-output",
-                                          "scalafix/output",
-                                          _.settings(sharedScalafixSettings)
-                                            .settings(commonSettings)
-                                            .settings(dontPublish)
-                                            .disablePlugins(ScalafixPlugin))
+val `scalafix-output` = MultiScalaProject(
+  "scalafix-output",
+  "scalafix/output",
+  _.settings(sharedScalafixSettings)
+    .settings(commonSettings)
+    .settings(dontPublish)
+    .disablePlugins(ScalafixPlugin)
+)
 
 lazy val outputCross =
   Def.setting((baseDirectory in ThisBuild).value / "scalafix/output/src/main/scala")
@@ -263,10 +245,12 @@ lazy val `scalafix-tests` = project
   .settings(
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
-    scalafixTestkitOutputSourceDirectories := Seq(outputCross.value,
-                                                  output212.value,
-                                                  output212Plus.value,
-                                                  output213.value),
+    scalafixTestkitOutputSourceDirectories := Seq(
+      outputCross.value,
+      output212.value,
+      output212Plus.value,
+      output213.value
+    ),
     scalafixTestkitInputSourceDirectories := sourceDirectories.in(`scalafix-input`, Compile).value,
     scalafixTestkitInputClasspath := fullClasspath.in(`scalafix-input`, Compile).value
   )
@@ -278,7 +262,7 @@ lazy val dontPublish = Seq(
   packagedArtifacts := Map.empty,
   publish := {},
   publishLocal := {},
-  scalaModuleMimaPreviousVersion := None,
+  scalaModuleMimaPreviousVersion := None
 )
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
@@ -353,7 +337,7 @@ inThisBuild(
                 s"$projectPrefix/publishSigned",
                 "sonatypePrepare",
                 "sonatypeBundleUpload",
-                "sonatypeClose",
+                "sonatypeClose"
               )
             } else {
               Nil
@@ -375,4 +359,5 @@ inThisBuild(
       val newCommands = toRun.toList.map(Exec(_, None))
       state.copy(remainingCommands = newCommands ::: state.remainingCommands)
     }
-  ))
+  )
+)

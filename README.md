@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scala/scala-collection-compat.svg?branch=master)](https://travis-ci.org/scala/scala-collection-compat)
+[![Build Status](https://travis-ci.org/scala/scala-library-compat.svg?branch=master)](https://travis-ci.org/scala/scala-library-compat)
 
 # Scala 2.13 Collection Compatibility Library And Migration Tool
 
@@ -8,7 +8,7 @@ This library provides some of the new APIs from Scala 2.13 to Scala 2.11 and 2.1
 To use this library, add the following to your build.sbt:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 ```
 
 Version 2.0.0+ is compatible with Scala 2.13, 2.12, and 2.11.
@@ -39,7 +39,7 @@ The library also adds backported versions of new collection types, currently `sc
 
 ## Migration Tool
 
-The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.10).
+The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.11).
 
 ```scala
 // project/plugins.sbt
@@ -92,7 +92,5 @@ import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSem
 
 ### Contributing
 
-The migration tool is not exhaustive and we will continue to improve
-it over time. If you encounter a use case that’s not supported, please
-report it as described in the
-[contributing documentation](CONTRIBUTING.md#migration-tool).
+The migration tool is not exhaustive. Contributions of additional rewrites are welcome.  If you encounter a use case that’s not supported, please report it as described in the [contributing
+documentation](CONTRIBUTING.md#migration-tool).
