@@ -42,5 +42,19 @@ class FactoryTest {
     val result  = factory.fromSpecific(source)
     Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
   }
+  @Test
+  def factoriesAreReusable(): Unit = {
+    def generically[M[X] <: Iterable[X]](in: M[Int], factory: Factory[Int, M[Int]]): Unit = {
+      val l = Iterator(-3, -2, -1).to(factory)
+      val m = in.iterator.to(factory)
+      Assert.assertEquals(in, m)
+    }
+
+    generically[List](List(1, 2, 3), List)
+    generically[Seq](Seq(1, 2, 3), Seq)
+    generically[IndexedSeq](IndexedSeq(1, 2, 3), IndexedSeq)
+    generically[Vector](Vector(1, 2, 3), Vector)
+    generically[Set](Set(1, 2, 3), Set)
+  }
 
 }

@@ -55,7 +55,12 @@ private[compat] trait PackageShared {
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
-    val builder: m.Builder[A, CC[A]] = fact match {
+    /* see https://github.com/scala/scala-library-compat/issues/337
+       `simpleCBF.apply` takes a by-name parameter and relies on
+       repeated references generating new builders, thus this expression
+       must be non-strict
+     */
+    def builder: m.Builder[A, CC[A]] = fact match {
       case c.Seq | i.Seq => new IdentityPreservingBuilder[A, i.Seq](i.Seq.newBuilder[A])
       case c.LinearSeq | i.LinearSeq =>
         new IdentityPreservingBuilder[A, i.LinearSeq](i.LinearSeq.newBuilder[A])
