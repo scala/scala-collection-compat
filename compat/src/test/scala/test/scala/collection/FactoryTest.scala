@@ -42,8 +42,6 @@ class FactoryTest {
     val result  = factory.fromSpecific(source)
     Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
   }
-
-
   @Test
   def factoriesAreReusable(): Unit = {
     def generically[M[X] <: Iterable[X]](in: M[Int], factory: Factory[Int, M[Int]]): Unit = {
