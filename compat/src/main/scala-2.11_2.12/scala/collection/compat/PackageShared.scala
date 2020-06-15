@@ -177,6 +177,10 @@ private[compat] trait PackageShared {
   type IterableOnce[+X] = c.TraversableOnce[X]
   val IterableOnce = c.TraversableOnce
 
+  implicit def toMapExtensionMethods[K, V](
+      self: scala.collection.Map[K, V]): MapExtensionMethods[K, V] =
+    new MapExtensionMethods[K, V](self)
+
   implicit def toMapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
       self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
     new MapViewExtensionMethods[K, V, C](self)
@@ -391,6 +395,14 @@ class Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](
   def lazyZip[El3, Repr3, T3](t3: T3)(implicit w3: T3 => IterableLike[El3, Repr3])
     : Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] =
     new Tuple3Zipped((self.colls._1, self.colls._2, t3))
+}
+
+class MapExtensionMethods[K, V](private val self: scala.collection.Map[K, V]) extends AnyVal {
+
+  def foreachEntry[U](f: (K, V) => U): Unit = {
+    self.foreach { case (k, v) => f(k, v) }
+  }
+
 }
 
 class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
