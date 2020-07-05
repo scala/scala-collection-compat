@@ -365,7 +365,7 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     newLL {
       if (isEmpty) suffix match {
         case lazyList: LazyList[B] => lazyList.state // don't recompute the LazyList
-        case _                     => stateFromIterator(suffix.toIterator)
+        case coll                  => stateFromIterator(coll.toIterator)
       } else sCons(head, tail lazyAppendedAll suffix)
     }
 
