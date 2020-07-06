@@ -2,6 +2,7 @@ package test.scala.collection
 
 import org.junit.Test
 import org.junit.Assert._
+import org.junit.Ignore
 
 import scala.collection.compat.immutable.LazyList
 import scala.collection.compat._
@@ -715,7 +716,8 @@ class LazyListLazinessTest {
   //   assertLazyAllSkipping(op, 4)
   // }
 
-  private def genericCons_unapply_properlyLazy(unapply: LazyList[Int] => Option[(Int, LazyList[Int])]): Unit = {
+  private def genericCons_unapply_properlyLazy(
+      unapply: LazyList[Int] => Option[(Int, LazyList[Int])]): Unit = {
     assertLazyAllSkipping(unapply, 1)
   }
 
@@ -817,13 +819,16 @@ class LazyListLazinessTest {
   }
 
   @Test
+  @Ignore // TODO: enable after upgrading to 2.13.4+
   def cons_properlyLazy(): Unit = {
     genericCons_properlyLazy(LazyList.cons(_, _))
   }
 
   @Test
+  @Ignore // TODO: enable after upgrading Scala.js to 1.1.2+
   def `#::_properlyLazy`(): Unit = {
-    genericCons_properlyLazy(_ #:: _)
+    // genericCons_properlyLazy(_ #:: _)
+    genericCons_properlyLazy((hd, tl) => tl.#::(hd))
   }
 
   @Test

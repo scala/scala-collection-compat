@@ -2,6 +2,7 @@ package test.scala.collection
 
 import org.junit.Test
 import org.junit.Assert._
+import org.junit.Ignore
 
 import scala.collection.compat.immutable.LazyList
 import scala.collection.compat._
@@ -148,6 +149,7 @@ class LazyListTest {
     assertEquals("LazyList(1)", l.toString)
   }
 
+  @Ignore // TODO enable once Scala.js is upgraded to 1.1.2+
   @Test
   def testLazyListToStringWhenLazyListHasCyclicReference: Unit = {
     lazy val cyc: LazyList[Int] = 1 #:: 2 #:: 3 #:: 4 #:: cyc
@@ -367,8 +369,12 @@ class LazyListTest {
         fail("Expected RuntimeException to be thrown")
       } catch { case e: RuntimeException => assertTrue(e.getMessage.contains("self-referential")) }
     }
-    assertNoStackOverflow { class L { val ll: LazyList[Nothing] = LazyList.empty #::: ll }; (new L).ll }
-    assertNoStackOverflow { class L { val ll: LazyList[Int] = 1 #:: ll.map(_ + 1).filter(_ % 2 == 0) }; (new L).ll }
+    assertNoStackOverflow {
+      class L { val ll: LazyList[Nothing] = LazyList.empty #::: ll }; (new L).ll
+    }
+    assertNoStackOverflow {
+      class L { val ll: LazyList[Int] = 1 #:: ll.map(_ + 1).filter(_ % 2 == 0) }; (new L).ll
+    }
     class L {
       lazy val a: LazyList[Nothing] = LazyList.empty #::: b
       lazy val b: LazyList[Nothing] = LazyList.empty #::: a
@@ -381,7 +387,7 @@ class LazyListTest {
   @Test
   def lazyAppendedAllExecutesOnce(): Unit = {
     var count = 0
-    LazyList(1).lazyAppendedAll({ count += 1; Seq(2)}).toList
+    LazyList(1).lazyAppendedAll({ count += 1; Seq(2) }).toList
     assertEquals(1, count)
   }
 }
