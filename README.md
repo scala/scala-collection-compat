@@ -39,7 +39,7 @@ The library also adds backported versions of new collection types, currently `sc
 
 ## Migration Tool
 
-The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.11).
+The migration rules use scalafix. Please see the [official installation instruction](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.12).
 
 ```scala
 // project/plugins.sbt
