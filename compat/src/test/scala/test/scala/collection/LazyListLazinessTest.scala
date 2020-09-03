@@ -2,6 +2,7 @@ package test.scala.collection
 
 import org.junit.Test
 import org.junit.Assert._
+import org.junit.Ignore
 
 import scala.collection.compat.immutable.LazyList
 import scala.collection.compat._
@@ -217,7 +218,7 @@ class LazyListLazinessTest {
   }
 
   @Test
-  def lazyAppendedAll_appendedAll_properlyLazy(): Unit = {
+  def lazyAppendedAll_properlyLazy(): Unit = {
     genericAppendedColl_properlyLazy(_ lazyAppendedAll _)
   }
 
@@ -715,6 +716,21 @@ class LazyListLazinessTest {
   //   assertLazyAllSkipping(op, 4)
   // }
 
+  private def genericCons_unapply_properlyLazy(
+      unapply: LazyList[Int] => Option[(Int, LazyList[Int])]): Unit = {
+    assertLazyAllSkipping(unapply, 1)
+  }
+
+  @Test
+  def cons_unapply_properlyLazy(): Unit = {
+    genericCons_unapply_properlyLazy(LazyList.cons.unapply)
+  }
+
+  @Test
+  def `#::_unapply_properlyLazy`(): Unit = {
+    genericCons_unapply_properlyLazy(LazyList.#::.unapply)
+  }
+
   /* factory laziness tests */
 
   @Test
@@ -776,24 +792,48 @@ class LazyListLazinessTest {
     assertRepeatedlyLazy(factory)
   }
 
-  @Test
-  def `#:: properlyLazy`(): Unit = {
-    val factory = lazyListFactory { init =>
+  private def genericCons_properlyLazy(cons: (=> Int, => LazyList[Int]) => LazyList[Int]): Unit = {
+    val headInitFactory = lazyListFactory { init =>
       def gen(index: Int): LazyList[Int] = {
         def elem(): Int = { init.evaluate(index); index }
         if (index >= LazinessChecker.count) LazyList.empty
-        // else elem() #:: gen(index + 1)
-        else gen(index + 1).#::(elem())
+        else cons(elem(), gen(index + 1))
       }
 
       gen(0)
     }
-    assertRepeatedlyLazy(factory)
+    assertRepeatedlyLazy(headInitFactory)
+
+    val tailInitFactory = lazyListFactory { init =>
+      def gen(index: Int): LazyList[Int] = {
+        if (index >= LazinessChecker.count) LazyList.empty
+        else {
+          init.evaluate(index)
+          cons(index, gen(index + 1))
+        }
+      }
+
+      LazyList.empty lazyAppendedAll gen(0) // prevent initial state evaluation
+    }
+    assertRepeatedlyLazy(tailInitFactory)
+  }
+
+  @Test
+  @Ignore // TODO: enable after upgrading to 2.13.4+
+  def cons_properlyLazy(): Unit = {
+    genericCons_properlyLazy(LazyList.cons(_, _))
+  }
+
+  @Test
+  @Ignore // TODO: enable after upgrading Scala.js to 1.1.2+
+  def `#::_properlyLazy`(): Unit = {
+    // genericCons_properlyLazy(_ #:: _)
+    genericCons_properlyLazy((hd, tl) => tl.#::(hd))
   }
 
   @Test
   def `#::: properlyLazy`(): Unit = {
-    val factory = lazyListFactory { init =>
+    val headInitFactory = lazyListFactory { init =>
       def gen(index: Int): LazyList[Int] = {
         def elem(): LazyList[Int] = LazyList.fill(1) { init.evaluate(index); index }
         if (index >= LazinessChecker.count) LazyList.empty
@@ -802,7 +842,20 @@ class LazyListLazinessTest {
 
       gen(0)
     }
-    assertRepeatedlyLazy(factory)
+    assertRepeatedlyLazy(headInitFactory)
+
+    val tailInitFactory = lazyListFactory { init =>
+      def gen(index: Int): LazyList[Int] = {
+        if (index >= LazinessChecker.count) LazyList.empty
+        else {
+          init.evaluate(index)
+          LazyList.fill(1)(index) #::: gen(index + 1)
+        }
+      }
+
+      LazyList.empty lazyAppendedAll gen(0) // prevent initial state evaluation
+    }
+    assertRepeatedlyLazy(tailInitFactory)
   }
 
   @Test

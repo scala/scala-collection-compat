@@ -231,9 +231,18 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
 
   @volatile private[this] var stateEvaluated: Boolean = false
   @inline private def stateDefined: Boolean           = stateEvaluated
+  private[this] var midEvaluation                     = false
 
   private lazy val state: State[A] = {
-    val res = lazyState()
+    // if it's already mid-evaluation, we're stuck in an infinite
+    // self-referential loop (also it's empty)
+    if (midEvaluation) {
+      throw new RuntimeException(
+        "self-referential LazyList or a derivation thereof has no more elements")
+    }
+    midEvaluation = true
+    val res = try lazyState()
+    finally midEvaluation = false
     // if we set it to `true` before evaluating, we may infinite loop
     // if something expects `state` to already be evaluated
     stateEvaluated = true
@@ -358,7 +367,7 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     newLL {
       if (isEmpty) suffix match {
         case lazyList: LazyList[B] => lazyList.state // don't recompute the LazyList
-        case _                     => stateFromIterator(suffix.toIterator)
+        case coll                  => stateFromIterator(coll.toIterator)
       } else sCons(head, tail lazyAppendedAll suffix)
     }
 
@@ -1257,7 +1266,7 @@ object LazyList extends SeqFactory[LazyList] {
      *  @param hd   The first element of the result lazy list
      *  @param tl   The remaining elements of the result lazy list
      */
-    def apply[A](hd: => A, tl: => LazyList[A]): LazyList[A] = newLL(sCons(hd, tl))
+    def apply[A](hd: => A, tl: => LazyList[A]): LazyList[A] = newLL(sCons(hd, newLL(tl.state)))
 
     /** Maps a lazy list to its head and tail */
     def unapply[A](xs: LazyList[A]): Option[(A, LazyList[A])] = #::.unapply(xs)
@@ -1270,7 +1279,7 @@ object LazyList extends SeqFactory[LazyList] {
     /** Construct a LazyList consisting of a given first element followed by elements
      *  from another LazyList.
      */
-    def #::[B >: A](elem: => B): LazyList[B] = newLL(sCons(elem, l()))
+    def #::[B >: A](elem: => B): LazyList[B] = newLL(sCons(elem, newLL(l().state)))
 
     /** Construct a LazyList consisting of the concatenation of the given LazyList and
      *  another LazyList.

@@ -2,6 +2,7 @@ package test.scala.collection
 
 import org.junit.Test
 import org.junit.Assert._
+import org.junit.Ignore
 
 import scala.collection.compat.immutable.LazyList
 import scala.collection.compat._
@@ -148,6 +149,7 @@ class LazyListTest {
     assertEquals("LazyList(1)", l.toString)
   }
 
+  @Ignore // TODO enable once Scala.js is upgraded to 1.1.2+
   @Test
   def testLazyListToStringWhenLazyListHasCyclicReference: Unit = {
     lazy val cyc: LazyList[Int] = 1 #:: 2 #:: 3 #:: 4 #:: cyc
@@ -161,7 +163,7 @@ class LazyListTest {
     cyc.tail.tail.head
     assertEquals("LazyList(1, 2, 3, <not computed>)", cyc.toString)
     cyc.tail.tail.tail.head
-    assertEquals("LazyList(1, 2, 3, 4, <cycle>)", cyc.toString)
+    assertEquals("LazyList(1, 2, 3, 4, <not computed>)", cyc.toString)
     cyc.tail.tail.tail.tail.head
     assertEquals("LazyList(1, 2, 3, 4, <cycle>)", cyc.toString)
   }
@@ -354,5 +356,38 @@ class LazyListTest {
     assertEquals(1 to 10, build(_ ++= (1 to 4) ++= (5 to 6) += 7 ++= (8 to 9) += 10))
     assertEquals(1 to 10, build(_ ++= LazyList.from(1).take(10)))
     assertEquals(1 to 10, build(_ ++= Iterator.from(1).take(10)))
+  }
+
+  @Test
+  def selfReferentialFailure(): Unit = {
+    def assertNoStackOverflow[A](lazyList: LazyList[A]): Unit = {
+      // don't hang the test if we've made a programming error in this test
+      val finite = lazyList.take(1000)
+      // AssertUtil.assertThrows[RuntimeException](finite.force, _ contains "self-referential")
+      try {
+        finite.force
+        fail("Expected RuntimeException to be thrown")
+      } catch { case e: RuntimeException => assertTrue(e.getMessage.contains("self-referential")) }
+    }
+    assertNoStackOverflow {
+      class L { val ll: LazyList[Nothing] = LazyList.empty #::: ll }; (new L).ll
+    }
+    assertNoStackOverflow {
+      class L { val ll: LazyList[Int] = 1 #:: ll.map(_ + 1).filter(_ % 2 == 0) }; (new L).ll
+    }
+    class L {
+      lazy val a: LazyList[Nothing] = LazyList.empty #::: b
+      lazy val b: LazyList[Nothing] = LazyList.empty #::: a
+    }
+    assertNoStackOverflow((new L).a)
+    assertNoStackOverflow((new L).b)
+  }
+
+  // scala/bug#11931
+  @Test
+  def lazyAppendedAllExecutesOnce(): Unit = {
+    var count = 0
+    LazyList(1).lazyAppendedAll({ count += 1; Seq(2) }).toList
+    assertEquals(1, count)
   }
 }
