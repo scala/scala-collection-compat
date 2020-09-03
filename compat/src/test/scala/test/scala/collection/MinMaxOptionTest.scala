@@ -34,7 +34,7 @@ class MinByMaxByTest {
    *  Any other exception is propagated.
    */
   def assertThrows[T <: Throwable: ClassTag](body: => Any,
-      checkMessage: String => Boolean = s => true): Unit = {
+                                             checkMessage: String => Boolean = s => true): Unit = {
     assertThrown[T](t => checkMessage(t.getMessage))(body)
   }
 
@@ -49,7 +49,8 @@ class MinByMaxByTest {
         ae.addSuppressed(failed)
         throw ae
       case NonFatal(other) =>
-        val ae = new AssertionError(s"Wrong exception: expected ${implicitly[ClassTag[T]]} but was ${other.getClass.getName}")
+        val ae = new AssertionError(
+          s"Wrong exception: expected ${implicitly[ClassTag[T]]} but was ${other.getClass.getName}")
         ae.addSuppressed(other)
         throw ae
     }
@@ -65,21 +66,27 @@ class MinByMaxByTest {
   @Test
   def testCorrectness() = {
     def f(x: Int) = -1 * x
-    val max = list.maxBy(f)
-    assertTrue("f(list.maxBy(f)) should ≥ f(x) where x is any element of list.", list.forall(f(_) <= f(max)))
+    val max       = list.maxBy(f)
+    assertTrue("f(list.maxBy(f)) should ≥ f(x) where x is any element of list.",
+               list.forall(f(_) <= f(max)))
     val min = list.minBy(f)
-    assertTrue("f(list.minBy(f)) should ≤ f(x) where x is any element of list.", list.forall(f(_) >= f(min)))
+    assertTrue("f(list.minBy(f)) should ≤ f(x) where x is any element of list.",
+               list.forall(f(_) >= f(min)))
   }
 
   // Ensure that it always returns the first match if more than one element have the same largest/smallest f(x).
-  // Note that this behavior is not explicitly stated before. 
+  // Note that this behavior is not explicitly stated before.
   // To make it compatible with the previous implementation, I add this behavior to docs.
   @Test
   def testReturnTheFirstMatch() = {
-    val d = List(1, 2, 3, 4, 5, 6, 7, 8)
+    val d         = List(1, 2, 3, 4, 5, 6, 7, 8)
     def f(x: Int) = x % 3;
-    assert(d.maxBy(f) == 2, "If multiple elements evaluated to the largest value, maxBy should return the first one.")
-    assert(d.minBy(f) == 3, "If multiple elements evaluated to the largest value, minBy should return the first one.")
+    assert(
+      d.maxBy(f) == 2,
+      "If multiple elements evaluated to the largest value, maxBy should return the first one.")
+    assert(
+      d.minBy(f) == 3,
+      "If multiple elements evaluated to the largest value, minBy should return the first one.")
   }
 
   // Make sure it evaluates f no more than list.length times.
@@ -91,7 +98,9 @@ class MinByMaxByTest {
       evaluatedCountOfMaxBy += 1
       x * 10
     })
-    assert(evaluatedCountOfMaxBy == list.length, s"maxBy: should evaluate f only ${list.length} times, but it evaluated $evaluatedCountOfMaxBy times.")
+    assert(
+      evaluatedCountOfMaxBy == list.length,
+      s"maxBy: should evaluate f only ${list.length} times, but it evaluated $evaluatedCountOfMaxBy times.")
 
     var evaluatedCountOfMinBy = 0
 
@@ -99,7 +108,9 @@ class MinByMaxByTest {
       evaluatedCountOfMinBy += 1
       x * 10
     })
-    assert(evaluatedCountOfMinBy == list.length, s"minBy: should evaluate f only ${list.length} times, but it evaluated $evaluatedCountOfMinBy times.")
+    assert(
+      evaluatedCountOfMinBy == list.length,
+      s"minBy: should evaluate f only ${list.length} times, but it evaluated $evaluatedCountOfMinBy times.")
   }
 
   @Test
@@ -125,6 +136,6 @@ class MinByMaxByTest {
     assert(seq.min.isNaN)
     assert(seq.max.isNaN)
   }
-  */
+ */
 
 }
