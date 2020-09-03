@@ -14,7 +14,6 @@ package scala.collection
 
 import scala.collection.generic.{CanBuildFrom, GenericOrderedCompanion, IsTraversableLike}
 import scala.{collection => c}
-import scala.collection.{mutable => m}
 import scala.runtime.Tuple2Zipped
 import scala.collection.{immutable => i, mutable => m}
 
@@ -67,4 +66,8 @@ package object compat extends compat.PackageShared {
   implicit def toImmutableQueueExtensionMethods[A](
       self: i.Queue[A]): ImmutableQueueExtensionMethods[A] =
     new ImmutableQueueExtensionMethods[A](self)
+
+  implicit def toMutableQueueExtensionMethods[A](
+      self: m.Queue[A]): MutableQueueExtensionMethods[A] =
+    new MutableQueueExtensionMethods[A](self)
 }

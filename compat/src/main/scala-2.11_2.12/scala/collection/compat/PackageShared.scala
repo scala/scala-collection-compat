@@ -430,3 +430,8 @@ class ImmutableQueueExtensionMethods[A](private val self: i.Queue[A]) extends An
   def enqueueAll[B >: A](iter: c.Iterable[B]): i.Queue[B] =
     self.enqueue(iter.to[i.Iterable])
 }
+
+class MutableQueueExtensionMethods[Element](private val self: m.Queue[Element]) extends AnyVal {
+  def enqueueAll(iter: c.Iterable[Element]): Unit =
+    self.enqueue(iter.toIndexedSeq: _*)
+}
