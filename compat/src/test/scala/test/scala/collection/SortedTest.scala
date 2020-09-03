@@ -10,7 +10,7 @@
  * additional information regarding copyright ownership.
  */
 
-package test.scala.collection.generic
+package test.scala.collection
 
 import org.junit.Assert._
 import org.junit.Test

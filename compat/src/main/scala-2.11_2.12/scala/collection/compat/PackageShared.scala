@@ -256,6 +256,34 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
   def iterator: Iterator[A] = self.toIterator
+
+  def minOption[B >: A](implicit ord: Ordering[B]): Option[A] = {
+    if (self.isEmpty)
+      None
+    else
+      Some(self.min(ord))
+  }
+
+  def maxOption[B >: A](implicit ord: Ordering[B]): Option[A] = {
+    if (self.isEmpty)
+      None
+    else
+      Some(self.max(ord))
+  }
+
+  def minByOption[B](f: A => B)(implicit cmp: Ordering[B]): Option[A] = {
+    if (self.isEmpty)
+      None
+    else
+      Some(self.minBy(f)(cmp))
+  }
+
+  def maxByOption[B](f: A => B)(implicit cmp: Ordering[B]): Option[A] = {
+    if (self.isEmpty)
+      None
+    else
+      Some(self.maxBy(f)(cmp))
+  }
 }
 
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
