@@ -20,13 +20,11 @@ To use this library, add the following to your `build.sbt`:
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 ```
 
-Exception: the 1.0.0 release was withdrawn and should not be used.
-
-All future versions will remain backwards binary compatible with 2.0.0+.
+All future versions will remain backwards binary compatible with 2.0.0. (The 1.0.0 release was withdrawn and should not be used.)
 
 ## How it works
 
-The 2.13 collections redesign did not break source compatibility for much ordinary code, there are exceptions.
+The 2.13 collections redesign did not break source compatibility for most ordinary code, but there are some exceptions.
 
 For example, the `to` method is used with a type parameter in 2.12:
 
