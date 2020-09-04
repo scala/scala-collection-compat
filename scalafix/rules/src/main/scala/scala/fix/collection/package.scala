@@ -52,7 +52,7 @@ package object collection {
   val canBuildFroms = Map(
     "scala/LowPriorityImplicits#fallbackStringCanBuildFrom()." -> "scala.collection.immutable.IndexedSeq",
     "scala/Array.canBuildFrom()."                              -> "scala.Array",
-    "scala/collection/BitSet.canBuildFrom()."                  -> "scala.collection.BitSet",
+    "scala/collection/BitSet.canBuildFrom."                    -> "scala.collection.BitSet",
     "scala/collection/immutable/HashMap.canBuildFrom()."       -> "scala.collection.immutable.HashMap",
     "scala/collection/immutable/IntMap.canBuildFrom()."        -> "scala.collection.immutable.IntMap",
     "scala/collection/immutable/List.canBuildFrom()."          -> "scala.collection.immutable.List",
