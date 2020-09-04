@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scala/scala-library-compat.svg?branch=master)](https://travis-ci.org/scala/scala-library-compat)
+[![Build Status](https://travis-ci.org/scala/scala-collection-compat.svg?branch=master)](https://travis-ci.org/scala/scala-collection-compat)
 
 # Scala 2.13 Collection Compatibility Library And Migration Tool
 

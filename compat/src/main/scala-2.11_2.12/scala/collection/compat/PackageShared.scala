@@ -55,7 +55,7 @@ private[compat] trait PackageShared {
 
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
-    /* see https://github.com/scala/scala-library-compat/issues/337
+    /* see https://github.com/scala/scala-collection-compat/issues/337
        `simpleCBF.apply` takes a by-name parameter and relies on
        repeated references generating new builders, thus this expression
        must be non-strict
