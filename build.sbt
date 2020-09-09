@@ -127,12 +127,12 @@ lazy val `binary-compat` = project
   .settings(commonSettings)
   .settings(
     scalaVersion := scala212,
-    libraryDependencies += "com.typesafe" %% "mima-core" % "0.6.1" % Test,
+    libraryDependencies += "com.typesafe" %% "mima-core" % "0.8.0" % Test,
     junit,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
-      "oldClasspath" -> (classDirectory in (`binary-compat-old`, Compile)).value.toString,
-      "newClasspath" -> (classDirectory in (`binary-compat-new`, Compile)).value.toString
+      "oldClasses" -> (classDirectory in (`binary-compat-old`, Compile)).value.toString,
+      "newClasses" -> (classDirectory in (`binary-compat-new`, Compile)).value.toString
     ),
     test in Test := (test in Test)
       .dependsOn(

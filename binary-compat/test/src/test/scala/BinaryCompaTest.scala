@@ -14,23 +14,23 @@ import org.junit.{Assert, Test}
 
 import build.BuildInfo._
 
+import java.io.File
+
 import com.typesafe.tools.mima.lib.MiMaLib
-import com.typesafe.tools.mima.core.Config
 
 class BinaryCompaTest {
   @Test
   def compat(): Unit = {
-    Config.setup("foo", Array(oldClasspath, newClasspath))
-    val mima        = new MiMaLib(Config.baseClassPath)
-    val allProblems = mima.collectProblems(oldClasspath, newClasspath)
+    val mima        = new MiMaLib(Seq())
+    val allProblems = mima.collectProblems(new File(oldClasses), new File(newClasses))
     val unexpectedDescriptions =
       allProblems.iterator
         .map(_.description("new"))
         // code improvement: it would be more standard to use a ProblemFilter here
         .filterNot(
-          _ == "static method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in class org.example.Lib has a different signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;")
+          _ == "method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in object org.example.Lib has a different generic signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;. See https://github.com/lightbend/mima#incompatiblesignatureproblem")
         .filterNot(
-          _ == "method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in object org.example.Lib has a different signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;")
+          _ == "static method id(scala.collection.Iterable,scala.collection.generic.CanBuildFrom)scala.collection.Iterable in class org.example.Lib has a different generic signature in new version, where it is <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<Lscala/runtime/Nothing$;TA;TC;>;)TC; rather than <A:Ljava/lang/Object;C::Lscala/collection/Iterable<Ljava/lang/Object;>;>(TC;Lscala/collection/generic/CanBuildFrom<TC;TA;TC;>;)TC;. See https://github.com/lightbend/mima#incompatiblesignatureproblem")
         .toList
     val msg =
       unexpectedDescriptions.mkString(
