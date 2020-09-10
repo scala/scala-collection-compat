@@ -13,15 +13,7 @@ lazy val commonSettings = Seq(
                                                  |
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
-                                                 |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := Some("2.1.6"),
-  mimaBinaryIssueFilters ++= {
-    import com.typesafe.tools.mima.core._
-    import com.typesafe.tools.mima.core.ProblemFilters._
-    Seq(
-      exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
-    )
-  }
+                                                 |""".stripMargin))
 )
 
 lazy val root = project
@@ -74,7 +66,15 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       Test / sourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm"
     )
     .jvmSettings(
-      junit
+      junit,
+      scalaModuleMimaPreviousVersion := Some("2.1.6"),
+      mimaBinaryIssueFilters ++= {
+        import com.typesafe.tools.mima.core._
+        import com.typesafe.tools.mima.core.ProblemFilters._
+        Seq(
+          exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
+        )
+      },
     )
     .jsSettings(
       scalacOptions += {
@@ -269,7 +269,6 @@ lazy val dontPublish = Seq(
   packagedArtifacts := Map.empty,
   publish := {},
   publishLocal := {},
-  scalaModuleMimaPreviousVersion := None
 )
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
