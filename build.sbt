@@ -66,8 +66,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
-      unmanagedSourceDirectories in Compile += {
-        val sharedSourceDir = (baseDirectory in ThisBuild).value / "compat/src/main"
+      Compile / unmanagedSourceDirectories += {
+        val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
         if (scalaVersion.value.startsWith("2.13.")) sharedSourceDir / "scala-2.13"
         else sharedSourceDir / "scala-2.11_2.12"
       },
@@ -78,14 +78,14 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     )
     .jsSettings(
       scalacOptions += {
-        val x = (baseDirectory in LocalRootProject).value.toURI.toString
+        val x = (LocalRootProject / baseDirectory).value.toURI.toString
         val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
           .Process("git rev-parse HEAD")
           .lineStream_!
           .head
         s"-P:scalajs:mapSourceURI:$x->$y/"
       },
-      fork in Test := false // Scala.js cannot run forked tests
+      Test / fork := false // Scala.js cannot run forked tests
     )
     .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
     .disablePlugins(ScalafixPlugin)
@@ -131,13 +131,13 @@ lazy val `binary-compat` = project
     junit,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
-      "oldClasses" -> (classDirectory in (`binary-compat-old`, Compile)).value.toString,
-      "newClasses" -> (classDirectory in (`binary-compat-new`, Compile)).value.toString
+      "oldClasses" -> (`binary-compat-old` / Compile / classDirectory).value.toString,
+      "newClasses" -> (`binary-compat-new` / Compile / classDirectory).value.toString
     ),
-    test in Test := (test in Test)
+    Test / test := (Test / test)
       .dependsOn(
-        compile in (`binary-compat-old`, Compile),
-        compile in (`binary-compat-new`, Compile)
+        `binary-compat-old` / Compile / compile,
+        `binary-compat-new` / Compile / compile,
       )
       .value
   )
@@ -149,8 +149,8 @@ lazy val `scalafix-rules` = project
   .settings(scalaModuleSettings)
   .settings(commonSettings)
   .settings(
-    organization := (organization in compat212JVM).value,
-    publishTo := (publishTo in compat212JVM).value,
+    organization := (compat212JVM / organization).value,
+    publishTo := (compat212JVM / publishTo).value,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
@@ -205,19 +205,19 @@ val `scalafix-output` = MultiScalaProject(
 )
 
 lazy val outputCross =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output/src/main/scala")
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output/src/main/scala")
 
 lazy val output212 =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main/scala")
-lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output212/src/main/scala")
+lazy val addOutput212 = Compile / unmanagedSourceDirectories += output212.value
 
 lazy val output212Plus =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main/scala")
-lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output212+/src/main/scala")
+lazy val addOutput212Plus = Compile / unmanagedSourceDirectories += output212Plus.value
 
 lazy val output213 =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main/scala")
-lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output213/src/main/scala")
+lazy val addOutput213 = Compile / unmanagedSourceDirectories += output213.value
 
 lazy val `scalafix-output211` = `scalafix-output`(
   scala211,
