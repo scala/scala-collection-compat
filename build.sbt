@@ -63,9 +63,9 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
         if (scalaVersion.value.startsWith("2.13.")) sharedSourceDir / "scala-2.13"
         else sharedSourceDir / "scala-2.11_2.12"
       },
-      Test / sourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm"
     )
     .jvmSettings(
+      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       junit,
       scalaModuleMimaPreviousVersion := Some("2.1.6"),
       mimaBinaryIssueFilters ++= {
