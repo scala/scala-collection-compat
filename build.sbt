@@ -19,8 +19,10 @@ lazy val commonSettings = Seq(
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
-  .settings(name := "scala-collection-compat")
-  .settings(dontPublish)
+  .settings(
+    name := "scala-collection-compat",
+    publish / skip := true
+  )
   .aggregate(
     compat211JVM,
     compat211JS,
@@ -173,7 +175,7 @@ lazy val `scalafix-data` = MultiScalaProject(
   "scalafix/data",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(dontPublish)
+    .settings(publish / skip := true)
 )
 
 val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
@@ -184,9 +186,9 @@ lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
+    publish / skip := true,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
@@ -200,7 +202,7 @@ val `scalafix-output` = MultiScalaProject(
   "scalafix/output",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(dontPublish)
+    .settings(publish / skip := true)
     .disablePlugins(ScalafixPlugin)
 )
 
@@ -242,15 +244,15 @@ lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
+  .settings(publish / skip := true)
 
 lazy val `scalafix-tests` = project
   .in(file("scalafix/tests"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
+    publish / skip := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     scalafixTestkitOutputSourceDirectories := Seq(
       outputCross.value,
@@ -263,13 +265,6 @@ lazy val `scalafix-tests` = project
   )
   .dependsOn(`scalafix-input`, `scalafix-rules`)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
-
-lazy val dontPublish = Seq(
-  publishArtifact := false,
-  packagedArtifacts := Map.empty,
-  publish := {},
-  publishLocal := {},
-)
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val isTravisTag        = sys.env.get("TRAVIS_TAG").exists(_.nonEmpty)
