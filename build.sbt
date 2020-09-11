@@ -13,22 +13,16 @@ lazy val commonSettings = Seq(
                                                  |
                                                  |See the NOTICE file distributed with this work for
                                                  |additional information regarding copyright ownership.
-                                                 |""".stripMargin)),
-  scalaModuleMimaPreviousVersion := Some("2.2.0"),
-  mimaBinaryIssueFilters ++= {
-    import com.typesafe.tools.mima.core._
-    import com.typesafe.tools.mima.core.ProblemFilters._
-    Seq(
-      exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
-    )
-  }
+                                                 |""".stripMargin))
 )
 
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
-  .settings(name := "scala-collection-compat")
-  .settings(dontPublish)
+  .settings(
+    name := "scala-collection-compat",
+    publish / skip := true
+  )
   .aggregate(
     compat211JVM,
     compat211JS,
@@ -66,26 +60,34 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
-      unmanagedSourceDirectories in Compile += {
-        val sharedSourceDir = (baseDirectory in ThisBuild).value / "compat/src/main"
+      Compile / unmanagedSourceDirectories += {
+        val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
         if (scalaVersion.value.startsWith("2.13.")) sharedSourceDir / "scala-2.13"
         else sharedSourceDir / "scala-2.11_2.12"
       },
-      Test / sourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm"
     )
     .jvmSettings(
-      junit
+      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
+      junit,
+      scalaModuleMimaPreviousVersion := Some("2.2.0"),
+      mimaBinaryIssueFilters ++= {
+        import com.typesafe.tools.mima.core._
+        import com.typesafe.tools.mima.core.ProblemFilters._
+        Seq(
+          exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
+        )
+      },
     )
     .jsSettings(
       scalacOptions += {
-        val x = (baseDirectory in LocalRootProject).value.toURI.toString
+        val x = (LocalRootProject / baseDirectory).value.toURI.toString
         val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
           .Process("git rev-parse HEAD")
           .lineStream_!
           .head
         s"-P:scalajs:mapSourceURI:$x->$y/"
       },
-      fork in Test := false // Scala.js cannot run forked tests
+      Test / fork := false // Scala.js cannot run forked tests
     )
     .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
     .disablePlugins(ScalafixPlugin)
@@ -131,13 +133,13 @@ lazy val `binary-compat` = project
     junit,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
-      "oldClasses" -> (classDirectory in (`binary-compat-old`, Compile)).value.toString,
-      "newClasses" -> (classDirectory in (`binary-compat-new`, Compile)).value.toString
+      "oldClasses" -> (`binary-compat-old` / Compile / classDirectory).value.toString,
+      "newClasses" -> (`binary-compat-new` / Compile / classDirectory).value.toString
     ),
-    test in Test := (test in Test)
+    Test / test := (Test / test)
       .dependsOn(
-        compile in (`binary-compat-old`, Compile),
-        compile in (`binary-compat-new`, Compile)
+        `binary-compat-old` / Compile / compile,
+        `binary-compat-new` / Compile / compile,
       )
       .value
   )
@@ -149,8 +151,8 @@ lazy val `scalafix-rules` = project
   .settings(scalaModuleSettings)
   .settings(commonSettings)
   .settings(
-    organization := (organization in compat212JVM).value,
-    publishTo := (publishTo in compat212JVM).value,
+    organization := (compat212JVM / organization).value,
+    publishTo := (compat212JVM / publishTo).value,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
@@ -173,7 +175,7 @@ lazy val `scalafix-data` = MultiScalaProject(
   "scalafix/data",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(dontPublish)
+    .settings(publish / skip := true)
 )
 
 val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
@@ -184,9 +186,9 @@ lazy val `scalafix-input` = project
   .in(file("scalafix/input"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
+    publish / skip := true,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
@@ -200,24 +202,24 @@ val `scalafix-output` = MultiScalaProject(
   "scalafix/output",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(dontPublish)
+    .settings(publish / skip := true)
     .disablePlugins(ScalafixPlugin)
 )
 
 lazy val outputCross =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output/src/main/scala")
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output/src/main/scala")
 
 lazy val output212 =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212/src/main/scala")
-lazy val addOutput212 = unmanagedSourceDirectories in Compile += output212.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output212/src/main/scala")
+lazy val addOutput212 = Compile / unmanagedSourceDirectories += output212.value
 
 lazy val output212Plus =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output212+/src/main/scala")
-lazy val addOutput212Plus = unmanagedSourceDirectories in Compile += output212Plus.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output212+/src/main/scala")
+lazy val addOutput212Plus = Compile / unmanagedSourceDirectories += output212Plus.value
 
 lazy val output213 =
-  Def.setting((baseDirectory in ThisBuild).value / "scalafix/output213/src/main/scala")
-lazy val addOutput213 = unmanagedSourceDirectories in Compile += output213.value
+  Def.setting((ThisBuild / baseDirectory).value / "scalafix/output213/src/main/scala")
+lazy val addOutput213 = Compile / unmanagedSourceDirectories += output213.value
 
 lazy val `scalafix-output211` = `scalafix-output`(
   scala211,
@@ -242,15 +244,15 @@ lazy val `scalafix-output213-failure` = project
   .in(file("scalafix/output213-failure"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
+  .settings(publish / skip := true)
 
 lazy val `scalafix-tests` = project
   .in(file("scalafix/tests"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
-  .settings(dontPublish)
   .settings(
     scalaVersion := scalafixScala212,
+    publish / skip := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     scalafixTestkitOutputSourceDirectories := Seq(
       outputCross.value,
@@ -263,14 +265,6 @@ lazy val `scalafix-tests` = project
   )
   .dependsOn(`scalafix-input`, `scalafix-rules`)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
-
-lazy val dontPublish = Seq(
-  publishArtifact := false,
-  packagedArtifacts := Map.empty,
-  publish := {},
-  publishLocal := {},
-  scalaModuleMimaPreviousVersion := None
-)
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
 val isTravisTag        = sys.env.get("TRAVIS_TAG").exists(_.nonEmpty)

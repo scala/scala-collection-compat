@@ -36,23 +36,23 @@ trait MultiScala {
 
   def srcFull(base: String): Seq[Def.Setting[_]] = {
     Seq(
-      unmanagedSourceDirectories in Compile +=
-        (baseDirectory in ThisBuild).value / base / "src" / "main" / "scala",
-      unmanagedSourceDirectories in Compile +=
-        (baseDirectory in ThisBuild).value / base / "src" / "main" / ("scala-" + scalaBinaryVersion.value),
-      unmanagedSourceDirectories in Compile ++= {
-        val sourceDir = (baseDirectory in ThisBuild).value / base / "src" / "main"
+      Compile / unmanagedSourceDirectories +=
+        (ThisBuild / baseDirectory).value / base / "src" / "main" / "scala",
+      Compile / unmanagedSourceDirectories +=
+        (ThisBuild / baseDirectory).value / base / "src" / "main" / ("scala-" + scalaBinaryVersion.value),
+      Compile / unmanagedSourceDirectories ++= {
+        val sourceDir = (ThisBuild / baseDirectory).value / base / "src" / "main"
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n >= 12 => List(sourceDir / "scala-2.12+")
           case _                       => Nil
         }
       },
-      unmanagedSourceDirectories in Test +=
-        (baseDirectory in ThisBuild).value / base / "src" / "test" / "scala",
-      unmanagedResourceDirectories in Compile +=
-        (baseDirectory in ThisBuild).value / base / "src" / "main" / "resources",
-      unmanagedResourceDirectories in Test +=
-        (baseDirectory in ThisBuild).value / base / "src" / "test" / "resources"
+      Test / unmanagedSourceDirectories +=
+        (ThisBuild / baseDirectory).value / base / "src" / "test" / "scala",
+      Compile / unmanagedResourceDirectories +=
+        (ThisBuild / baseDirectory).value / base / "src" / "main" / "resources",
+      Test / unmanagedResourceDirectories +=
+        (ThisBuild / baseDirectory).value / base / "src" / "test" / "resources"
     )
   }
 }
