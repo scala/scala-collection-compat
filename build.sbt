@@ -69,7 +69,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       junit,
-      scalaModuleMimaPreviousVersion := Some("2.1.6"),
+      scalaModuleMimaPreviousVersion := Some("2.2.0"),
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
