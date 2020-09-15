@@ -184,6 +184,10 @@ private[compat] trait PackageShared {
   implicit def toMapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
       self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
     new MapViewExtensionMethods[K, V, C](self)
+
+  implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
+    new SeqExtensionMethods[A](self)
+
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {

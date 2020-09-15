@@ -41,9 +41,6 @@ package object compat extends compat.PackageShared {
     : TraversableLikeExtensionMethods[traversable.A, Repr] =
     new TraversableLikeExtensionMethods[traversable.A, Repr](traversable.conversion(self))
 
-  implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =
-    new SeqExtensionMethods[A](self)
-
   implicit def toTrulyTraversableLikeExtensionMethods[T1, El1, Repr1](self: T1)(
       implicit w1: T1 => TraversableLike[El1, Repr1]
   ): TrulyTraversableLikeExtensionMethods[El1, Repr1] =
