@@ -8,7 +8,9 @@ COURSIER="$HERE/.coursier"
 SCALAFMT="$HERE/.scalafmt-$VERSION"
 
 if [ ! -f $COURSIER ]; then
-  curl -L -o $COURSIER https://git.io/vgvpD
+  # note that the launch script we're using here is considered antiquated and was removed by
+  # https://github.com/coursier/coursier/pull/1565
+  curl -L -o $COURSIER 'https://github.com/coursier/coursier/blob/483c980e784cf33168be94cfc1e5682f56d71142/coursier?raw=true'
   chmod +x $COURSIER
 fi
 
