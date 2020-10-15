@@ -74,7 +74,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
         Seq(
-          exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
+          exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*") // it's package-private
         )
       },
     )
