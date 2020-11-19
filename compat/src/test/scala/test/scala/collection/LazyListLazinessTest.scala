@@ -2,11 +2,8 @@ package test.scala.collection
 
 import org.junit.Test
 import org.junit.Assert._
-import org.junit.Ignore
 
-import scala.collection.compat.immutable.LazyList
-import scala.collection.compat._
-import scala.collection.Iterator
+import scala.collection.{IterableOnce, Iterator, SeqFactory}
 
 class LazyListLazinessTest {
   import LazyListLazinessTest._
@@ -214,7 +211,7 @@ class LazyListLazinessTest {
     genericAppendedColl_properlyLazy(append)
     val ll = LazyList.from(1)
     assertKnownEmptyYields(append(_, ll))(_ eq ll)
-    // assertKnownEmptyYieldsKnownEmpty(append(_, Nil))
+    assertKnownEmptyYieldsKnownEmpty(append(_, Nil))
   }
 
   @Test
@@ -223,10 +220,18 @@ class LazyListLazinessTest {
   }
 
   @Test
+  def appendedAll_properlyLazy(): Unit = {
+    genericAppendedCollValue_properlyLazy(_ appendedAll _)
+    genericAppendedCollValue_properlyLazy(_ :++ _)
+  }
+
+  @Test
   def concat_properlyLazy(): Unit = {
+    genericAppendedCollValue_properlyLazy(_ concat _)
     genericAppendedCollValue_properlyLazy(_ ++ _)
   }
 
+  @deprecated("Uses deprecated union", since = "2.13.0")
   @Test
   def union_properlyLazy(): Unit = {
     genericAppendedCollValue_properlyLazy(_ union _)
@@ -234,14 +239,14 @@ class LazyListLazinessTest {
 
   @Test
   def appended_properlyLazy(): Unit = {
-    val op = lazyListOp(_ :+ -1)
+    val op = lazyListOp(_ appended -1)
     assertLazyAll(op)
     assertRepeatedlyLazy(op)
   }
 
   @Test
   def prepended_properlyLazy(): Unit = {
-    val op = lazyListOp(ll => (-1 +: ll).tail)
+    val op = lazyListOp(_.prepended(-1).tail)
     assertLazyAll(op)
     assertRepeatedlyLazy(op)
   }
@@ -250,7 +255,7 @@ class LazyListLazinessTest {
   def prependedAll_properlyLazy(): Unit = {
     def check(prefix: Seq[Int]): Unit = {
       val op = lazyListOp { ll =>
-        var prepended = prefix ++: ll
+        var prepended = ll prependedAll prefix
         var toDrop    = prefix.length
         while (toDrop > 0) {
           prepended = prepended.tail
@@ -262,11 +267,14 @@ class LazyListLazinessTest {
       assertRepeatedlyLazy(op)
     }
     for (coll <- Seq(Nil, 2 :: Nil, 1 to 10)) check(coll)
-    // assertKnownEmptyYieldsKnownEmpty(Nil ++: _)
+    assertKnownEmptyYieldsKnownEmpty(_ prependedAll Nil)
 
     // Check that prepending a `LazyList` leaves it fully lazy
     val checker = new OpLazinessChecker
-    checker.lazyList ++: LazyList.from(0).take(4)
+    LazyList
+      .from(0)
+      .take(4)
+      .prependedAll(checker.lazyList)
     checker.assertAll(evaluated = false)
   }
 
@@ -337,28 +345,19 @@ class LazyListLazinessTest {
 
   @Test
   def sizeCompare_properlyLazy(): Unit = {
-    for (factory <- List[Factory[Int, Seq[Int]]](LazyList, Vector)) {
-      // assertLazyAllSkipping(_ sizeCompare factory.fill(3)(1), 4)
-      assertLazyAllSkipping(_ sizeCompare factory.fromSpecific(List(1, 1, 1)), 4)
+    for (factory <- List[SeqFactory[Seq]](LazyList, Vector)) {
+      assertLazyAllSkipping(_ sizeCompare factory.fill(3)(1), 4)
     }
   }
 
   @Test
   def iterator_properlyLazy(): Unit = {
-    // genericLazyOp_properlyLazy(_.iterator to LazyList)
-    val op = lazyListOp(_.iterator to LazyList)
-    assertLazyAll(op)
-    assertRepeatedlyLazy(op)
-    // assertKnownEmptyYieldsKnownEmpty(op)
+    genericLazyOp_properlyLazy(_.iterator to LazyList)
   }
 
   @Test
   def view_properlyLazy(): Unit = {
-    // genericLazyOp_properlyLazy(_.view to LazyList)
-    val op = lazyListOp(_.view to LazyList)
-    assertLazyAll(op)
-    assertRepeatedlyLazy(op)
-    // assertKnownEmptyYieldsKnownEmpty(op)
+    genericLazyOp_properlyLazy(_.view to LazyList)
   }
 
   @Test
@@ -385,13 +384,13 @@ class LazyListLazinessTest {
 
   @Test
   def corresponds_properlyLazy(): Unit = {
-    // assertLazyAllSkipping(_.corresponds(Iterator.empty[Int])(_ == _), 1)
+    assertLazyAllSkipping(_.corresponds(Iterator.empty[Int])(_ == _), 1)
     assertLazyAllSkipping(_.corresponds(LazyList.empty[Int])(_ == _), 1)
 
-    // assertLazyAllSkipping(_.corresponds(Iterator.from(1))(_ == _), 1)
+    assertLazyAllSkipping(_.corresponds(Iterator.from(1))(_ == _), 1)
     assertLazyAllSkipping(_.corresponds(LazyList.from(1))(_ == _), 1)
 
-    // assertLazyAllSkipping(_.corresponds(Iterator.from(0).take(1))(_ == _), 2)
+    assertLazyAllSkipping(_.corresponds(Iterator.from(0).take(1))(_ == _), 2)
     assertLazyAllSkipping(_.corresponds(LazyList.from(0).take(1))(_ == _), 2)
 
     // check laziness of corresponding `LazyList`
@@ -563,10 +562,7 @@ class LazyListLazinessTest {
     } {
       val op = lazyListOp(_.patch(from, Nil, replaced))
       val d  = DropProfile(dropCount = replaced, repeatedDrops = false)
-      // genericLazyOp_properlyLazy(op, d)
-      assertLazyAll(op)
-      assertRepeatedlyLazy(op, d)
-      // assertKnownEmptyYieldsKnownEmpty(op)
+      genericLazyOp_properlyLazy(op, d)
     }
   }
 
@@ -591,16 +587,16 @@ class LazyListLazinessTest {
     genericSameElements_properlyLazy(_ == _)
   }
 
-  // @Test
-  // def search_properlyLazy(): Unit = {
-  //   assertLazyAllSkipping(_.search(0), 1)
-  //   assertLazyAllSkipping(_.search(1), 2)
-  //   assertLazyAllSkipping(_.search(-1, 4, 7), 7)
-  // }
+  @Test
+  def search_properlyLazy(): Unit = {
+    assertLazyAllSkipping(_.search(0), 1)
+    assertLazyAllSkipping(_.search(1), 2)
+    assertLazyAllSkipping(_.search(-1, 4, 7), 7)
+  }
 
   @Test
   def segmentLength_properlyLazy(): Unit = {
-    // assertLazyAllSkipping(_.segmentLength(_ => false), 1)
+    assertLazyAllSkipping(_.segmentLength(_ => false), 1)
     assertLazyAllSkipping(_.segmentLength(_ => false, 4), 5)
   }
 
@@ -633,23 +629,22 @@ class LazyListLazinessTest {
 
   @Test
   def zip_properlyLazy(): Unit = {
-    // assertLazyAll(_.zip(Nil).force)
-    assertLazyAllSkipping(_.zip(Nil).force, 1)
+    assertLazyAll(_.zip(Nil).force)
     val op = lazyListOp(_.zip(LazyList from 0))
     assertLazyAll(op)
     assertKnownEmptyYields(op)(_.knownSize == 0)
     genericLazyOp_properlyLazy(op.andThen(_.map({ case (a, b) => a + b })))
   }
 
-  // @Test
-  // def lazyZip_properlyLazy(): Unit = {
-  //   assertLazyAll(_.lazyZip(Nil).to(LazyList).force)
-  //   val op = lazyListOp(_.lazyZip(LazyList from 0))
-  //   assertLazyAll(op)
-  //   assertKnownEmptyYields(op)(_.knownSize == 0)
-  //
-  //   genericLazyOp_properlyLazy(op.andThen(_.map({ case (a, b) => a + b })))
-  // }
+  @Test
+  def lazyZip_properlyLazy(): Unit = {
+    assertLazyAll(_.lazyZip(Nil).to(LazyList).force)
+    val op = lazyListOp(_.lazyZip(LazyList from 0))
+    assertLazyAll(op)
+    assertKnownEmptyYields(op)(_.knownSize == 0)
+
+    genericLazyOp_properlyLazy(op.andThen(_.map({ case (a, b) => a + b })))
+  }
 
   @Test
   def zipWithIndex_properlyLazy(): Unit = {
@@ -663,7 +658,7 @@ class LazyListLazinessTest {
   def zipAll_properlyLazy(): Unit = {
     val op1 = lazyListOp(_.zipAll(Nil, 0, 0))
     assertLazyAll(op1)
-    // assertKnownEmptyYields(op1)(_.knownSize == 0)
+    assertKnownEmptyYields(op1)(_.knownSize == 0)
 
     val op2 = lazyListOp(_.zipAll(LazyList.tabulate(LazinessChecker.doubleCount)(i => i), 0, 0))
     for (op <- op1 :: op2 :: Nil) {
@@ -696,25 +691,24 @@ class LazyListLazinessTest {
     }
   }
 
-  // This test does not work across all Scala versions, or on scala.js
-  // @Test
-  // def serialization_properlyLazy(): Unit = {
-  //   def serializeDeserialize(obj: LazyList[Int]): LazyList[Int] = {
-  //     import java.io._
-  //     val buffer = new ByteArrayOutputStream
-  //     val out    = new ObjectOutputStream(buffer)
-  //     out.writeObject(obj)
-  //     val in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray))
-  //     in.readObject.asInstanceOf[LazyList[Int]]
-  //   }
-  //
-  //   assertLazyAll(serializeDeserialize)
-  //   val op = lazyListOp { list =>
-  //     list.take(4).force
-  //     serializeDeserialize(list)
-  //   }
-  //   assertLazyAllSkipping(op, 4)
-  // }
+  @Test
+  def serialization_properlyLazy(): Unit = {
+    def serializeDeserialize(obj: LazyList[Int]): LazyList[Int] = {
+      import java.io._
+      val buffer = new ByteArrayOutputStream
+      val out    = new ObjectOutputStream(buffer)
+      out.writeObject(obj)
+      val in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray))
+      in.readObject.asInstanceOf[LazyList[Int]]
+    }
+
+    assertLazyAll(serializeDeserialize)
+    val op = lazyListOp { list =>
+      list.take(4).force
+      serializeDeserialize(list)
+    }
+    assertLazyAllSkipping(op, 4)
+  }
 
   private def genericCons_unapply_properlyLazy(
       unapply: LazyList[Int] => Option[(Int, LazyList[Int])]): Unit = {
@@ -755,7 +749,7 @@ class LazyListLazinessTest {
         if (i >= LazinessChecker.count) None
         else {
           init.evaluate(i)
-          Some(i, i + 1)
+          Some((i, i + 1))
         }
       }
     }
@@ -819,19 +813,18 @@ class LazyListLazinessTest {
   }
 
   @Test
-  @Ignore // TODO: enable after upgrading to 2.13.4+
+  @Ignore // TODO: enable after upgrading to 3.0.0-M2 (2.13.4 has the fix, but M1 is still at 2.13.3)
   def cons_properlyLazy(): Unit = {
     genericCons_properlyLazy(LazyList.cons(_, _))
   }
 
   @Test
   def `#::_properlyLazy`(): Unit = {
-    // genericCons_properlyLazy(_ #:: _)
-    genericCons_properlyLazy((hd, tl) => tl.#::(hd))
+    genericCons_properlyLazy(_ #:: _)
   }
 
   @Test
-  def `#::: properlyLazy`(): Unit = {
+  def `#:::_properlyLazy`(): Unit = {
     val headInitFactory = lazyListFactory { init =>
       def gen(index: Int): LazyList[Int] = {
         def elem(): LazyList[Int] = LazyList.fill(1) { init.evaluate(index); index }
@@ -891,7 +884,7 @@ class LazyListLazinessTest {
   @Test
   def concat_companion_properlyLazy(): Unit = {
     val quarterCount = LazinessChecker.count / 4
-    // assertEquals(0, LazyList.concat().knownSize)
+    assertEquals(0, LazyList.concat().knownSize)
 
     val factory = lazyListFactory { init =>
       val lists = (0 until 4) map { i =>
@@ -910,32 +903,24 @@ class LazyListLazinessTest {
   @Test
   def range_properlyLazy(): Unit = {
     var counter = 0
-    class CustomLong(val value: Long) {
+    case class CustomLong(value: Long) {
       counter += 1
-
-      override def equals(obj: Any): Boolean = obj match {
-        case that: CustomLong => this.value == that.value
-        case _                => false
-      }
-      override def hashCode(): Int = value.##
     }
     object CustomLong {
       import scala.language.implicitConversions
-      def apply(value: Long): CustomLong                   = new CustomLong(value)
-      implicit def long2CustomLong(long: Long): CustomLong = apply(long)
+      implicit def long2CustomLong(long: Long): CustomLong = CustomLong(long)
 
       implicit val customIntegralIsIntegral: Integral[CustomLong] = new Integral[CustomLong] {
-        private val I = implicitly[Integral[Long]]
+        private val I = Integral[Long]
 
-        override def quot(x: CustomLong, y: CustomLong)  = I.quot(x.value, y.value)
-        override def rem(x: CustomLong, y: CustomLong)   = I.rem(x.value, y.value)
-        override def plus(x: CustomLong, y: CustomLong)  = I.plus(x.value, y.value)
-        override def minus(x: CustomLong, y: CustomLong) = I.minus(x.value, y.value)
-        override def times(x: CustomLong, y: CustomLong) = I.times(x.value, y.value)
-        override def negate(x: CustomLong)               = I.negate(x.value)
-        override def fromInt(x: Int)                     = I.fromInt(x)
-        def parseString(str: String): Option[CustomLong] =
-          scala.util.Try(str.toLong).toOption.map(CustomLong.apply)
+        override def quot(x: CustomLong, y: CustomLong)    = I.quot(x.value, y.value)
+        override def rem(x: CustomLong, y: CustomLong)     = I.rem(x.value, y.value)
+        override def plus(x: CustomLong, y: CustomLong)    = I.plus(x.value, y.value)
+        override def minus(x: CustomLong, y: CustomLong)   = I.minus(x.value, y.value)
+        override def times(x: CustomLong, y: CustomLong)   = I.times(x.value, y.value)
+        override def negate(x: CustomLong)                 = I.negate(x.value)
+        override def fromInt(x: Int)                       = I.fromInt(x)
+        override def parseString(str: String)              = I.parseString(str).map(CustomLong.apply)
         override def toInt(x: CustomLong)                  = I.toInt(x.value)
         override def toLong(x: CustomLong)                 = I.toLong(x.value)
         override def toFloat(x: CustomLong)                = I.toFloat(x.value)
@@ -957,7 +942,7 @@ class LazyListLazinessTest {
 
   @Test
   def unapplySeq_properlyLazy(): Unit = {
-    genericLazyOp_properlyLazy(LazyList.unapplySeq(_).get.toSeq.to(LazyList))
+    genericLazyOp_properlyLazy(LazyList.unapplySeq(_).toSeq.to(LazyList))
   }
 
   @Test
@@ -1147,7 +1132,7 @@ private object LazyListLazinessTest {
    * a lazy list that is known to be empty.
    */
   def assertKnownEmptyYields[A](op: LazyListOp[A])(predicate: A => Boolean): Unit = {
-    assertTrue("not known to be empty", predicate(op(LazyList.empty)))
+    assert(predicate(op(LazyList.empty)))
   }
 
   /** Asserts that operation yields a lazy list that is known to be empty
