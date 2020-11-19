@@ -825,7 +825,6 @@ class LazyListLazinessTest {
   }
 
   @Test
-  @Ignore // TODO: enable after we drop Scala.js 0.6.x support
   def `#::_properlyLazy`(): Unit = {
     // genericCons_properlyLazy(_ #:: _)
     genericCons_properlyLazy((hd, tl) => tl.#::(hd))
