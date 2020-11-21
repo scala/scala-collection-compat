@@ -17,7 +17,7 @@ Only the most commonly used APIs are supported; many are missing. Contributions 
 To use this library, add the following to your `build.sbt`:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.2.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.3.0"
 ```
 
 All future versions will remain backwards binary compatible with 2.0.0. (The 1.0.0 release was withdrawn and should not be used.)
@@ -64,7 +64,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.2.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.3.0"
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
@@ -82,8 +82,8 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.2.0"
-libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.2.0"
+scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.3.0"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.3.0"
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
