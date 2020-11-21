@@ -15,3 +15,14 @@ target/
 /.cache-tests
 admin/.coursier
 admin/.scalafmt*
+
+# metals
+/.bloop/
+/.metals/
+/project/**/metals.sbt
+
+# sbt - Build Server Protocol
+/.bsp/
+
+# vscode
+/.vscode/
