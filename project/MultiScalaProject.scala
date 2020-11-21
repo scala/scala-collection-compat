@@ -44,6 +44,7 @@ trait MultiScala {
         val sourceDir = (ThisBuild / baseDirectory).value / base / "src" / "main"
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n >= 12 => List(sourceDir / "scala-2.12+")
+          case Some((3, _))            => List(sourceDir / "scala-2.13")
           case _                       => Nil
         }
       },

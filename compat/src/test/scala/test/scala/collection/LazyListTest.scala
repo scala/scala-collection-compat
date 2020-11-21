@@ -37,7 +37,7 @@ class LazyListTest {
     assertEquals(5, wf.map(identity).length) // success instead of NPE
   }
 
-  @Test(timeout = 10000) // scala/bug#6881
+  @Test(timeout = 10000L) // scala/bug#6881
   def test_reference_equality: Unit = {
     // Make sure we're tested with reference equality
     val s = LazyList.from(0)
@@ -192,7 +192,7 @@ class LazyListTest {
 
   val cycle1: LazyList[Int] = 1 #:: 2 #:: cycle1
   val cycle2: LazyList[Int] = 1 #:: 2 #:: 3 #:: cycle2
-  @Test(timeout = 10000)
+  @Test(timeout = 10000L)
   def testSameElements(): Unit = {
     assert(LazyList().sameElements(LazyList()))
     assert(!LazyList().sameElements(LazyList(1)))

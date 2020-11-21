@@ -31,6 +31,8 @@ lazy val root = project
     compat212JS,
     compat213JVM,
     compat213JS,
+    compat30JVM,
+    compat30JS,
     `scalafix-data211`,
     `scalafix-data212`,
     `scalafix-data213`,
@@ -51,6 +53,7 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.12"
 lazy val scala213 = "2.13.3"
+lazy val scala30  = "3.0.0-M1"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
@@ -62,7 +65,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
-        if (scalaVersion.value.startsWith("2.13.")) sharedSourceDir / "scala-2.13"
+        if (scalaVersion.value.startsWith("2.13.") || isDotty.value) sharedSourceDir / "scala-2.13"
         else sharedSourceDir / "scala-2.11_2.12"
       },
     )
@@ -79,13 +82,16 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       },
     )
     .jsSettings(
-      scalacOptions += {
-        val x = (LocalRootProject / baseDirectory).value.toURI.toString
-        val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
-          .Process("git rev-parse HEAD")
-          .lineStream_!
-          .head
-        s"-P:scalajs:mapSourceURI:$x->$y/"
+      scalacOptions ++= {
+        if (isDotty.value) Seq() // Scala.js does not support -P with Scala 3: lampepfl/dotty#9783
+        else {
+          val x = (LocalRootProject / baseDirectory).value.toURI.toString
+          val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
+            .Process("git rev-parse HEAD")
+            .lineStream_!
+            .head
+          Seq(s"-P:scalajs:mapSourceURI:$x->$y/")
+        }
       },
       Test / fork := false // Scala.js cannot run forked tests
     )
@@ -102,6 +108,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
 val compat213 = compat(scala213)
+val compat30  = compat(scala30)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
@@ -110,6 +117,8 @@ lazy val compat212JVM    = compat212.jvm
 lazy val compat212JS     = compat212.js
 lazy val compat213JVM    = compat213.jvm
 lazy val compat213JS     = compat213.js
+lazy val compat30JVM     = compat30.jvm
+lazy val compat30JS      = compat30.js
 
 lazy val `binary-compat-old` = project
   .in(file("binary-compat/old"))
