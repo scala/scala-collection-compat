@@ -17,7 +17,7 @@ admin/.coursier
 admin/.scalafmt*
 
 # metals
-/.bloop/
+.bloop/
 /.metals/
 /project/**/metals.sbt
 

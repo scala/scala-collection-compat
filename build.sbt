@@ -53,7 +53,7 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.12"
 lazy val scala213 = "2.13.3"
-lazy val scala30  = "3.0.0-M1"
+lazy val scala30  = "3.0.0-M2"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
@@ -83,15 +83,13 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     )
     .jsSettings(
       scalacOptions ++= {
-        if (isDotty.value) Seq() // Scala.js does not support -P with Scala 3: lampepfl/dotty#9783
-        else {
-          val x = (LocalRootProject / baseDirectory).value.toURI.toString
-          val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
-            .Process("git rev-parse HEAD")
-            .lineStream_!
-            .head
-          Seq(s"-P:scalajs:mapSourceURI:$x->$y/")
-        }
+        val x = (LocalRootProject / baseDirectory).value.toURI.toString
+        val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
+          .Process("git rev-parse HEAD")
+          .lineStream_!
+          .head
+        val opt = if (isDotty.value) "-scalajs-mapSourceURI" else "-P:scalajs:mapSourceURI"
+        Seq(s"$opt:$x->$y/")
       },
       Test / fork := false // Scala.js cannot run forked tests
     )
