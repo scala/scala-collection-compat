@@ -141,8 +141,10 @@ class BuildFromTest {
     val xs4: List[Int]    = xs2
     val xs5: List[String] = xs3
 
-    val xs6                         = TreeMap((1, "1"), (2, "2"))
-    val (xs7, xs8)                  = mapSplit(xs6) { case (k, v) => Left[(String, Int), (Int, Boolean)]((v, k)) }
+    val xs6 = TreeMap((1, "1"), (2, "2"))
+    val (xs7, xs8) = mapSplit(xs6) {
+      case (k, v) => Left((v, k)): Either[(String, Int), (Int, Boolean)]
+    }
     val xs9: TreeMap[String, Int]   = xs7
     val xs10: TreeMap[Int, Boolean] = xs8
   }
