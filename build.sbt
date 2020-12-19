@@ -31,8 +31,10 @@ lazy val root = project
     compat212JS,
     compat213JVM,
     compat213JS,
-    compat30JVM,
-    compat30JS,
+    compat30M2JVM,
+    compat30M2JS,
+    compat30M3JVM,
+    compat30M3JS,
     `scalafix-data211`,
     `scalafix-data212`,
     `scalafix-data213`,
@@ -53,7 +55,8 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.12"
 lazy val scala213 = "2.13.3"
-lazy val scala30  = "3.0.0-M2"
+lazy val scala30M2  = "3.0.0-M2"
+lazy val scala30M3  = "3.0.0-M3"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
@@ -106,7 +109,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
 val compat211 = compat(scala211)
 val compat212 = compat(scala212)
 val compat213 = compat(scala213)
-val compat30  = compat(scala30)
+val compat30M2  = compat(scala30M2)
+val compat30M3  = compat(scala30M3)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
@@ -115,8 +119,10 @@ lazy val compat212JVM    = compat212.jvm
 lazy val compat212JS     = compat212.js
 lazy val compat213JVM    = compat213.jvm
 lazy val compat213JS     = compat213.js
-lazy val compat30JVM     = compat30.jvm
-lazy val compat30JS      = compat30.js
+lazy val compat30M2JVM   = compat30M2.jvm
+lazy val compat30M2JS    = compat30M2.js
+lazy val compat30M3JVM   = compat30M3.jvm
+lazy val compat30M3JS    = compat30M3.js
 
 lazy val `binary-compat-old` = project
   .in(file("binary-compat/old"))

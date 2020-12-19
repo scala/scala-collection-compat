@@ -28,8 +28,13 @@ import java.io.File
  */
 trait MultiScala {
   def majorMinor(in: String): String = {
-    val Array(major, minor, _) = in.split("\\.")
-    major + minor
+    val milestoneRegex = raw"\d*-(M\d*)".r
+    val Array(major, minor, milestone) = in.split("\\.")
+    val mExt = milestone match {
+      case milestoneRegex(m) => m
+      case _ => ""
+    }
+    major + minor + mExt
   }
 
   def projectIdPerScala(name: String, scalaV: String): String = s"$name${majorMinor(scalaV)}"
