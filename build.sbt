@@ -100,9 +100,9 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .nativeSettings(
       nativeLinkStubs := true,
       addCompilerPlugin(
-        "org.scala-native" % "junit-plugin" % "0.4.0-SNAPSHOT" cross CrossVersion.full
+        "org.scala-native" % "junit-plugin" % "0.4.0" cross CrossVersion.full
       ),
-      libraryDependencies += "org.scala-native" %%% "junit-runtime" % "0.4.0-SNAPSHOT",
+      libraryDependencies += "org.scala-native" %%% "junit-runtime" % "0.4.0",
       Test / fork := false // Scala Native cannot run forked tests
     )
 )
