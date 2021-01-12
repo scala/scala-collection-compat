@@ -819,7 +819,6 @@ class LazyListLazinessTest {
   }
 
   @Test
-  @Ignore // TODO: enable after upgrading to 2.13.4+
   def cons_properlyLazy(): Unit = {
     genericCons_properlyLazy(LazyList.cons(_, _))
   }
