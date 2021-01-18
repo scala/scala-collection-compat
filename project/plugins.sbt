@@ -2,7 +2,7 @@ val crossVer = "1.0.0"
 val scalaJSVersion =
   Option(System.getenv("SCALAJS_VERSION")).filter(_.nonEmpty).getOrElse("1.4.0")
 val scalaNativeVersion =
-  Option(System.getenv("SCALANATIVE_VERSION")).filter(_.nonEmpty).getOrElse("0.3.9")
+  Option(System.getenv("SCALANATIVE_VERSION")).filter(_.nonEmpty).getOrElse("0.4.0-test1")
 
 addSbtPlugin("ch.epfl.lamp"           % "sbt-dotty"                     % "0.5.1")
 addSbtPlugin("org.scala-js"           % "sbt-scalajs"                   % scalaJSVersion)
