@@ -53,7 +53,7 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.12"
+lazy val scala212 = "2.12.13"
 lazy val scala213 = "2.13.4"
 lazy val scala30  = "3.0.0-M3"
 
@@ -100,9 +100,9 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .nativeSettings(
       nativeLinkStubs := true,
       addCompilerPlugin(
-        "org.scala-native" % "junit-plugin" % "0.4.0" cross CrossVersion.full
+        "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
       ),
-      libraryDependencies += "org.scala-native" %%% "junit-runtime" % "0.4.0",
+      libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
       Test / fork := false // Scala Native cannot run forked tests
     )
 )
