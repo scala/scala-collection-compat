@@ -34,13 +34,13 @@ matrix:
 
     # Scala Native includes
     - scala: 2.11.12
-      env: SCALANATIVE_VERSION=0.3.9    ADOPTOPENJDK=8
+      env: SCALANATIVE_VERSION=0.4.0    ADOPTOPENJDK=8
 
     - scala: 2.11.12
       env: SCALANATIVE_VERSION=0.4.0-M2 ADOPTOPENJDK=8
 
     - scala: 2.11.12
-      env: SCALANATIVE_VERSION=0.3.9    ADOPTOPENJDK=11
+      env: SCALANATIVE_VERSION=0.4.0    ADOPTOPENJDK=11
 
     - scala: 2.11.12
       env: SCALANATIVE_VERSION=0.4.0-M2 ADOPTOPENJDK=11
