@@ -5,6 +5,7 @@ import sbtcrossproject.{Platform, CrossProject}
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbtcrossproject.CrossPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
+import scalanativecrossproject.ScalaNativeCrossPlugin.autoImport._
 
 import java.io.File
 
@@ -87,6 +88,7 @@ class MultiScalaCrossProject(platforms: Seq[Platform],
         .settings(moduleName := name)
         .jvmSettings(scalaVersion := scalaV)
         .jsSettings(scalaVersion := scalaVJs)
+        .nativeSettings(scalaVersion := scalaV)
         .settings(srcFull(name))
 
     configurePerScala(configure(resultingProject))

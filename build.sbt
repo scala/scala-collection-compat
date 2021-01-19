@@ -29,8 +29,10 @@ lazy val root = project
     compat211Native,
     compat212JVM,
     compat212JS,
+    compat212Native,
     compat213JVM,
     compat213JS,
+    compat213Native,
     compat30JVM,
     compat30JS,
     `scalafix-data211`,
@@ -51,7 +53,7 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.12"
+lazy val scala212 = "2.12.13"
 lazy val scala213 = "2.13.4"
 lazy val scala30  = "3.0.0-M3"
 
@@ -96,10 +98,12 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
     .disablePlugins(ScalafixPlugin)
     .nativeSettings(
-      crossScalaVersions := List(scala211),
-      scalaVersion := scala211, // allows to compile if scalaVersion set not 2.11
       nativeLinkStubs := true,
-      Test / test := {}
+      addCompilerPlugin(
+        "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
+      ),
+      libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
+      Test / fork := false // Scala Native cannot run forked tests
     )
 )
 
@@ -113,8 +117,10 @@ lazy val compat211JS     = compat211.js
 lazy val compat211Native = compat211.native
 lazy val compat212JVM    = compat212.jvm
 lazy val compat212JS     = compat212.js
+lazy val compat212Native = compat212.native
 lazy val compat213JVM    = compat213.jvm
 lazy val compat213JS     = compat213.js
+lazy val compat213Native = compat213.native
 lazy val compat30JVM     = compat30.jvm
 lazy val compat30JS      = compat30.js
 
@@ -353,7 +359,7 @@ inThisBuild(
 
           Seq(
             List(s"$projectPrefix/clean"),
-            if (isScalaNative) List() else List(s"$testProjectPrefix/test"),
+            List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
             publishTask
           ).flatten
