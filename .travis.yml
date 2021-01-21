@@ -8,12 +8,13 @@ scala:
   - 2.11.12
   - 2.12.12
   - 2.13.4
+  - 3.0.0-M2
   - 3.0.0-M3
 
 env:
   - SCALAJS_VERSION=          ADOPTOPENJDK=8
   - SCALAJS_VERSION=1.4.0     ADOPTOPENJDK=8
-  - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8 
+  - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
   - SCALAJS_VERSION=          ADOPTOPENJDK=11
   - SCALAJS_VERSION=1.4.0     ADOPTOPENJDK=11
   - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
@@ -36,7 +37,14 @@ matrix:
 
   exclude:
 
-    # not supported yet
+    # Scala Native doesn't support Scala 3 yet
+
+    - scala: 3.0.0-M2
+      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
+
+    - scala: 3.0.0-M2
+      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
+
     - scala: 3.0.0-M3
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
 
