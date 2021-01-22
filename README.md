@@ -51,7 +51,7 @@ And, it includes support for some non-collections classes such as the `@nowarn` 
 
 ## Migration rules
 
-The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.12).
+The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.13).
 
 ```scala
 // project/plugins.sbt

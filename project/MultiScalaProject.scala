@@ -23,7 +23,7 @@ import java.io.File
  *
  * // instanciate a sbt project
  * lazy val myProject211 = myProject("2.11.12", _.settings(...) /* scala version dependent configurations */)
- * lazy val myProject212 = myProject("2.12.12" , _.settings(...))
+ * lazy val myProject212 = myProject("2.12.13" , _.settings(...))
  * // ...
  * }}}
  */
