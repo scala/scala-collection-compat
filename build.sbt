@@ -358,6 +358,7 @@ inThisBuild(
             }
 
           Seq(
+            List(s"""++${sys.env.get("TRAVIS_SCALA_VERSION").get}!"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
