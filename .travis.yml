@@ -8,8 +8,8 @@ scala:
   - 2.11.12
   - 2.12.13
   - 2.13.4
-  - 3.0.0-M2
   - 3.0.0-M3
+  - 3.0.0-RC1
 
 env:
   - SCALAJS_VERSION=          ADOPTOPENJDK=8
@@ -39,16 +39,16 @@ matrix:
 
     # Scala Native doesn't support Scala 3 yet
 
-    - scala: 3.0.0-M2
+    - scala: 3.0.0-M3
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
 
-    - scala: 3.0.0-M2
+    - scala: 3.0.0-M3
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
 
-    - scala: 3.0.0-M3
+    - scala: 3.0.0-RC1
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
 
-    - scala: 3.0.0-M3
+    - scala: 3.0.0-RC1
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
 
 install:
