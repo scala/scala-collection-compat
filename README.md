@@ -55,7 +55,7 @@ The migration rules use scalafix. Please see the [official installation instruct
 
 ```scala
 // project/plugins.sbt
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.25")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.26")
 ```
 
 ### Collection213Upgrade
