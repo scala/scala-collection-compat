@@ -52,9 +52,9 @@ lazy val root = project
 
 lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 
-lazy val scala211 = "2.13.5"
+lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.13"
-lazy val scala213 = "2.13.4"
+lazy val scala213 = "2.13.5"
 lazy val scala30  = "3.0.0-RC1"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
