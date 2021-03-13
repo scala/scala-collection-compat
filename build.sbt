@@ -70,6 +70,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
         if (scalaVersion.value.startsWith("2.13.") || isDotty.value) sharedSourceDir / "scala-2.13"
         else sharedSourceDir / "scala-2.11_2.12"
       },
+      versionScheme := Some("early-semver"),
+      versionPolicyIntention := Compatibility.BinaryCompatible,
     )
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
@@ -144,6 +146,7 @@ lazy val `binary-compat` = project
     scalaVersion := scala212,
     libraryDependencies += "com.typesafe" %% "mima-core" % "0.8.0" % Test,
     junit,
+    versionPolicyIntention := Compatibility.None,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
       "oldClasses" -> (`binary-compat-old` / Compile / classDirectory).value.toString,
@@ -166,6 +169,7 @@ lazy val `scalafix-rules` = project
   .settings(
     organization := (compat212JVM / organization).value,
     publishTo := (compat212JVM / publishTo).value,
+    versionPolicyIntention := Compatibility.None,
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
@@ -361,6 +365,7 @@ inThisBuild(
             List(s"""++${sys.env.get("TRAVIS_SCALA_VERSION").get}!"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
+            List(s"$projectPrefix/versionPolicyCheck"),
             List(s"$projectPrefix/publishLocal"),
             publishTask
           ).flatten
