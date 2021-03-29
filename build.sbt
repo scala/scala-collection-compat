@@ -55,7 +55,7 @@ lazy val junit = libraryDependencies += "com.novocode" % "junit-interface" % "0.
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.13"
 lazy val scala213 = "2.13.5"
-lazy val scala30  = "3.0.0-RC1"
+lazy val scala30  = "3.0.0-RC2"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
@@ -67,8 +67,12 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
-        if (scalaVersion.value.startsWith("2.13.") || isDotty.value) sharedSourceDir / "scala-2.13"
-        else sharedSourceDir / "scala-2.11_2.12"
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _) | (2, 13)) =>
+            sharedSourceDir / "scala-2.13"
+          case _ =>
+            sharedSourceDir / "scala-2.11_2.12"
+        }
       },
       versionScheme := Some("early-semver"),
       versionPolicyIntention := Compatibility.BinaryCompatible,
@@ -76,7 +80,10 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       junit,
-      scalaModuleMimaPreviousVersion := Some("2.4.0").filterNot(_ => isDotty.value),
+      scalaModuleMimaPreviousVersion := (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _)) => None
+        case _            => Some("2.4.0")
+      }),
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
@@ -92,7 +99,10 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
           .Process("git rev-parse HEAD")
           .lineStream_!
           .head
-        val opt = if (isDotty.value) "-scalajs-mapSourceURI" else "-P:scalajs:mapSourceURI"
+        val opt = CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _)) => "-scalajs-mapSourceURI"
+          case _            => "-P:scalajs:mapSourceURI"
+        }
         Seq(s"$opt:$x->$y/")
       },
       Test / fork := false // Scala.js cannot run forked tests
@@ -277,8 +287,8 @@ lazy val `scalafix-tests` = project
       output212Plus.value,
       output213.value
     ),
-    scalafixTestkitInputSourceDirectories := sourceDirectories.in(`scalafix-input`, Compile).value,
-    scalafixTestkitInputClasspath := fullClasspath.in(`scalafix-input`, Compile).value
+    scalafixTestkitInputSourceDirectories := (`scalafix-input` / Compile / sourceDirectories).value,
+    scalafixTestkitInputClasspath := (`scalafix-input` / Compile / fullClasspath).value,
   )
   .dependsOn(`scalafix-input`, `scalafix-rules`)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
