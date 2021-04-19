@@ -5,51 +5,11 @@ import: scala/scala-dev:travis/default.yml
 language: scala
 
 scala:
-  - 2.11.12
-  - 2.12.13
-  - 2.13.5
-  - 3.0.0-RC2
   - 3.0.0-RC3
 
 env:
   - SCALAJS_VERSION=          ADOPTOPENJDK=8
   - SCALAJS_VERSION=1.5.1     ADOPTOPENJDK=8
-  - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
-  - SCALAJS_VERSION=          ADOPTOPENJDK=11
-  - SCALAJS_VERSION=1.5.1     ADOPTOPENJDK=11
-  - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
-
-matrix:
-
-  include:
-
-    # run migration test
-    - scala: 2.12.13
-      env: TEST_SCALAFIX=true      ADOPTOPENJDK=8
-
-    # run binary compatibility test
-    - scala: 2.12.13
-      env: TEST_BINARY_COMPAT=true ADOPTOPENJDK=8
-
-    # run scalafmt
-    - scala: 2.12.13
-      env: TEST_SCALAFMT=true      ADOPTOPENJDK=8
-
-  exclude:
-
-    # Scala Native doesn't support Scala 3 yet
-
-    - scala: 3.0.0-RC2
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
-
-    - scala: 3.0.0-RC2
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
-
-    - scala: 3.0.0-RC3
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
-
-    - scala: 3.0.0-RC3
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
 
 install:
   - git fetch --tags # get all tags for sbt-dynver
