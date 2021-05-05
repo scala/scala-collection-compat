@@ -4,6 +4,7 @@ import com.lightbend.tools.scalamoduleplugin.ScalaModulePlugin._
 import scala.sys.process._
 
 lazy val commonSettings = Seq(
+  scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
   headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
                                                  |
                                                  |Copyright EPFL and Lightbend, Inc.
