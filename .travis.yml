@@ -24,15 +24,15 @@ matrix:
   include:
 
     # run migration test
-    - scala: 2.12.13
+    - scala: 2.12.14
       env: TEST_SCALAFIX=true      ADOPTOPENJDK=8
 
     # run binary compatibility test
-    - scala: 2.12.13
+    - scala: 2.12.14
       env: TEST_BINARY_COMPAT=true ADOPTOPENJDK=8
 
     # run scalafmt
-    - scala: 2.12.13
+    - scala: 2.12.14
       env: TEST_SCALAFMT=true      ADOPTOPENJDK=8
 
   exclude:
