@@ -6,9 +6,8 @@ language: scala
 
 scala:
   - 2.11.12
-  - 2.12.13
+  - 2.12.14
   - 2.13.6
-  - 3.0.0-RC3
   - 3.0.0
 
 env:
@@ -16,8 +15,7 @@ env:
   - SCALAJS_VERSION=1.5.1     ADOPTOPENJDK=8
   - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
   - SCALAJS_VERSION=          ADOPTOPENJDK=11
-  - SCALAJS_VERSION=1.5.1     ADOPTOPENJDK=11
-  - SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
+  - SCALAJS_VERSION=          ADOPTOPENJDK=17
 
 matrix:
 
@@ -39,17 +37,8 @@ matrix:
 
     # Scala Native doesn't support Scala 3 yet
 
-    - scala: 3.0.0-RC3
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
-
-    - scala: 3.0.0-RC3
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
-
     - scala: 3.0.0
       env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=8
-
-    - scala: 3.0.0
-      env: SCALANATIVE_VERSION=0.4.0 ADOPTOPENJDK=11
 
 install:
   - git fetch --tags # get all tags for sbt-dynver
