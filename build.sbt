@@ -110,7 +110,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       },
       Test / fork := false // Scala.js cannot run forked tests
     )
-    .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
+    .jsEnablePlugins(ScalaJSJUnitPlugin)
     .disablePlugins(ScalafixPlugin)
     .nativeSettings(
       nativeLinkStubs := true,
