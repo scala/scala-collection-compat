@@ -81,17 +81,12 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       junit,
-      scalaModuleMimaPreviousVersion := (CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, _)) => None
-        case _            => Some("2.4.0")
-      }),
+      scalaModuleMimaPreviousVersion := Some("2.5.0"),
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
         Seq(
           exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
-          exclude[MissingClassProblem]("scala.annotation.nowarn"), // it's part of scala-library from 2.12.13 onwards
-          exclude[MissingClassProblem]("scala.annotation.nowarn$") // it's part of scala-library from 2.12.13 onwards
         )
       },
     )
