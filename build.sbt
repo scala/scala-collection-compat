@@ -75,13 +75,11 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
             sharedSourceDir / "scala-2.11_2.12"
         }
       },
-      versionScheme := Some("early-semver"),
       versionPolicyIntention := Compatibility.BinaryCompatible,
     )
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       junit,
-      scalaModuleMimaPreviousVersion := Some("2.5.0"),
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
@@ -373,7 +371,6 @@ inThisBuild(
             List(s"""++${sys.env.get("TRAVIS_SCALA_VERSION").get}!"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
-            List(s"$projectPrefix/versionPolicyCheck"),
             List(s"$projectPrefix/publishLocal"),
             publishTask
           ).flatten
