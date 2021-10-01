@@ -4,7 +4,6 @@ import com.lightbend.tools.scalamoduleplugin.ScalaModulePlugin._
 import scala.sys.process._
 
 lazy val commonSettings = Seq(
-  scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
   headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
                                                  |
                                                  |Copyright EPFL and Lightbend, Inc.
@@ -65,6 +64,7 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     .settings(
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
+      scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
@@ -173,6 +173,7 @@ lazy val `scalafix-rules` = project
   .settings(scalaModuleSettings)
   .settings(commonSettings)
   .settings(
+    scalaModuleAutomaticModuleName := None,
     organization := (compat212JVM / organization).value,
     publishTo := (compat212JVM / publishTo).value,
     versionPolicyIntention := Compatibility.None,
@@ -288,101 +289,3 @@ lazy val `scalafix-tests` = project
   )
   .dependsOn(`scalafix-input`, `scalafix-rules`)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
-
-val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
-val isTravisTag        = sys.env.get("TRAVIS_TAG").exists(_.nonEmpty)
-val isScalaJs          = sys.env.get("SCALAJS_VERSION").exists(_.nonEmpty)
-val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").exists(_.nonEmpty)
-val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
-val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
-val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
-val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
-
-// required by sbt-scala-module
-inThisBuild(
-  Seq(
-    commands += Command.command("scalafmt-test") { state =>
-      val exitCode = Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
-      if (exitCode == 0) state else state.fail
-    },
-    commands += Command.command("scalafmt") { state =>
-      Seq("admin/scalafmt.sh") ! state.globalLogging.full
-      state
-    },
-    commands += Command.command("ci") { state =>
-      val toRun: Seq[String] =
-        if (isScalafmt) {
-          Seq("scalafmt-test")
-        } else {
-          List(
-            "TRAVIS_SCALA_VERSION",
-            "TRAVIS_TAG",
-            "SCALAJS_VERSION",
-            "SCALANATIVE_VERSION",
-            "TEST_SCALAFIX",
-            "TEST_SCALAFMT",
-            "TEST_BINARY_COMPAT"
-          ).foreach(k =>
-            println(k.padTo(20, " ").mkString("") + " -> " + sys.env.getOrElse(k, "None")))
-
-          val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
-
-          val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
-          val binaryCompatProject = "binary-compat"
-
-          val testProjectPrefix =
-            if (isScalafix) {
-              "scalafix-tests"
-            } else if (isBinaryCompat) {
-              binaryCompatProject
-            } else {
-              compatProject
-            }
-
-          val projectPrefix =
-            if (isScalafix) {
-              "scalafix-rules"
-            } else if (isBinaryCompat) {
-              binaryCompatProject
-            } else {
-              compatProject
-            }
-
-          val publishTask =
-            if (isTravisTag && !isBinaryCompat && jdkVersion == Some(8)) {
-              // we cannot run "ci-release" because that reads the `CI_RELEASE` / `CI_SONATYPE_RELEASE`
-              // env vars, which we cannot modify from java (easily). so we inline what this command does.
-              CiReleasePlugin.setupGpg()
-              List(
-                // same fix as https://github.com/olafurpg/sbt-ci-release/pull/66
-                // need to replicate it here since we're not using the `ci-release` command
-                "set pgpSecretRing := pgpSecretRing.value",
-                "set pgpPublicRing := pgpPublicRing.value",
-                s"$projectPrefix/publishSigned",
-                "sonatypePrepare",
-                "sonatypeBundleUpload",
-                "sonatypeClose"
-              )
-            } else {
-              Nil
-            }
-
-          Seq(
-            List(s"""++${sys.env.get("TRAVIS_SCALA_VERSION").get}!"""),
-            List(s"$projectPrefix/clean"),
-            List(s"$testProjectPrefix/test"),
-            List(s"$projectPrefix/publishLocal"),
-            publishTask
-          ).flatten
-        }
-
-      println("---------")
-      println("Running CI: ")
-      toRun.foreach(println)
-      println("---------")
-
-      val newCommands = toRun.toList.map(Exec(_, None))
-      state.copy(remainingCommands = newCommands ::: state.remainingCommands)
-    }
-  )
-)
