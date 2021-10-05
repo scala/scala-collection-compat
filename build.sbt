@@ -291,14 +291,15 @@ lazy val scalafixTests = project
   .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
-val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
-val isTravisTag        = sys.env.get("TRAVIS_TAG").exists(_.nonEmpty)
-val isScalaJs          = sys.env.get("SCALAJS_VERSION").exists(_.nonEmpty)
-val isScalaNative      = sys.env.get("SCALANATIVE_VERSION").exists(_.nonEmpty)
-val isScalafix         = sys.env.get("TEST_SCALAFIX").nonEmpty
-val isScalafmt         = sys.env.get("TEST_SCALAFMT").nonEmpty
-val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
-val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
+val ciScalaVersion     = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
+val isTravisTag        = sys.env.get("CI_TAG").exists(_.nonEmpty)
+val isScalaJs          = sys.env.get("CI_PLATFORM") == Some("js")
+val isScalaNative      = sys.env.get("CI_PLATFORM") == Some("native")
+val isScalafix         = sys.env.get("CI_MODE") == Some("testScalafix")
+val isScalafmt         = sys.env.get("CI_MODE") == Some("testScalafmt")
+val isBinaryCompat     = sys.env.get("CI_MODE") == Some("testBinaryCompat")
+val isHeaderCheck      = sys.env.get("CI_MODE") == Some("headerCheck")
+val jdkVersion         = sys.env.get("CI_JDK").map(_.toInt)
 
 // required by sbt-scala-module
 inThisBuild {
@@ -314,23 +315,23 @@ inThisBuild {
     },
     commands += Command.command("ci") { state =>
       val toRun: Seq[String] =
-        if (isScalafmt) {
+        if (isScalafmt)
           Seq("scalafmtTest")
-        } else {
+        else if (isHeaderCheck)
+          Seq("headerCheck")
+        else {
           List(
-            "TRAVIS_SCALA_VERSION",
-            "TRAVIS_TAG",
-            "SCALAJS_VERSION",
-            "SCALANATIVE_VERSION",
-            "TEST_SCALAFIX",
-            "TEST_SCALAFMT",
-            "TEST_BINARY_COMPAT"
+            "CI_SCALA_VERSION",
+            "CI_TAG",
+            "CI_PLATFORM",
+            "CI_MODE",
+            "CI_JDK",
           ).foreach(k =>
             println(k.padTo(20, " ").mkString("") + " -> " + sys.env.getOrElse(k, "None")))
 
           val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
 
-          val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
+          val compatProject       = "compat" + ciScalaVersion.get.binary + platformSuffix
           val binaryCompatProject = "binaryCompat"
 
           val testProjectPrefix =
@@ -371,11 +372,10 @@ inThisBuild {
             }
 
           Seq(
-            List(s"""++${sys.env.get("TRAVIS_SCALA_VERSION").get}!"""),
+            List(s"""++${sys.env.get("CI_SCALA_VERSION").get}!"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
-            List("headerCheck"),
             publishTask
           ).flatten
         }
