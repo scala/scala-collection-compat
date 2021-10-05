@@ -1,6 +1,6 @@
 addSbtPlugin("org.scala-lang.modules" % "sbt-scala-module"              % "3.0.0")
 addSbtPlugin("com.eed3si9n"           % "sbt-buildinfo"                 % "0.10.0")
-addSbtPlugin("ch.epfl.scala"          % "sbt-scalafix"                  % "0.9.29")
+addSbtPlugin("ch.epfl.scala"          % "sbt-scalafix"                  % "0.9.31")
 
 addSbtPlugin("org.portable-scala"     % "sbt-scalajs-crossproject"      % "1.1.0")
 addSbtPlugin("org.portable-scala"     % "sbt-scala-native-crossproject" % "1.1.0")
