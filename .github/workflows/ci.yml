@@ -22,7 +22,7 @@ jobs:
         java-version: ${{matrix.java}}
     - name: Test
       run: sbt test package
-    - name: Headers
-      run: sbt headerCheck
     - name: Version policy
       run: sbt PolicyCheck
+    - name: Headers
+      run: sbt headerCheck
