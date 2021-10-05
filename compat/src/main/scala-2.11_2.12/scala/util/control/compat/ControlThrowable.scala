@@ -9,6 +9,7 @@
  * See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership.
  */
+
 package scala.util.control.compat
 
 /** A parent class for throwable objects intended for flow control.

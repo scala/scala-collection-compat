@@ -1,10 +1,6 @@
 import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
-import com.lightbend.tools.scalamoduleplugin.ScalaModulePlugin._
-
-import scala.sys.process._
 
 lazy val commonSettings = Seq(
-  scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
   headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
                                                  |
                                                  |Copyright EPFL and Lightbend, Inc.
@@ -36,16 +32,16 @@ lazy val root = project
     compat213Native,
     compat30JVM,
     compat30JS,
-    `scalafix-data211`,
-    `scalafix-data212`,
-    `scalafix-data213`,
-    `scalafix-input`,
-    `scalafix-output211`,
-    `scalafix-output212`,
-    `scalafix-output213`,
-    // `scalafix-output213-failure`,
-    `scalafix-rules`,
-    `scalafix-tests`
+    scalafixData211,
+    scalafixData212,
+    scalafixData213,
+    scalafixInput,
+    scalafixOutput211,
+    scalafixOutput212,
+    scalafixOutput213,
+    // scalafixOutput213Failure,
+    scalafixRules,
+    scalafixTests
   )
   .disablePlugins(ScalafixPlugin)
 
@@ -60,11 +56,12 @@ lazy val scala30  = "3.0.2"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
-  _.settings(scalaModuleSettings)
+  _.settings(ScalaModulePlugin.scalaModuleSettings)
     .settings(commonSettings)
     .settings(
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
+      scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
@@ -132,20 +129,20 @@ lazy val compat213Native = compat213.native
 lazy val compat30JVM     = compat30.jvm
 lazy val compat30JS      = compat30.js
 
-lazy val `binary-compat-old` = project
+lazy val binaryCompatOld = project
   .in(file("binary-compat/old"))
   .settings(commonSettings)
   .settings(scalaVersion := scala212)
   .disablePlugins(ScalafixPlugin)
 
-lazy val `binary-compat-new` = project
+lazy val binaryCompatNew = project
   .in(file("binary-compat/new"))
   .settings(commonSettings)
   .settings(scalaVersion := scala212)
   .dependsOn(compat212JVM)
   .disablePlugins(ScalafixPlugin)
 
-lazy val `binary-compat` = project
+lazy val binaryCompat = project
   .in(file("binary-compat/test"))
   .settings(commonSettings)
   .settings(
@@ -155,24 +152,25 @@ lazy val `binary-compat` = project
     versionPolicyIntention := Compatibility.None,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
-      "oldClasses" -> (`binary-compat-old` / Compile / classDirectory).value.toString,
-      "newClasses" -> (`binary-compat-new` / Compile / classDirectory).value.toString
+      "oldClasses" -> (binaryCompatOld / Compile / classDirectory).value.toString,
+      "newClasses" -> (binaryCompatNew / Compile / classDirectory).value.toString
     ),
     Test / test := (Test / test)
       .dependsOn(
-        `binary-compat-old` / Compile / compile,
-        `binary-compat-new` / Compile / compile,
+        binaryCompatOld / Compile / compile,
+        binaryCompatNew / Compile / compile,
       )
       .value
   )
   .enablePlugins(BuildInfoPlugin)
   .disablePlugins(ScalafixPlugin)
 
-lazy val `scalafix-rules` = project
+lazy val scalafixRules = project
   .in(file("scalafix/rules"))
-  .settings(scalaModuleSettings)
+  .settings(ScalaModulePlugin.scalaModuleSettings)
   .settings(commonSettings)
   .settings(
+    scalaModuleAutomaticModuleName := None,
     organization := (compat212JVM / organization).value,
     publishTo := (compat212JVM / publishTo).value,
     versionPolicyIntention := Compatibility.None,
@@ -193,39 +191,43 @@ lazy val sharedScalafixSettings = Seq(
 )
 
 // common part between input/output
-lazy val `scalafix-data` = MultiScalaProject(
-  "scalafix-data",
+lazy val scalafixData = MultiScalaProject(
+  "scalafixData",
   "scalafix/data",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
     .settings(publish / skip := true)
 )
 
-val `scalafix-data211` = `scalafix-data`(scala211, _.dependsOn(compat211JVM))
-val `scalafix-data212` = `scalafix-data`(scalafixScala212, _.dependsOn(compat212JVM))
-val `scalafix-data213` = `scalafix-data`(scala213, _.dependsOn(compat213JVM))
+val scalafixData211 = scalafixData(scala211, _.dependsOn(compat211JVM))
+val scalafixData212 = scalafixData(scalafixScala212, _.dependsOn(compat212JVM))
+val scalafixData213 = scalafixData(scala213, _.dependsOn(compat213JVM))
 
-lazy val `scalafix-input` = project
+lazy val scalafixInput = project
   .in(file("scalafix/input"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(
     scalaVersion := scalafixScala212,
     publish / skip := true,
+    excludeFilter := HiddenFileFilter || "*.scala",  // exclude from headerCheck
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
       "-P:semanticdb:synthetics:on"
     )
   )
-  .dependsOn(`scalafix-data212`)
+  .dependsOn(scalafixData212)
 
-val `scalafix-output` = MultiScalaProject(
-  "scalafix-output",
+val scalafixOutput = MultiScalaProject(
+  "scalafixOutput",
   "scalafix/output",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(publish / skip := true)
+    .settings(
+      publish / skip := true,
+      excludeFilter := HiddenFileFilter || "*.scala",  // exclude from headerCheck
+    )
     .disablePlugins(ScalafixPlugin)
 )
 
@@ -244,32 +246,32 @@ lazy val output213 =
   Def.setting((ThisBuild / baseDirectory).value / "scalafix/output213/src/main/scala")
 lazy val addOutput213 = Compile / unmanagedSourceDirectories += output213.value
 
-lazy val `scalafix-output211` = `scalafix-output`(
+lazy val scalafixOutput211 = scalafixOutput(
   scala211,
-  _.dependsOn(`scalafix-data211`)
+  _.dependsOn(scalafixData211)
 )
 
-lazy val `scalafix-output212` = `scalafix-output`(
+lazy val scalafixOutput212 = scalafixOutput(
   scala212,
   _.settings(addOutput212)
     .settings(addOutput212Plus)
-    .dependsOn(`scalafix-data212`)
+    .dependsOn(scalafixData212)
 )
 
-lazy val `scalafix-output213` = `scalafix-output`(
+lazy val scalafixOutput213 = scalafixOutput(
   scala213,
   _.settings(addOutput213)
     .settings(addOutput212Plus)
-    .dependsOn(`scalafix-data213`)
+    .dependsOn(scalafixData213)
 )
 
-lazy val `scalafix-output213-failure` = project
+lazy val scalafixOutput213Failure = project
   .in(file("scalafix/output213-failure"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(publish / skip := true)
 
-lazy val `scalafix-tests` = project
+lazy val scalafixTests = project
   .in(file("scalafix/tests"))
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
@@ -283,10 +285,10 @@ lazy val `scalafix-tests` = project
       output212Plus.value,
       output213.value
     ),
-    scalafixTestkitInputSourceDirectories := (`scalafix-input` / Compile / sourceDirectories).value,
-    scalafixTestkitInputClasspath := (`scalafix-input` / Compile / fullClasspath).value,
+    scalafixTestkitInputSourceDirectories := (scalafixInput / Compile / sourceDirectories).value,
+    scalafixTestkitInputClasspath := (scalafixInput / Compile / fullClasspath).value,
   )
-  .dependsOn(`scalafix-input`, `scalafix-rules`)
+  .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
 val travisScalaVersion = sys.env.get("TRAVIS_SCALA_VERSION").flatMap(Version.parse)
@@ -299,9 +301,10 @@ val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
 val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
 
 // required by sbt-scala-module
-inThisBuild(
+inThisBuild {
+  import scala.sys.process._
   Seq(
-    commands += Command.command("scalafmt-test") { state =>
+    commands += Command.command("scalafmtTest") { state =>
       val exitCode = Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
       if (exitCode == 0) state else state.fail
     },
@@ -312,7 +315,7 @@ inThisBuild(
     commands += Command.command("ci") { state =>
       val toRun: Seq[String] =
         if (isScalafmt) {
-          Seq("scalafmt-test")
+          Seq("scalafmtTest")
         } else {
           List(
             "TRAVIS_SCALA_VERSION",
@@ -328,11 +331,11 @@ inThisBuild(
           val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
 
           val compatProject       = "compat" + travisScalaVersion.get.binary + platformSuffix
-          val binaryCompatProject = "binary-compat"
+          val binaryCompatProject = "binaryCompat"
 
           val testProjectPrefix =
             if (isScalafix) {
-              "scalafix-tests"
+              "scalafixTests"
             } else if (isBinaryCompat) {
               binaryCompatProject
             } else {
@@ -341,7 +344,7 @@ inThisBuild(
 
           val projectPrefix =
             if (isScalafix) {
-              "scalafix-rules"
+              "scalafixRules"
             } else if (isBinaryCompat) {
               binaryCompatProject
             } else {
@@ -372,6 +375,7 @@ inThisBuild(
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
+            List("headerCheck"),
             publishTask
           ).flatten
         }
@@ -385,4 +389,4 @@ inThisBuild(
       state.copy(remainingCommands = newCommands ::: state.remainingCommands)
     }
   )
-)
+}

@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/scala/scala-collection-compat.svg?branch=master)](https://travis-ci.org/scala/scala-collection-compat)
-
 ## Purpose and scope
 
 This library makes some Scala 2.13 APIs available on Scala 2.11 and 2.12.
@@ -17,7 +15,7 @@ Only the most commonly used APIs are supported; many are missing. Contributions 
 To use this library, add the following to your `build.sbt`:
 
 ```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "<version>"
 ```
 
 All future versions will remain backwards binary compatible with 2.0.0. (The 1.0.0 release was withdrawn and should not be used.)
@@ -51,11 +49,11 @@ And, it includes support for some non-collections classes such as the `@nowarn` 
 
 ## Migration rules
 
-The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.13).
+The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.15).
 
 ```scala
 // project/plugins.sbt
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.29")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.31")
 ```
 
 ### Collection213Upgrade
