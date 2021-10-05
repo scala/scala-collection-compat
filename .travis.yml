@@ -43,7 +43,4 @@ matrix:
 install:
   - git fetch --tags # get all tags for sbt-dynver
 
-before_script:
-  - admin/checkCLA.sh
-
 script: sbt ci
