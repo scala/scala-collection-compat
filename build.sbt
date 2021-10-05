@@ -212,6 +212,7 @@ lazy val `scalafix-input` = project
   .settings(
     scalaVersion := scalafixScala212,
     publish / skip := true,
+    excludeFilter := HiddenFileFilter || "*.scala",  // exclude from headerCheck
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
@@ -225,7 +226,10 @@ val `scalafix-output` = MultiScalaProject(
   "scalafix/output",
   _.settings(sharedScalafixSettings)
     .settings(commonSettings)
-    .settings(publish / skip := true)
+    .settings(
+      publish / skip := true,
+      excludeFilter := HiddenFileFilter || "*.scala",  // exclude from headerCheck
+    )
     .disablePlugins(ScalafixPlugin)
 )
 
