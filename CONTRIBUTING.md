@@ -69,7 +69,7 @@ sbt task to run the migration tool on the input files and check whether the resu
 expected output files:
 
 ~~~
-> scalafix-tests/test
+> scalafixTests/test
 ~~~
 
 Fix the implementation of the rule (in the `rules/src/main/scala/fix/NewCollections.scala` file) until the
