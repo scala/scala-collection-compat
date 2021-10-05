@@ -375,6 +375,7 @@ inThisBuild {
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
+            List("headerCheck"),
             publishTask
           ).flatten
         }
