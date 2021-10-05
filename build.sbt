@@ -1,10 +1,6 @@
 import _root_.scalafix.sbt.BuildInfo.{scalafixVersion, scala212 => scalafixScala212}
-import com.lightbend.tools.scalamoduleplugin.ScalaModulePlugin._
-
-import scala.sys.process._
 
 lazy val commonSettings = Seq(
-  scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
   headerLicense := Some(HeaderLicense.Custom(s"""|Scala (https://www.scala-lang.org)
                                                  |
                                                  |Copyright EPFL and Lightbend, Inc.
@@ -60,11 +56,12 @@ lazy val scala30  = "3.0.2"
 
 lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
   "compat",
-  _.settings(scalaModuleSettings)
+  _.settings(ScalaModulePlugin.scalaModuleSettings)
     .settings(commonSettings)
     .settings(
       name := "scala-collection-compat",
       moduleName := "scala-collection-compat",
+      scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
@@ -170,9 +167,10 @@ lazy val `binary-compat` = project
 
 lazy val `scalafix-rules` = project
   .in(file("scalafix/rules"))
-  .settings(scalaModuleSettings)
+  .settings(ScalaModulePlugin.scalaModuleSettings)
   .settings(commonSettings)
   .settings(
+    scalaModuleAutomaticModuleName := None,
     organization := (compat212JVM / organization).value,
     publishTo := (compat212JVM / publishTo).value,
     versionPolicyIntention := Compatibility.None,
@@ -303,7 +301,8 @@ val isBinaryCompat     = sys.env.get("TEST_BINARY_COMPAT").nonEmpty
 val jdkVersion         = sys.env.get("ADOPTOPENJDK").map(_.toInt)
 
 // required by sbt-scala-module
-inThisBuild(
+inThisBuild {
+  import scala.sys.process._
   Seq(
     commands += Command.command("scalafmt-test") { state =>
       val exitCode = Seq("admin/scalafmt.sh", "--test") ! state.globalLogging.full
@@ -389,4 +388,4 @@ inThisBuild(
       state.copy(remainingCommands = newCommands ::: state.remainingCommands)
     }
   )
-)
+}
