@@ -1,8 +1,5 @@
-/.settings/
-/.idea/
 target/
 *.log
-*.iml
 /\.target/
 /\.cache
 /\.project
@@ -13,16 +10,13 @@ target/
 /bin/
 /.cache-main
 /.cache-tests
-admin/.coursier
-admin/.scalafmt*
 
-# metals
+# IDEs and editors
+/.settings/
+/.idea/
+*.iml
 .bloop/
 /.metals/
 /project/**/metals.sbt
-
-# sbt - Build Server Protocol
 /.bsp/
-
-# vscode
 /.vscode/

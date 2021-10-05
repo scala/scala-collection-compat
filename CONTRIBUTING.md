@@ -53,9 +53,7 @@ class ToIteratorVsIteratorSrc(xs: Iterable[Int]) {
     - run sbt
       and then run the following task `compile`;
 
-5. Format your code with the `scalafmt` sbt task.
-
-6. Commit your changes, push your branch to your fork and create a pull request.
+5. Commit your changes, push your branch to your fork and create a pull request.
 
 Then maybe someone will take over and implement your use case… or maybe you will
 (see next section)!
