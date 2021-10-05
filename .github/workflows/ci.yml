@@ -10,7 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 11, 17]
-        scala: [2.11.12, 2.12.15, 2.13.6, 3.0.2]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,4 +21,8 @@ jobs:
         distribution: temurin
         java-version: ${{matrix.java}}
     - name: Test
-      run: sbt ++${{matrix.scala}} test headerCheck versionPolicyCheck package
+      run: sbt test package
+    - name: Headers
+      run: sbt headerCheck
+    - name: Version policy
+      run: sbt PolicyCheck
