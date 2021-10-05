@@ -62,7 +62,7 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.5.0"
+ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "<version>"
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```
@@ -80,8 +80,8 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "2.5.0"
-libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0"
+ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "<version>"
+libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "<version>"
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
 ```

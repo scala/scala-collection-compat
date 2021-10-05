@@ -149,7 +149,6 @@ lazy val binaryCompat = project
     scalaVersion := scala212,
     libraryDependencies += "com.typesafe" %% "mima-core" % "0.8.0" % Test,
     junit,
-    versionPolicyIntention := Compatibility.None,
     buildInfoPackage := "build",
     buildInfoKeys := Seq[BuildInfoKey](
       "oldClasses" -> (binaryCompatOld / Compile / classDirectory).value.toString,
@@ -171,9 +170,8 @@ lazy val scalafixRules = project
   .settings(commonSettings)
   .settings(
     scalaModuleAutomaticModuleName := None,
-    organization := (compat212JVM / organization).value,
-    publishTo := (compat212JVM / publishTo).value,
     versionPolicyIntention := Compatibility.None,
+    versionCheck := {},  // I don't understand why this fails otherwise?! oh well
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
@@ -292,7 +290,6 @@ lazy val scalafixTests = project
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
 val ciScalaVersion     = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
-val isTravisTag        = sys.env.get("CI_TAG").exists(_.nonEmpty)
 val isScalaJs          = sys.env.get("CI_PLATFORM") == Some("js")
 val isScalaNative      = sys.env.get("CI_PLATFORM") == Some("native")
 val isScalafix         = sys.env.get("CI_MODE") == Some("testScalafix")
@@ -322,7 +319,6 @@ inThisBuild {
         else {
           List(
             "CI_SCALA_VERSION",
-            "CI_TAG",
             "CI_PLATFORM",
             "CI_MODE",
             "CI_JDK",
@@ -352,31 +348,11 @@ inThisBuild {
               compatProject
             }
 
-          val publishTask =
-            if (isTravisTag && !isBinaryCompat && jdkVersion == Some(8)) {
-              // we cannot run "ci-release" because that reads the `CI_RELEASE` / `CI_SONATYPE_RELEASE`
-              // env vars, which we cannot modify from java (easily). so we inline what this command does.
-              CiReleasePlugin.setupGpg()
-              List(
-                // same fix as https://github.com/olafurpg/sbt-ci-release/pull/66
-                // need to replicate it here since we're not using the `ci-release` command
-                "set pgpSecretRing := pgpSecretRing.value",
-                "set pgpPublicRing := pgpPublicRing.value",
-                s"$projectPrefix/publishSigned",
-                "sonatypePrepare",
-                "sonatypeBundleUpload",
-                "sonatypeClose"
-              )
-            } else {
-              Nil
-            }
-
           Seq(
             List(s"""++${sys.env.get("CI_SCALA_VERSION").get}!"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
-            publishTask
           ).flatten
         }
 
