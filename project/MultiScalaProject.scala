@@ -59,26 +59,19 @@ trait MultiScala {
   }
 }
 
-object MultiScalaCrossProject {
-  def apply(platforms: Platform*)(name: String,
-                                  configure: CrossProject => CrossProject): MultiScalaCrossProject =
-    new MultiScalaCrossProject(platforms, name, configure)
-}
-
-class MultiScalaCrossProject(platforms: Seq[Platform],
-                             name: String,
-                             configure: CrossProject => CrossProject)
+class MultiScalaCrossProject(name: String,
+                             configureCommonJvm: CrossProject => CrossProject,
+                             configureJs: CrossProject => CrossProject,
+                             configureNative: CrossProject => CrossProject)
     extends MultiScala {
-
-  def apply(scalaV: String): CrossProject = apply(scalaV, scalaV, x => x)
-
   def apply(
-      scalaV: String,
-      scalaVJs: String,
-      configurePerScala: CrossProject => CrossProject = x => x
+      platforms: Seq[Platform],
+      scalaV: String
   ): CrossProject = {
+    val hasJs     = platforms.contains(JSPlatform)
+    val hasNative = platforms.contains(NativePlatform)
     val projectId = projectIdPerScala(name, scalaV)
-    val resultingProject =
+    val res =
       CrossProject(
         id = projectId,
         base = file(s".cross/$projectId")
@@ -86,12 +79,13 @@ class MultiScalaCrossProject(platforms: Seq[Platform],
         .crossType(CrossType.Full)
         .withoutSuffixFor(JVMPlatform)
         .settings(moduleName := name)
-        .jvmSettings(scalaVersion := scalaV)
-        .jsSettings(scalaVersion := scalaVJs)
-        .nativeSettings(scalaVersion := scalaV)
+        .settings(scalaVersion := scalaV)
         .settings(srcFull(name))
 
-    configurePerScala(configure(resultingProject))
+    val conf = configureCommonJvm
+      .andThen(if (hasJs) configureJs else identity)
+      .andThen(if (hasNative) configureNative else identity)
+    conf(res)
   }
 }
 
