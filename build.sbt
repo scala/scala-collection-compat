@@ -54,7 +54,7 @@ lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.6"
 lazy val scala30  = "3.0.2"
 
-lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform)(
+lazy val compat = new MultiScalaCrossProject(
   "compat",
   _.settings(ScalaModulePlugin.scalaModuleSettings)
     .settings(commonSettings)
@@ -85,7 +85,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
         )
       },
     )
-    .jsSettings(
+    .disablePlugins(ScalafixPlugin),
+  _.jsSettings(
       scalacOptions ++= {
         val x = (LocalRootProject / baseDirectory).value.toURI.toString
         val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
@@ -100,9 +101,8 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
       },
       Test / fork := false // Scala.js cannot run forked tests
     )
-    .jsEnablePlugins(ScalaJSJUnitPlugin)
-    .disablePlugins(ScalafixPlugin)
-    .nativeSettings(
+    .jsEnablePlugins(ScalaJSJUnitPlugin),
+  _.nativeSettings(
       nativeLinkStubs := true,
       addCompilerPlugin(
         "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
@@ -112,10 +112,10 @@ lazy val compat = MultiScalaCrossProject(JSPlatform, JVMPlatform, NativePlatform
     )
 )
 
-val compat211 = compat(scala211)
-val compat212 = compat(scala212)
-val compat213 = compat(scala213)
-val compat30  = compat(scala30)
+val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
+val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
+val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
+val compat30  = compat(Seq(JSPlatform, JVMPlatform), scala30)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
