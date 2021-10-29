@@ -14,36 +14,35 @@ package scala.collection.compat
 
 import scala.reflect.ClassTag
 import scala.collection.generic.CanBuildFrom
+import scala.{collection => c}
 import scala.collection.{immutable => i, mutable => m}
 
 /* builder optimized for a single ++= call, which returns identity on result if possible
  * and defers to the underlying builder if not.
  */
-private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](
-    that: m.Builder[A, CC[A]])(implicit ct: ClassTag[CC[A]])
-    extends m.Builder[A, CC[A]] {
+private abstract class PreservingBuilder[A, C <: TraversableOnce[A]] extends m.Builder[A, C] {
+  val that: m.Builder[A, C]
+  val ct: ClassTag[C]
 
   //invariant: ruined => (collection == null)
-  var collection: CC[A] = null.asInstanceOf[CC[A]]
-  var ruined            = false
+  var collection: C = null.asInstanceOf[C]
+  var ruined        = false
 
   private[this] def ruin(): Unit = {
     if (collection != null) that ++= collection
-    collection = null.asInstanceOf[CC[A]]
+    collection = null.asInstanceOf[C]
     ruined = true
   }
 
   override def ++=(elems: TraversableOnce[A]): this.type =
     elems match {
-      case ct(ca) if collection == null && !ruined => {
+      case ct(ca) if collection == null && !ruined =>
         collection = ca
         this
-      }
-      case _ => {
+      case _ =>
         ruin()
         that ++= elems
         this
-      }
     }
 
   def +=(elem: A): this.type = {
@@ -53,13 +52,28 @@ private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](
   }
 
   def clear(): Unit = {
-    collection = null.asInstanceOf[CC[A]]
+    collection = null.asInstanceOf[C]
     if (ruined) that.clear()
     ruined = false
   }
 
-  def result(): CC[A] = if (collection == null) that.result() else collection
+  def result(): C = if (collection == null) that.result() else collection
 }
+
+private final class IdentityPreservingBuilder[A, CC[X] <: TraversableOnce[X]](
+    val that: m.Builder[A, CC[A]])(implicit val ct: ClassTag[CC[A]])
+    extends PreservingBuilder[A, CC[A]]
+
+private final class IdentityPreservingBitSetBuilder[C <: c.BitSet](val that: m.Builder[Int, C])(
+    implicit val ct: ClassTag[C])
+    extends PreservingBuilder[Int, C]
+
+private final class IdentityPreservingMapBuilder[
+    K,
+    V,
+    CC[X, Y] <: c.Map[X, Y] with c.MapLike[X, Y, CC[X, Y]]](val that: m.Builder[(K, V), CC[K, V]])(
+    implicit val ct: ClassTag[CC[K, V]])
+    extends PreservingBuilder[(K, V), CC[K, V]]
 
 private[compat] object CompatImpl {
   def simpleCBF[A, C](f: => m.Builder[A, C]): CanBuildFrom[Any, A, C] =

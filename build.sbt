@@ -72,18 +72,28 @@ lazy val compat = new MultiScalaCrossProject(
             sharedSourceDir / "scala-2.11_2.12"
         }
       },
+      Test / unmanagedSourceDirectories += {
+        val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/test"
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _) | (2, 13)) =>
+            sharedSourceDir / "scala-2.13"
+          case _ =>
+            sharedSourceDir / "scala-2.11_2.12"
+        }
+      },
       versionPolicyIntention := Compatibility.BinaryCompatible,
-    )
-    .jvmSettings(
-      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
-      junit,
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
         Seq(
           exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
+          exclude[Problem]("scala.collection.compat.*PreservingBuilder*")
         )
       },
+    )
+    .jvmSettings(
+      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
+      junit,
     )
     .disablePlugins(ScalafixPlugin),
   _.jsSettings(

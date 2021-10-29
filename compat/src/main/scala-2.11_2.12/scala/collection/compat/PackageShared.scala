@@ -12,10 +12,10 @@
 
 package scala.collection.compat
 
+import scala.annotation.nowarn
 import scala.collection.generic._
 import scala.reflect.ClassTag
 import scala.collection.{
-  BitSet,
   GenTraversable,
   IterableLike,
   IterableView,
@@ -61,9 +61,39 @@ private[compat] trait PackageShared {
        must be non-strict
      */
     def builder: m.Builder[A, CC[A]] = fact match {
-      case c.Seq | i.Seq => new IdentityPreservingBuilder[A, i.Seq](i.Seq.newBuilder[A])
+      case c.Seq | i.Seq =>
+        new IdentityPreservingBuilder[A, i.Seq](i.Seq.newBuilder[A])
+
       case c.LinearSeq | i.LinearSeq =>
         new IdentityPreservingBuilder[A, i.LinearSeq](i.LinearSeq.newBuilder[A])
+      case i.Queue =>
+        new IdentityPreservingBuilder[A, i.Queue](i.Queue.newBuilder[A])
+      case i.Stream =>
+        new IdentityPreservingBuilder[A, i.Stream](i.Stream.newBuilder[A])
+      case i.Stack =>
+        new IdentityPreservingBuilder[A, i.Stack](i.Stack.newBuilder[A]): @nowarn("cat=deprecation")
+      case i.List =>
+        new IdentityPreservingBuilder[A, i.List](i.List.newBuilder[A])
+
+      case c.IndexedSeq | i.IndexedSeq =>
+        new IdentityPreservingBuilder[A, i.IndexedSeq](i.IndexedSeq.newBuilder[A])
+      case i.Vector =>
+        new IdentityPreservingBuilder[A, i.Vector](i.Vector.newBuilder[A])
+
+      case c.Set | i.Set =>
+        new IdentityPreservingBuilder[A, i.Set](i.Set.newBuilder[A])
+
+      case i.HashSet =>
+        new IdentityPreservingBuilder[A, i.HashSet](i.HashSet.newBuilder[A])
+      case i.ListSet =>
+        new IdentityPreservingBuilder[A, i.ListSet](i.ListSet.newBuilder[A])
+
+      case c.Iterable | i.Iterable =>
+        new IdentityPreservingBuilder[A, i.Iterable](i.Iterable.newBuilder[A])
+
+      case c.Traversable | i.Traversable =>
+        new IdentityPreservingBuilder[A, i.Traversable](i.Traversable.newBuilder[A])
+
       case _ => fact.newBuilder[A]
     }
     simpleCBF(builder)
@@ -71,29 +101,89 @@ private[compat] trait PackageShared {
 
   implicit def sortedSetCompanionToCBF[A: Ordering,
                                        CC[X] <: c.SortedSet[X] with c.SortedSetLike[X, CC[X]]](
-      fact: SortedSetFactory[CC]): CanBuildFrom[Any, A, CC[A]] =
-    simpleCBF(fact.newBuilder[A])
+      fact: SortedSetFactory[CC]): CanBuildFrom[Any, A, CC[A]] = {
+    def builder: m.Builder[A, CC[A]] = {
+      val b = fact match {
+        case c.SortedSet | i.SortedSet =>
+          new IdentityPreservingBuilder[A, i.SortedSet](i.SortedSet.newBuilder[A])
+        case i.TreeSet =>
+          new IdentityPreservingBuilder[A, i.TreeSet](i.TreeSet.newBuilder[A])
+        case _ =>
+          fact.newBuilder[A]
+      }
+      // Cast needed because GADT inference doesn't unify CC (didn't dig down why). Example:
+      //   def t: CC[A] = fact match { case i.SortedSet => null: i.SortedSet[A] }
+      b.asInstanceOf[m.Builder[A, CC[A]]]
+    }
+    simpleCBF(builder)
+  }
 
   implicit def arrayCompanionToCBF[A: ClassTag](fact: Array.type): CanBuildFrom[Any, A, Array[A]] =
     simpleCBF(Array.newBuilder[A])
 
-  implicit def mapFactoryToCBF[K, V, CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](
-      fact: MapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] =
-    simpleCBF(fact.newBuilder[K, V])
+  // bounds should be `c.` but binary compatibility
+  implicit def mapFactoryToCBF[K,
+                               V,
+                               CC[A, B] <: /*c.*/ Map[A, B] with /*c.*/ MapLike[A, B, CC[A, B]]](
+      fact: MapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] = {
+    def builder: m.Builder[(K, V), CC[K, V]] = {
+      val b = fact match {
+        case c.Map | i.Map =>
+          new IdentityPreservingMapBuilder[K, V, i.Map](i.Map.newBuilder[K, V])
+        case i.HashMap =>
+          new IdentityPreservingMapBuilder[K, V, i.HashMap](i.HashMap.newBuilder[K, V])
+        case i.ListMap =>
+          new IdentityPreservingMapBuilder[K, V, i.ListMap](i.ListMap.newBuilder[K, V])
+        case _ =>
+          fact.newBuilder[K, V]
+      }
+      // Cast needed because GADT inference doesn't unify CC (didn't dig down why). Example:
+      //   def t: CC[K, V] = fact match { case i.Map => null: i.Map[K, V] }
+      b.asInstanceOf[m.Builder[(K, V), CC[K, V]]]
+    }
+    simpleCBF(builder)
+  }
 
   implicit def sortedMapFactoryToCBF[
       K: Ordering,
       V,
       CC[A, B] <: c.SortedMap[A, B] with c.SortedMapLike[A, B, CC[A, B]]](
-      fact: SortedMapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] =
-    simpleCBF(fact.newBuilder[K, V])
+      fact: SortedMapFactory[CC]): CanBuildFrom[Any, (K, V), CC[K, V]] = {
+    def builder: m.Builder[(K, V), CC[K, V]] = {
+      val b = fact match {
+        case c.SortedMap | i.SortedMap =>
+          new IdentityPreservingMapBuilder[K, V, i.SortedMap](i.SortedMap.newBuilder[K, V])
+        case i.TreeMap =>
+          new IdentityPreservingMapBuilder[K, V, i.TreeMap](i.TreeMap.newBuilder[K, V])
+        case _ =>
+          fact.newBuilder[K, V]
+      }
+      b.asInstanceOf[m.Builder[(K, V), CC[K, V]]]
+    }
+    simpleCBF(builder)
+  }
 
-  implicit def bitSetFactoryToCBF(fact: BitSetFactory[BitSet]): CanBuildFrom[Any, Int, BitSet] =
-    simpleCBF(fact.newBuilder)
+  implicit def bitSetFactoryToCBF(
+      fact: BitSetFactory[c.BitSet]): CanBuildFrom[Any, Int, c.BitSet] = {
+    def builder: m.Builder[Int, c.BitSet] = fact match {
+      case c.BitSet =>
+        new IdentityPreservingBitSetBuilder[i.BitSet](i.BitSet.newBuilder)
+      case _ =>
+        fact.newBuilder
+    }
+    simpleCBF(builder)
+  }
 
   implicit def immutableBitSetFactoryToCBF(
-      fact: BitSetFactory[i.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] =
-    simpleCBF(fact.newBuilder)
+      fact: BitSetFactory[i.BitSet]): CanBuildFrom[Any, Int, ImmutableBitSetCC[Int]] = {
+    def builder: m.Builder[Int, i.BitSet] = fact match {
+      case i.BitSet =>
+        new IdentityPreservingBitSetBuilder[i.BitSet](i.BitSet.newBuilder)
+      case _ =>
+        fact.newBuilder
+    }
+    simpleCBF(builder)
+  }
 
   implicit def mutableBitSetFactoryToCBF(
       fact: BitSetFactory[m.BitSet]): CanBuildFrom[Any, Int, MutableBitSetCC[Int]] =
