@@ -87,29 +87,28 @@ lazy val compat = new MultiScalaCrossProject(
     )
     .disablePlugins(ScalafixPlugin),
   _.jsSettings(
-      scalacOptions ++= {
-        val x = (LocalRootProject / baseDirectory).value.toURI.toString
-        val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
-          .Process("git rev-parse HEAD")
-          .lineStream_!
-          .head
-        val opt = CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((3, _)) => "-scalajs-mapSourceURI"
-          case _            => "-P:scalajs:mapSourceURI"
-        }
-        Seq(s"$opt:$x->$y/")
-      },
-      Test / fork := false // Scala.js cannot run forked tests
-    )
-    .jsEnablePlugins(ScalaJSJUnitPlugin),
+    scalacOptions ++= {
+      val x = (LocalRootProject / baseDirectory).value.toURI.toString
+      val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
+        .Process("git rev-parse HEAD")
+        .lineStream_!
+        .head
+      val opt = CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _)) => "-scalajs-mapSourceURI"
+        case _            => "-P:scalajs:mapSourceURI"
+      }
+      Seq(s"$opt:$x->$y/")
+    },
+    Test / fork := false // Scala.js cannot run forked tests
+  ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
-      nativeLinkStubs := true,
-      addCompilerPlugin(
-        "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
-      ),
-      libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
-      Test / fork := false // Scala Native cannot run forked tests
-    )
+    nativeLinkStubs := true,
+    addCompilerPlugin(
+      "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
+    ),
+    libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
+    Test / fork := false // Scala Native cannot run forked tests
+  )
 )
 
 val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
@@ -171,7 +170,7 @@ lazy val scalafixRules = project
   .settings(
     scalaModuleAutomaticModuleName := None,
     versionPolicyIntention := Compatibility.None,
-    versionCheck := {},  // I don't understand why this fails otherwise?! oh well
+    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
@@ -289,14 +288,14 @@ lazy val scalafixTests = project
   .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
-val ciScalaVersion     = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
-val isScalaJs          = sys.env.get("CI_PLATFORM") == Some("js")
-val isScalaNative      = sys.env.get("CI_PLATFORM") == Some("native")
-val isScalafix         = sys.env.get("CI_MODE") == Some("testScalafix")
-val isScalafmt         = sys.env.get("CI_MODE") == Some("testScalafmt")
-val isBinaryCompat     = sys.env.get("CI_MODE") == Some("testBinaryCompat")
-val isHeaderCheck      = sys.env.get("CI_MODE") == Some("headerCheck")
-val jdkVersion         = sys.env.get("CI_JDK").map(_.toInt)
+val ciScalaVersion = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
+val isScalaJs      = sys.env.get("CI_PLATFORM") == Some("js")
+val isScalaNative  = sys.env.get("CI_PLATFORM") == Some("native")
+val isScalafix     = sys.env.get("CI_MODE") == Some("testScalafix")
+val isScalafmt     = sys.env.get("CI_MODE") == Some("testScalafmt")
+val isBinaryCompat = sys.env.get("CI_MODE") == Some("testBinaryCompat")
+val isHeaderCheck  = sys.env.get("CI_MODE") == Some("headerCheck")
+val jdkVersion     = sys.env.get("CI_JDK").map(_.toInt)
 
 // required by sbt-scala-module
 inThisBuild {
