@@ -34,16 +34,15 @@ private abstract class PreservingBuilder[A, C <: TraversableOnce[A]] extends m.B
     ruined = true
   }
 
-  override def ++=(elems: TraversableOnce[A]): this.type =
-    elems match {
-      case ct(ca) if collection == null && !ruined =>
-        collection = ca
-        this
+  override def ++=(elems: TraversableOnce[A]): this.type = {
+    (if (collection == null && !ruined) ct.unapply(elems) else None) match {
+      case Some(c) => collection = c
       case _ =>
         ruin()
         that ++= elems
-        this
     }
+    this
+  }
 
   def +=(elem: A): this.type = {
     ruin()
@@ -53,8 +52,10 @@ private abstract class PreservingBuilder[A, C <: TraversableOnce[A]] extends m.B
 
   def clear(): Unit = {
     collection = null.asInstanceOf[C]
-    if (ruined) that.clear()
-    ruined = false
+    if (ruined) {
+      that.clear()
+      ruined = false
+    }
   }
 
   def result(): C = if (collection == null) that.result() else collection
