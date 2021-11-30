@@ -1,5 +1,5 @@
-package scala.language
+package scala.compat
 
-object compat {
+object higherKinds {
   implicit lazy val higherKinds = scala.languageFeature.higherKinds
 }
