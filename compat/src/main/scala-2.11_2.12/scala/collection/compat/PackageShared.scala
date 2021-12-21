@@ -531,7 +531,10 @@ class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutabl
 
   def updateWith(key: K)(remappingFunction: (Option[V]) => Option[V]): Option[V] = {
     val updatedEntry = remappingFunction(self.get(key))
-    updatedEntry.foreach{ case v => self.update(key, v) }
+    updatedEntry match {
+      case Some(v) => self.update(key, v)
+      case None => self.remove(key)
+    }
     updatedEntry
   }
 }
