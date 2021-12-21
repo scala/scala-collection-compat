@@ -271,6 +271,10 @@ private[compat] trait PackageShared {
       self: scala.collection.Map[K, V]): MapExtensionMethods[K, V] =
     new MapExtensionMethods[K, V](self)
 
+  implicit def toMutableMapExtensionMethods[K, V](
+      self: scala.collection.mutable.Map[K, V]): MutableMapExtensionMethods[K, V] =
+    new MutableMapExtensionMethods[K, V](self)
+
   implicit def toMapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
       self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
     new MapViewExtensionMethods[K, V, C](self)
@@ -521,6 +525,15 @@ class MapExtensionMethods[K, V](private val self: scala.collection.Map[K, V]) ex
     self.foreach { case (k, v) => f(k, v) }
   }
 
+}
+
+class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutable.Map[K, V]) extends AnyVal {
+
+  def updateWith(key: K)(remappingFunction: (Option[V]) => Option[V]): Option[V] = {
+    val updatedEntry = remappingFunction(self.get(key))
+    updatedEntry.foreach{ case v => self.update(key, v) }
+    updatedEntry
+  }
 }
 
 class MapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
