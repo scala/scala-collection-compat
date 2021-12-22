@@ -527,13 +527,14 @@ class MapExtensionMethods[K, V](private val self: scala.collection.Map[K, V]) ex
 
 }
 
-class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutable.Map[K, V]) extends AnyVal {
+class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutable.Map[K, V])
+    extends AnyVal {
 
   def updateWith(key: K)(remappingFunction: (Option[V]) => Option[V]): Option[V] = {
     val updatedEntry = remappingFunction(self.get(key))
     updatedEntry match {
       case Some(v) => self.update(key, v)
-      case None => self.remove(key)
+      case None    => self.remove(key)
     }
     updatedEntry
   }

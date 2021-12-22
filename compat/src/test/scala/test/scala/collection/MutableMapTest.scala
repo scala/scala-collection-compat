@@ -22,13 +22,13 @@ class MutableMapTest {
 
   @Test
   def updateWith: Unit = {
-    val map  = m.Map("a" -> 1, "c" -> 3)
-    map.updateWith("b"){
-      case None => Some(2)
+    val map = m.Map("a" -> 1, "c" -> 3)
+    map.updateWith("b") {
+      case None    => Some(2)
       case Some(x) => Some(-1)
     }
-    map.updateWith("c"){
-      case None => Some(-1)
+    map.updateWith("c") {
+      case None    => Some(-1)
       case Some(_) => None
     }
     assertEquals(map.get("b"), Some(2))
