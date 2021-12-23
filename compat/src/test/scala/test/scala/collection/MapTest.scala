@@ -40,7 +40,7 @@ class MapTest {
       case Some(_) => None
     }
     // unmodified entries are preserved
-    assertEquals(map.get(a), Some(1))
+    assertEquals(map.get("a"), Some(1))
     // updateWith can add entries
     assertEquals(map.get("b"), Some(2))
     // updateWith can remove entries
@@ -59,8 +59,8 @@ class MapTest {
       case Some(_) => None
     }
     // unmodified entries are preserved
-    assertEquals(map.get(a), bAdded.get(a))
-    assertEquals(map.get(a), cRemoved.get(a))
+    assertEquals(map.get("a"), bAdded.get("a"))
+    assertEquals(map.get("a"), cRemoved.get("a"))
     // updatedWith can add entries
     assertEquals(bAdded.get("b"), Some(2))
     // updatedWith can remove entries
