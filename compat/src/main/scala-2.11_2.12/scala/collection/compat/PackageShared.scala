@@ -271,6 +271,10 @@ private[compat] trait PackageShared {
       self: scala.collection.Map[K, V]): MapExtensionMethods[K, V] =
     new MapExtensionMethods[K, V](self)
 
+  implicit def toImmutableMapExtensionMethods[K, V](
+      self: scala.collection.immutable.Map[K, V]): ImmutableMapExtensionMethods[K, V] =
+    new ImmutableMapExtensionMethods[K, V](self)
+
   implicit def toMutableMapExtensionMethods[K, V](
       self: scala.collection.mutable.Map[K, V]): MutableMapExtensionMethods[K, V] =
     new MutableMapExtensionMethods[K, V](self)
@@ -525,6 +529,16 @@ class MapExtensionMethods[K, V](private val self: scala.collection.Map[K, V]) ex
     self.foreach { case (k, v) => f(k, v) }
   }
 
+}
+
+class ImmutableMapExtensionMethods[K, V](private val self: scala.collection.immutable.Map[K, V])
+    extends AnyVal {
+
+  def updatedWith[V1 >: V](key: K)(remappingFunction: (Option[V]) => Option[V1]): Map[K, V1] =
+    remappingFunction(self.get(key)) match {
+      case Some(v) => self.updated(key, v)
+      case None    => self - key
+    }
 }
 
 class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutable.Map[K, V])
