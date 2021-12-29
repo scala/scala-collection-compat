@@ -47,7 +47,7 @@ lazy val root = project
 
 // == Core Libraries ==
 
-lazy val junit = libraryDependencies += "com.github.sbt" % "junit-interface" % "0.13.2" % Test
+lazy val junit = libraryDependencies += "com.github.sbt" % "junit-interface" % "0.13.3" % Test
 
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
