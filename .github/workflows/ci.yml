@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 11, 17]
-        scala: [2.11.12, 2.12.15, 2.13.7, 3.0.2]
+        scala: [2.11.12, 2.12.15, 2.13.8, 3.0.2]
         platform: [jvm, js, native]
         mode: [normal]
         exclude:
