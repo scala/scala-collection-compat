@@ -118,6 +118,10 @@ lazy val compat = new MultiScalaCrossProject(
     addCompilerPlugin(
       "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
     ),
+    mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
+        case _ => mimaPreviousArtifacts.value
+      }),
     libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
     Test / fork := false // Scala Native cannot run forked tests
   )
