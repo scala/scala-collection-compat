@@ -32,6 +32,7 @@ lazy val root = project
     compat213Native,
     compat30JVM,
     compat30JS,
+    compat31Native,
     scalafixData211,
     scalafixData212,
     scalafixData213,
@@ -53,6 +54,7 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.8"
 lazy val scala30  = "3.0.2"
+lazy val scala31  = "3.1.1"
 
 lazy val compat = new MultiScalaCrossProject(
   "compat",
@@ -116,6 +118,10 @@ lazy val compat = new MultiScalaCrossProject(
     addCompilerPlugin(
       "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
     ),
+    mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
+        case _ => mimaPreviousArtifacts.value
+      }),
     libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
     Test / fork := false // Scala Native cannot run forked tests
   )
@@ -125,6 +131,7 @@ val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
 val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
 val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
 val compat30  = compat(Seq(JSPlatform, JVMPlatform), scala30)
+val compat31  = compat(Seq(JVMPlatform, NativePlatform), scala31)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
@@ -137,6 +144,7 @@ lazy val compat213JS     = compat213.js
 lazy val compat213Native = compat213.native
 lazy val compat30JVM     = compat30.jvm
 lazy val compat30JS      = compat30.js
+lazy val compat31Native  = compat31.native
 
 lazy val binaryCompatOld = project
   .in(file("binary-compat/old"))
