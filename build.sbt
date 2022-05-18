@@ -95,6 +95,15 @@ lazy val compat = new MultiScalaCrossProject(
     )
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
+      Compile / unmanagedSourceDirectories += {
+        val jvmParent = (ThisBuild / baseDirectory).value / "compat/jvm/src/main"
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _) | (2, 13)) =>
+            jvmParent / "scala-2.13"
+          case _ =>
+            jvmParent / "scala-2.11_2.12"
+        }
+      },
       junit,
     )
     .disablePlugins(ScalafixPlugin),
