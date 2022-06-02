@@ -348,6 +348,9 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
   def sameElements[B >: A](that: c.TraversableOnce[B]): Boolean = {
     self.sameElements(that.iterator)
   }
+  def nextOption(): Option[A] = {
+    if (self.hasNext) Some(self.next()) else None
+  }
   def concat[B >: A](that: c.TraversableOnce[B]): c.TraversableOnce[B] = self ++ that
   def tapEach[U](f: A => U): c.Iterator[A]                             = self.map(a => { f(a); a })
 }

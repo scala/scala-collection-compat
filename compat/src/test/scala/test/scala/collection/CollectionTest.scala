@@ -115,6 +115,14 @@ class CollectionTest {
   }
 
   @Test
+  def nextOption(): Unit = {
+    val it = Iterator(1, 2)
+    assertEquals(Some(1), it.nextOption())
+    assertEquals(Some(2), it.nextOption())
+    assertEquals(None, it.nextOption())
+  }
+
+  @Test
   def tapEach(): Unit = {
     var count = 0
     val it    = Iterator(1, 2, 3).tapEach(count += _)
