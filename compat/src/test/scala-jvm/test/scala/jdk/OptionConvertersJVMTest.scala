@@ -11,13 +11,14 @@ import scala.jdk.OptionConverters._
  *
  * See https://github.com/scala/scala/blob/2.13.x/test/junit/scala/jdk/OptionConvertersTest.scala.
  */
-class OptionConvertersTest {
+class OptionConvertersJVMTest {
   @Test
   def scalaToEverything(): Unit = {
     val o  = Option("fish")
     val n  = (None: Option[String])
     val od = Option(2.7)
     val nd = (None: Option[Double])
+
     val oi = Option(4)
     val ni = (None: Option[Int])
     val ol = Option(-1L)

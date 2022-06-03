@@ -91,7 +91,7 @@ lazy val compat = new MultiScalaCrossProject(
           exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
           exclude[Problem]("scala.collection.compat.*PreservingBuilder*")
         )
-      },
+      }
     )
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
@@ -104,7 +104,7 @@ lazy val compat = new MultiScalaCrossProject(
             jvmParent / "scala-2.11_2.12"
         }
       },
-      junit,
+      junit
     )
     .disablePlugins(ScalafixPlugin),
   _.jsSettings(
@@ -119,6 +119,15 @@ lazy val compat = new MultiScalaCrossProject(
         case _            => "-P:scalajs:mapSourceURI"
       }
       Seq(s"$opt:$x->$y/")
+    },
+    Compile / unmanagedSourceDirectories += {
+      val jsParent = (ThisBuild / baseDirectory).value / "compat/js/src/main"
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _) | (2, 13)) =>
+          jsParent / "scala-2.13"
+        case _ =>
+          jsParent / "scala-2.11_2.12"
+      }
     },
     Test / fork := false // Scala.js cannot run forked tests
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
