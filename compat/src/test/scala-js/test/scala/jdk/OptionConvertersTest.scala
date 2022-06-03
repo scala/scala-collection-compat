@@ -8,7 +8,7 @@ import scala.jdk.OptionConverters._
 
 /**
  * The tests were copied from the Scala 2.13 Standard Library. `scala.jdk.javaapi` stuff has been omitted and
- * everything concerning `OptionalInt`, `OptionalDouble` and `OptionalLong` is only available on the jvm tests.
+ * everything concerning `OptionalInt`, `OptionalDouble` and `OptionalLong` is only available in the jvm tests.
  *
  * See https://github.com/scala/scala/blob/2.13.x/test/junit/scala/jdk/OptionConvertersTest.scala.
  */

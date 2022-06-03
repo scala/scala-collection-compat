@@ -120,6 +120,7 @@ lazy val compat = new MultiScalaCrossProject(
       }
       Seq(s"$opt:$x->$y/")
     },
+    Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-js",
     Compile / unmanagedSourceDirectories += {
       val jsParent = (ThisBuild / baseDirectory).value / "compat/js/src/main"
       CrossVersion.partialVersion(scalaVersion.value) match {
