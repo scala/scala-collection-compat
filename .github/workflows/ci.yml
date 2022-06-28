@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 11, 17]
-        scala: [2.11.12, 2.12.15, 2.13.8, 3.0.2]
+        scala: [2.11.12, 2.12.16, 2.13.8, 3.0.2]
         platform: [jvm, js, native]
         mode: [normal]
         exclude:
@@ -27,27 +27,27 @@ jobs:
             platform: native
         include:
           - java: 8
-            scala: 2.12.15
+            scala: 2.12.16
             mode: testScalafix
             platform: jvm
           - java: 8
-            scala: 2.12.15
+            scala: 2.12.16
             mode: testBinaryCompat
             platform: jvm
           - java: 8
-            scala: 2.12.15
+            scala: 2.12.16
             mode: testScalafmt
             platform: jvm
           - java: 8
-            scala: 2.12.15
+            scala: 2.12.16
             mode: headerCheck
             platform: jvm
           - java: 11
-            scala: 2.12.15
+            scala: 2.12.16
             mode: normal
             platform: jvm
           - java: 17
-            scala: 2.12.15
+            scala: 2.12.16
             mode: normal
             platform: jvm
     runs-on: ubuntu-latest
