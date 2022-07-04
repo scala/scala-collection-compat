@@ -18,7 +18,7 @@ import org.junit.Assert._
 
 class OptionTest {
 
-  private val value: String = "example"
+  private val value: String        = "example"
   private val some: Option[String] = Some(value)
   private val none: Option[String] = None
 

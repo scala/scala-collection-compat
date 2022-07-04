@@ -283,8 +283,8 @@ private[compat] trait PackageShared {
       self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
     new MapViewExtensionMethods[K, V, C](self)
 
-
-  implicit def toOptionCompanionExtension(self: Option.type): OptionCompanionExtensionMethods = new OptionCompanionExtensionMethods(self)
+  implicit def toOptionCompanionExtension(self: Option.type): OptionCompanionExtensionMethods =
+    new OptionCompanionExtensionMethods(self)
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
