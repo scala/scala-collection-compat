@@ -122,12 +122,12 @@ lazy val compat = new MultiScalaCrossProject(
     },
     Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-js",
     Compile / unmanagedSourceDirectories += {
-      val jsParent = (ThisBuild / baseDirectory).value / "compat/js/src/main"
+      val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _) | (2, 13)) =>
-          jsParent / "scala-2.13"
+          jsAndNativeSourcesParent / "scala-2.13"
         case _ =>
-          jsParent / "scala-2.11_2.12"
+          jsAndNativeSourcesParent / "scala-2.11_2.12"
       }
     },
     Test / fork := false // Scala.js cannot run forked tests
@@ -141,6 +141,15 @@ lazy val compat = new MultiScalaCrossProject(
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
       case _            => mimaPreviousArtifacts.value
     }),
+    Compile / unmanagedSourceDirectories += {
+      val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _) | (2, 13)) =>
+          jsAndNativeSourcesParent / "scala-2.13"
+        case _ =>
+          jsAndNativeSourcesParent / "scala-2.11_2.12"
+      }
+    },
     libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
     Test / fork := false // Scala Native cannot run forked tests
   )
