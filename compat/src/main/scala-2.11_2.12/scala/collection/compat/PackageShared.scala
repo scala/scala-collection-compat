@@ -282,6 +282,9 @@ private[compat] trait PackageShared {
   implicit def toMapViewExtensionMethods[K, V, C <: scala.collection.Map[K, V]](
       self: IterableView[(K, V), C]): MapViewExtensionMethods[K, V, C] =
     new MapViewExtensionMethods[K, V, C](self)
+
+  implicit def toOptionCompanionExtension(fact: Option.type): OptionCompanionExtensionMethods =
+    new OptionCompanionExtensionMethods(fact)
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
@@ -586,4 +589,10 @@ class ImmutableQueueExtensionMethods[A](private val self: i.Queue[A]) extends An
 class MutableQueueExtensionMethods[Element](private val self: m.Queue[Element]) extends AnyVal {
   def enqueueAll(iter: c.Iterable[Element]): Unit =
     self.enqueue(iter.toIndexedSeq: _*)
+}
+
+class OptionCompanionExtensionMethods(private val fact: Option.type) extends AnyVal {
+  def when[A](cond: Boolean)(a: => A): Option[A] = if (cond) Some(a) else None
+
+  @inline def unless[A](cond: Boolean)(a: => A): Option[A] = when(!cond)(a)
 }
