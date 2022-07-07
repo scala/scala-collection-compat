@@ -91,11 +91,20 @@ lazy val compat = new MultiScalaCrossProject(
           exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
           exclude[Problem]("scala.collection.compat.*PreservingBuilder*")
         )
-      },
+      }
     )
     .jvmSettings(
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
-      junit,
+      Compile / unmanagedSourceDirectories += {
+        val jvmParent = (ThisBuild / baseDirectory).value / "compat/jvm/src/main"
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _) | (2, 13)) =>
+            jvmParent / "scala-2.13"
+          case _ =>
+            jvmParent / "scala-2.11_2.12"
+        }
+      },
+      junit
     )
     .disablePlugins(ScalafixPlugin),
   _.jsSettings(
@@ -111,6 +120,16 @@ lazy val compat = new MultiScalaCrossProject(
       }
       Seq(s"$opt:$x->$y/")
     },
+    Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-js",
+    Compile / unmanagedSourceDirectories += {
+      val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _) | (2, 13)) =>
+          jsAndNativeSourcesParent / "scala-2.13"
+        case _ =>
+          jsAndNativeSourcesParent / "scala-2.11_2.12"
+      }
+    },
     Test / fork := false // Scala.js cannot run forked tests
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
@@ -122,6 +141,15 @@ lazy val compat = new MultiScalaCrossProject(
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
       case _            => mimaPreviousArtifacts.value
     }),
+    Compile / unmanagedSourceDirectories += {
+      val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _) | (2, 13)) =>
+          jsAndNativeSourcesParent / "scala-2.13"
+        case _ =>
+          jsAndNativeSourcesParent / "scala-2.11_2.12"
+      }
+    },
     libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
     Test / fork := false // Scala Native cannot run forked tests
   )
