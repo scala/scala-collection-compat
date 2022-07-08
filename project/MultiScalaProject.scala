@@ -21,9 +21,9 @@ import java.io.File
  *   _.settings(...) // Project => Project (scala version independent configurations)
  * )
  *
- * // instanciate a sbt project
+ * // instantiate a sbt project
  * lazy val myProject211 = myProject("2.11.12", _.settings(...) /* scala version dependent configurations */)
- * lazy val myProject212 = myProject("2.12.14" , _.settings(...))
+ * lazy val myProject212 = myProject("2.12.16" , _.settings(...))
  * // ...
  * }}}
  */
