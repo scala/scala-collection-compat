@@ -372,7 +372,7 @@ inThisBuild {
 
           val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
 
-          val compatProject       = "compat" + ciScalaVersion.get.binary + platformSuffix
+          val compatProject       = s"compat${ciScalaVersion.get}$platformSuffix"
           val binaryCompatProject = "binaryCompat"
 
           val testProjectPrefix =
@@ -394,7 +394,7 @@ inThisBuild {
             }
 
           Seq(
-            List(s"""++${sys.env.get("CI_SCALA_VERSION").get}!"""),
+            List(s"""++${sys.env.get("CI_SCALA_VERSION").get}"""),
             List(s"$projectPrefix/clean"),
             List(s"$testProjectPrefix/test"),
             List(s"$projectPrefix/publishLocal"),
