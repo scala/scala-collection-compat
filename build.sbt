@@ -30,9 +30,9 @@ lazy val root = project
     compat213JVM,
     compat213JS,
     compat213Native,
-    compat30JVM,
-    compat30JS,
-    compat31Native,
+    compat3JVM,
+    compat3JS,
+    compat3Native,
     scalafixData211,
     scalafixData212,
     scalafixData213,
@@ -53,8 +53,7 @@ lazy val junit = libraryDependencies += "com.github.sbt" % "junit-interface" % "
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.8"
-lazy val scala30  = "3.0.2"
-lazy val scala31  = "3.1.3"
+lazy val scala3   = "3.1.3"
 
 lazy val compat = new MultiScalaCrossProject(
   "compat",
@@ -158,8 +157,7 @@ lazy val compat = new MultiScalaCrossProject(
 val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
 val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
 val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
-val compat30  = compat(Seq(JSPlatform, JVMPlatform), scala30)
-val compat31  = compat(Seq(JVMPlatform, NativePlatform), scala31)
+val compat3   = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala3)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
@@ -170,9 +168,9 @@ lazy val compat212Native = compat212.native
 lazy val compat213JVM    = compat213.jvm
 lazy val compat213JS     = compat213.js
 lazy val compat213Native = compat213.native
-lazy val compat30JVM     = compat30.jvm
-lazy val compat30JS      = compat30.js
-lazy val compat31Native  = compat31.native
+lazy val compat3JVM      = compat3.jvm
+lazy val compat3JS       = compat3.js
+lazy val compat3Native   = compat3.native
 
 lazy val binaryCompatOld = project
   .in(file("binary-compat/old"))
@@ -335,8 +333,7 @@ lazy val scalafixTests = project
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
 val ciScalaVersion = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
-val isScalaJs      = sys.env.get("CI_PLATFORM") == Some("js")
-val isScalaNative  = sys.env.get("CI_PLATFORM") == Some("native")
+val ciPlatform     = sys.env.get("CI_PLATFORM").map(p => if (p == "JVM") "" else p)
 val isScalafix     = sys.env.get("CI_MODE") == Some("testScalafix")
 val isScalafmt     = sys.env.get("CI_MODE") == Some("testScalafmt")
 val isBinaryCompat = sys.env.get("CI_MODE") == Some("testBinaryCompat")
@@ -370,9 +367,7 @@ inThisBuild {
           ).foreach(k =>
             println(k.padTo(20, " ").mkString("") + " -> " + sys.env.getOrElse(k, "None")))
 
-          val platformSuffix = if (isScalaJs) "JS" else if (isScalaNative) "Native" else ""
-
-          val compatProject       = s"compat${ciScalaVersion.get}$platformSuffix"
+          val compatProject       = s"compat${ciScalaVersion.get}${ciPlatform.get}"
           val binaryCompatProject = "binaryCompat"
 
           val testProjectPrefix =
