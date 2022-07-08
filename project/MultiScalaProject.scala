@@ -30,7 +30,10 @@ import java.io.File
 trait MultiScala {
   def majorMinor(in: String): String = {
     val Array(major, minor, _) = in.split("\\.")
-    major + minor
+    if (major == "2")
+      s"$major$minor"
+    else
+      major
   }
 
   def projectIdPerScala(name: String, scalaV: String): String = s"$name${majorMinor(scalaV)}"

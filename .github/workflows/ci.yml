@@ -11,45 +11,43 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 11, 17]
-        scala: [2.11.x, 2.12.x, 2.13.x, 3.0.x]
-        platform: [jvm, js, native]
+        scala: [2.11.x, 2.12.x, 2.13.x, 3.x]
+        platform: [JVM, JS, Native]
         mode: [normal]
         exclude:
-          - scala: 3.0.x
-            platform: native
           - java: 11
-            platform: js
+            platform: JS
           - java: 11
-            platform: native
+            platform: Native
           - java: 17
-            platform: js
+            platform: JS
           - java: 17
-            platform: native
+            platform: Native
         include:
           - java: 8
             scala: 2.12.x
             mode: testScalafix
-            platform: jvm
+            platform: JVM
           - java: 8
             scala: 2.12.x
             mode: testBinaryCompat
-            platform: jvm
+            platform: JVM
           - java: 8
             scala: 2.12.x
             mode: testScalafmt
-            platform: jvm
+            platform: JVM
           - java: 8
             scala: 2.12.x
             mode: headerCheck
-            platform: jvm
+            platform: JVM
           - java: 11
             scala: 2.12.x
             mode: normal
-            platform: jvm
+            platform: JVM
           - java: 17
             scala: 2.12.x
             mode: normal
-            platform: jvm
+            platform: JVM
     runs-on: ubuntu-latest
     env:
       CI_JDK: ${{matrix.java}}
