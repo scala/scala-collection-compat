@@ -53,28 +53,29 @@ case class Collection213ExperimentalV0(index: SemanticdbIndex)
   }
 
   def replaceSetMapPlusMinus(ctx: RuleCtx): Patch = {
-    def rewriteOp(op: Tree, rhs: Tree, doubleOp: String, col0: String): Patch = {
-      val col = "_root_.scala.collection." + col0
-      val callSite =
-        if (startsWithParens(rhs)) {
-          ctx.addLeft(rhs, col)
-        } else {
-          ctx.addLeft(rhs, col + "(") +
-            ctx.addRight(rhs, ")")
-        }
-
-      ctx.addRight(op, doubleOp) + callSite
+    def rewriteOp(ap: Term.ApplyInfix, doubleOp: String, col0: String): Patch = {
+      val col = col0 match {
+        case "Set" => q"_root_.scala.collection.Set"
+        case "Map" => q"_root_.scala.collection.Map"
+      }
+      val newAp = ap
+        .copy(
+          args = Term.Apply(col, ap.args) :: Nil,
+          op = Term.Name(doubleOp * 2)
+        )
+        .toString()
+      ctx.replaceTree(ap, newAp)
     }
 
     ctx.tree.collect {
-      case ap @ Term.ApplyInfix(CollectionSet(), op @ setPlus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "+", "Set")
+      case ap @ Term.ApplyInfix(CollectionSet(), setPlus(_), Nil, _) =>
+        rewriteOp(ap, "+", "Set")
 
-      case Term.ApplyInfix(CollectionSet(), op @ setMinus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "-", "Set")
+      case ap @ Term.ApplyInfix(CollectionSet(), setMinus(_), Nil, _) =>
+        rewriteOp(ap, "-", "Set")
 
-      case Term.ApplyInfix(_, op @ mapPlus(_), Nil, List(rhs)) =>
-        rewriteOp(op, rhs, "+", "Map")
+      case ap @ Term.ApplyInfix(_, op @ mapPlus(_), Nil, _) =>
+        rewriteOp(ap, "+", "Map")
     }.asPatch
   }
 
