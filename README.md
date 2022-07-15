@@ -49,7 +49,7 @@ And, it includes support for some non-collections classes such as the `@nowarn` 
 
 ## Migration rules
 
-The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) and, in particular, check that your full Scala version is supported (ex 2.12.16).
+The migration rules use scalafix. Please see the [official installation instructions](https://scalacenter.github.io/scalafix/docs/users/installation.html) if you are using an old version of sbt (<1.3) or in case the commands below do not work.
 
 ```scala
 // project/plugins.sbt
@@ -62,14 +62,13 @@ The `Collection213Upgrade` rewrite upgrades to the 2.13 collections without the 
 
 ```scala
 // build.sbt
-ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "<version>"
-addCompilerPlugin(scalafixSemanticdb)
-scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
+scalacOptions += "-P:semanticdb:synthetics:on"
 ```
 
 ```bash
 // sbt shell
-> ;test:scalafix Collection213Upgrade ;scalafix Collection213Upgrade
+> scalafixEnable
+> scalafixAll dependency:Collection213Upgrade@org.scala-lang.modules:scala-collection-migrations:<version> 
 ```
 
 ### Collection213CrossCompat
@@ -80,23 +79,15 @@ To cross-build for 2.12 and 2.11, the rewrite rule introduces a dependency on th
 
 ```scala
 // build.sbt
-ThisBuild / scalafixDependencies += "org.scala-lang.modules" %% "scala-collection-migrations" % "<version>"
 libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "<version>"
-addCompilerPlugin(scalafixSemanticdb)
-scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")
+scalacOptions += "-P:semanticdb:synthetics:on"
 ```
 
 
 ```bash
 // sbt shell
-> ;test:scalafix Collection213CrossCompat ;scalafix Collection213CrossCompat
-```
-
-### Build.scala
-
-```scala
-// If you are using project/Build.scala add the following imports:
-import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixDependencies, scalafixSemanticdb}
+> scalafixEnable
+> scalafixAll dependency:Collection213CrossCompat@org.scala-lang.modules:scala-collection-migrations:<version> 
 ```
 
 ### Contributing
