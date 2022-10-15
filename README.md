@@ -90,6 +90,14 @@ scalacOptions += "-P:semanticdb:synthetics:on"
 > scalafixAll dependency:Collection213CrossCompat@org.scala-lang.modules:scala-collection-migrations:<version> 
 ```
 
+### Fixing unused import warnings
+In Scala 2.13 the `import scala.collection.compat._` sometimes is not needed (e.g. `.to(SeqType)` is natively available).
+This leads to a `unused import` warning under Scala 2.13 even though the import is required for Scala 2.12.
+In order to work around this, you can pass a compiler option to ignore this specific issue, e.g. in SBT:
+```scala
+scalacOptions += "-Wconf:origin=scala.collection.compat.*:s"
+```
+
 ### Contributing
 
 The migration tool is not exhaustive. Contributions of additional rewrites are welcome.  If you encounter a use case that’s not supported, please report it as described in the [contributing
