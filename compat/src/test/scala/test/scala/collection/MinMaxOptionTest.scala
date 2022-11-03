@@ -16,44 +16,14 @@ import org.junit.Assert._
 import org.junit.Test
 
 import scala.util.Random
-import scala.reflect.ClassTag
-import scala.util.control.NonFatal
 
 import scala.collection.compat._
 
 // whole file copied/adapted from same-named file in scala/scala repo
 
 /* Test for scala/bug#7614 */
-class MinByMaxByTest {
+class MinByMaxByTest extends AssertThrown {
   val list = List.fill(1000)(Random.nextInt(10000) - 5000)
-
-  // next two methods copied from AssertUtil in scala/scala repo
-
-  /** Check that throwable T (or a subclass) was thrown during evaluation of `body`,
-   *  and that its message satisfies the `checkMessage` predicate.
-   *  Any other exception is propagated.
-   */
-  def assertThrows[T <: Throwable: ClassTag](body: => Any,
-                                             checkMessage: String => Boolean = s => true): Unit = {
-    assertThrown[T](t => checkMessage(t.getMessage))(body)
-  }
-
-  def assertThrown[T <: Throwable: ClassTag](checker: T => Boolean)(body: => Any): Unit =
-    try {
-      body
-      fail("Expression did not throw!")
-    } catch {
-      case e: T if checker(e) => ()
-      case failed: T =>
-        val ae = new AssertionError(s"Exception failed check: $failed")
-        ae.addSuppressed(failed)
-        throw ae
-      case NonFatal(other) =>
-        val ae = new AssertionError(
-          s"Wrong exception: expected ${implicitly[ClassTag[T]]} but was ${other.getClass.getName}")
-        ae.addSuppressed(other)
-        throw ae
-    }
 
   // Basic emptiness check
   @Test

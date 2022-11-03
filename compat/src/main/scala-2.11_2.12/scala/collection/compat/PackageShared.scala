@@ -53,6 +53,60 @@ private[compat] trait PackageShared {
     def newBuilder: m.Builder[A, C] = factory()
   }
 
+  implicit class StringOps(s: String) {
+
+    /**
+     * Try to parse as a `Boolean`
+     * @return `Some(true)` if the string is "true" case insensitive,
+     * `Some(false)` if the string is "false" case insensitive,
+     * and `None` if the string is anything else
+     * @throws java.lang.NullPointerException if the string is `null`
+     */
+    def toBooleanOption: Option[Boolean] = StringParsers.parseBool(s)
+
+    /**
+     * Try to parse as a `Byte`
+     * @return `Some(value)` if the string contains a valid byte value, otherwise `None`
+     * @throws java.lang.NullPointerException if the string is `null`
+     */
+    def toByteOption: Option[Byte] = StringParsers.parseByte(s)
+
+    /**
+     * Try to parse as a `Short`
+     * @return `Some(value)` if the string contains a valid short value, otherwise `None`
+     * @throws java.lang.NullPointerException if the string is `null`
+     */
+    def toShortOption: Option[Short] = StringParsers.parseShort(s)
+
+    /**
+     * Try to parse as an `Int`
+     * @return `Some(value)` if the string contains a valid Int value, otherwise `None`
+     * @throws java.lang.NullPointerException if the string is `null`
+     */
+    def toIntOption: Option[Int] = StringParsers.parseInt(s)
+
+    /**
+     * Try to parse as a `Long`
+     * @return `Some(value)` if the string contains a valid long value, otherwise `None`
+     * @throws java.lang.NullPointerException if the string is `null`
+     */
+    def toLongOption: Option[Long] = StringParsers.parseLong(s)
+
+    /**
+     * Try to parse as a `Float`
+     * @return `Some(value)` if the string is a parsable `Float`, `None` otherwise
+     * @throws java.lang.NullPointerException If the string is null
+     */
+    def toFloatOption: Option[Float] = StringParsers.parseFloat(s)
+
+    /**
+     * Try to parse as a `Double`
+     * @return `Some(value)` if the string is a parsable `Double`, `None` otherwise
+     * @throws java.lang.NullPointerException If the string is null
+     */
+    def toDoubleOption: Option[Double] = StringParsers.parseDouble(s)
+  }
+
   implicit def genericCompanionToCBF[A, CC[X] <: GenTraversable[X]](
       fact: GenericCompanion[CC]): CanBuildFrom[Any, A, CC[A]] = {
     /* see https://github.com/scala/scala-collection-compat/issues/337
