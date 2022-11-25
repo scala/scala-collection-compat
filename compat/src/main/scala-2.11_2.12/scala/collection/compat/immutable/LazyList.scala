@@ -33,7 +33,7 @@ import scala.collection.generic.{
   SeqFactory
 }
 import scala.collection.immutable.{LinearSeq, NumericRange}
-import scala.collection.mutable.{ArrayBuffer, Builder, StringBuilder}
+import scala.collection.mutable.{Builder, StringBuilder}
 import scala.language.implicitConversions
 
 /**  This class implements an immutable linked list that evaluates elements
@@ -515,10 +515,6 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
       if (knownIsEmpty) LazyList.from(prefix)
       else newLL(stateFromIteratorConcatSuffix(prefix.toIterator)(state))
     } else super.++:(prefix)(bf)
-
-  private def prependedAllToLL[B >: A](prefix: Traversable[B]): LazyList[B] =
-    if (knownIsEmpty) LazyList.from(prefix)
-    else newLL(stateFromIteratorConcatSuffix(prefix.toIterator)(state))
 
   /** @inheritdoc
    *
@@ -1512,14 +1508,17 @@ object LazyList extends SeqFactory[LazyList] {
 
     private[this] def readObject(in: ObjectInputStream): Unit = {
       in.defaultReadObject()
-      val init     = new ArrayBuffer[A]
+      val init     = new mutable.ListBuffer[A]
       var initRead = false
       while (!initRead) in.readObject match {
         case SerializeEnd => initRead = true
         case a            => init += a.asInstanceOf[A]
       }
       val tail = in.readObject().asInstanceOf[LazyList[A]]
-      coll = tail.prependedAllToLL(init)
+      // scala/scala#10118: caution that no code path can evaluate `tail.state`
+      // before the resulting LazyList is returned
+      val it = init.toList.iterator
+      coll = newLL(stateFromIteratorConcatSuffix(it)(tail.state))
     }
 
     private[this] def readResolve(): Any = coll
