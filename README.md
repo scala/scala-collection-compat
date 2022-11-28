@@ -22,6 +22,12 @@ All future versions will remain backwards binary compatible with 2.0.0. (The 1.0
 
 ## How it works
 
+The 2.13 and 3.0 versions consist only of an empty `scala.collection.compat` package object, so `import scala.collection.compat._` won't cause an error in cross-compiled code.
+
+The 2.11 and 2.12 versions have the needed compatibility code in this package.
+
+### Changed methods
+
 The 2.13 collections redesign did not break source compatibility for most ordinary code, but there are some exceptions.
 
 For example, the `to` method is used with a type parameter in 2.12:
@@ -37,15 +43,25 @@ import scala.collection.compat._
 xs.to(List)
 ```
 
-The 2.13 and 3.0 versions consist only of an empty `scala.collection.compat` package object, so `import scala.collection.compat._` won't cause an error in cross-compiled code.
-
-The 2.11 and 2.12 versions have the needed compatibility code in this package.
+### New collections
 
 The library also adds backported versions of new collection types, such as `immutable.ArraySeq` and `immutable.LazyList`. (On 2.13, these types are just aliases to standard library types.)
 
-And it adds backported versions of some 2.13 collections methods such as `maxOption`.
+### New collection methods
 
-And, it includes support for some non-collections classes such as the `@nowarn` annotation added in 2.13.2.
+Support is included for some 2.13 collections methods such as `maxOption`.
+
+### Other new classes
+
+Support is included for some non-collections classes, such as:
+
+* `@nowarn` annotation, added in 2.13.2 and 2.12.13. (The 2.11 `@nowarn` doesn't do anything, but its presence facilitates cross-compilation.)
+
+### Other new methods
+
+Support is included for some other methods, such as:
+
+* `toIntOption` (and `Long`, et al) on `String`
 
 ## Migration rules
 
@@ -68,7 +84,7 @@ scalacOptions += "-P:semanticdb:synthetics:on"
 ```bash
 // sbt shell
 > scalafixEnable
-> scalafixAll dependency:Collection213Upgrade@org.scala-lang.modules:scala-collection-migrations:<version> 
+> scalafixAll dependency:Collection213Upgrade@org.scala-lang.modules:scala-collection-migrations:<version>
 ```
 
 ### Collection213CrossCompat
@@ -87,7 +103,7 @@ scalacOptions += "-P:semanticdb:synthetics:on"
 ```bash
 // sbt shell
 > scalafixEnable
-> scalafixAll dependency:Collection213CrossCompat@org.scala-lang.modules:scala-collection-migrations:<version> 
+> scalafixAll dependency:Collection213CrossCompat@org.scala-lang.modules:scala-collection-migrations:<version>
 ```
 
 ### Fixing unused import warnings
