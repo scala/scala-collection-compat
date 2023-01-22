@@ -133,9 +133,6 @@ lazy val compat = new MultiScalaCrossProject(
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
     nativeLinkStubs := true,
-    addCompilerPlugin(
-      "org.scala-native" % "junit-plugin" % nativeVersion cross CrossVersion.full
-    ),
     mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
       case _            => mimaPreviousArtifacts.value
@@ -149,9 +146,9 @@ lazy val compat = new MultiScalaCrossProject(
           jsAndNativeSourcesParent / "scala-2.11_2.12"
       }
     },
-    libraryDependencies += "org.scala-native" %%% "junit-runtime" % nativeVersion,
+    versionPolicyIntention := Compatibility.None,
     Test / fork := false // Scala Native cannot run forked tests
-  )
+  ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
 
 val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
