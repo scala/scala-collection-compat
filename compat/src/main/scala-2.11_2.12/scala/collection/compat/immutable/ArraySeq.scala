@@ -15,7 +15,7 @@ package scala.collection.compat.immutable
 import java.util.Arrays
 
 import scala.annotation.unchecked.uncheckedVariance
-import scala.collection.AbstractSeq
+import scala.collection.{AbstractSeq, IndexedSeqOptimized}
 import scala.collection.generic._
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable.{ArrayBuilder, Builder, WrappedArrayBuilder}
@@ -34,7 +34,7 @@ import scala.util.hashing.MurmurHash3
  *  @define mayNotTerminateInf
  *  @define willNotTerminateInf
  */
-abstract class ArraySeq[+T] extends AbstractSeq[T] with IndexedSeq[T] {
+abstract class ArraySeq[+T] extends AbstractSeq[T] with IndexedSeq[T] with IndexedSeqOptimized[T, ArraySeq[T]] {
 
   override protected[this] def thisCollection: ArraySeq[T] = this
 
