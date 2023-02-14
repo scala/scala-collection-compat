@@ -34,7 +34,10 @@ import scala.util.hashing.MurmurHash3
  *  @define mayNotTerminateInf
  *  @define willNotTerminateInf
  */
-abstract class ArraySeq[+T] extends AbstractSeq[T] with IndexedSeq[T] with IndexedSeqOptimized[T, ArraySeq[T]] {
+abstract class ArraySeq[+T]
+    extends AbstractSeq[T]
+    with IndexedSeq[T]
+    with IndexedSeqOptimized[T, ArraySeq[T]] {
 
   override protected[this] def thisCollection: ArraySeq[T] = this
 
