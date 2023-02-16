@@ -22,8 +22,6 @@ lazy val root = project
   )
   .aggregate(
     compat211JVM,
-    compat211JS,
-    compat211Native,
     compat212JVM,
     compat212JS,
     compat212Native,
@@ -126,7 +124,7 @@ lazy val compat = new MultiScalaCrossProject(
         case Some((3, _) | (2, 13)) =>
           jsAndNativeSourcesParent / "scala-2.13"
         case _ =>
-          jsAndNativeSourcesParent / "scala-2.11_2.12"
+          jsAndNativeSourcesParent / "scala-2.12"
       }
     },
     Test / fork := false // Scala.js cannot run forked tests
@@ -143,7 +141,7 @@ lazy val compat = new MultiScalaCrossProject(
         case Some((3, _) | (2, 13)) =>
           jsAndNativeSourcesParent / "scala-2.13"
         case _ =>
-          jsAndNativeSourcesParent / "scala-2.11_2.12"
+          jsAndNativeSourcesParent / "scala-2.12"
       }
     },
     versionPolicyIntention := Compatibility.None,
@@ -151,14 +149,12 @@ lazy val compat = new MultiScalaCrossProject(
   ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
 
-val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
+val compat211 = compat(Seq(JVMPlatform), scala211)
 val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
 val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
 val compat3   = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala3)
 
 lazy val compat211JVM    = compat211.jvm
-lazy val compat211JS     = compat211.js
-lazy val compat211Native = compat211.native
 lazy val compat212JVM    = compat212.jvm
 lazy val compat212JS     = compat212.js
 lazy val compat212Native = compat212.native

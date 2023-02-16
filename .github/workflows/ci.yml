@@ -15,6 +15,10 @@ jobs:
         platform: [JVM, JS, Native]
         mode: [normal]
         exclude:
+          - scala: 2.11.x
+            platform: JS
+          - scala: 2.11.x
+            platform: Native
           - java: 11
             platform: JS
           - java: 11
