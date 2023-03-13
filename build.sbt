@@ -23,7 +23,6 @@ lazy val root = project
   .aggregate(
     compat211JVM,
     compat211JS,
-    compat211Native,
     compat212JVM,
     compat212JS,
     compat212Native,
@@ -132,7 +131,6 @@ lazy val compat = new MultiScalaCrossProject(
     Test / fork := false // Scala.js cannot run forked tests
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
-    nativeLinkStubs := true,
     mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
       case _            => mimaPreviousArtifacts.value
@@ -151,14 +149,13 @@ lazy val compat = new MultiScalaCrossProject(
   ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
 
-val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
+val compat211 = compat(Seq(JSPlatform, JVMPlatform), scala211)
 val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
 val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
 val compat3   = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala3)
 
 lazy val compat211JVM    = compat211.jvm
 lazy val compat211JS     = compat211.js
-lazy val compat211Native = compat211.native
 lazy val compat212JVM    = compat212.jvm
 lazy val compat212JS     = compat212.js
 lazy val compat212Native = compat212.native
