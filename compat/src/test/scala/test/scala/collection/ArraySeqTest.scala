@@ -72,4 +72,11 @@ class ArraySeqTest {
     Assert.assertEquals(ArraySeq[T](), array.slice(1, 1))
     Assert.assertEquals(ArraySeq[T](), array.slice(2, 1))
   }
+
+  @Test def ArraySeqIndexedSeqOptimized(): Unit = {
+    val x                = ArraySeq(1, 2)
+    val y                = ArraySeq(3, 4)
+    val z: ArraySeq[Int] = x ++ y
+    assert(z.toList == List(1, 2, 3, 4))
+  }
 }
