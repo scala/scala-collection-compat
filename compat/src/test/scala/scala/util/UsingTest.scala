@@ -765,7 +765,7 @@ class UsingTest {
     Using(Source.fromString("Hello, Source!")) { source =>
       // If this simply compiles, then mission accomplished.
     }
-  }  
+  }
 }
 
 object UsingTest {

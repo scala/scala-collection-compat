@@ -403,7 +403,7 @@ object Using {
     /** An implicit `Releasable` for [[scala.io.Source `Source`s]] which aren't [[java.lang.AutoCloseable `AutoCloseable`s]] in Scala 2.11. */
     implicit object SourceReleasable extends Releasable[Source] {
       def release(resource: Source): Unit = resource.close()
-    }    
+    }
   }
 
 }
