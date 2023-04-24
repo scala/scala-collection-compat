@@ -15,6 +15,7 @@ package scala.util
 import org.junit.Test
 import org.junit.Assert._
 
+import scala.io.Source
 import scala.reflect.ClassTag
 import scala.runtime.NonLocalReturnControl
 
@@ -757,6 +758,13 @@ class UsingTest {
       .failed
       .get
     assertThrowableClass[RuntimeException](ex)
+  }
+
+  @Test
+  def usingSource(): Unit = {
+    Using(Source.fromString("Hello, Source!")) { source =>
+      // If this simply compiles, then mission accomplished.
+    }
   }
 }
 
