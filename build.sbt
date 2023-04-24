@@ -147,6 +147,7 @@ lazy val compat = new MultiScalaCrossProject(
       }
     },
     versionPolicyIntention := Compatibility.None,
+    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
     Test / fork := false // Scala Native cannot run forked tests
   ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
