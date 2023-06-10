@@ -82,7 +82,7 @@ lazy val compat = new MultiScalaCrossProject(
             sharedSourceDir / "scala-2.11_2.12"
         }
       },
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      versionPolicyIntention := Compatibility.BinaryCompatible,
       mimaBinaryIssueFilters ++= {
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
