@@ -578,8 +578,8 @@ class TrulyTraversableLikeExtensionMethods[El1, Repr1](
 class Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](
     private val self: Tuple2Zipped[El1, Repr1, El2, Repr2]) {
 
-  def lazyZip[El3, Repr3, T3](t3: T3)(implicit w3: T3 => IterableLike[El3, Repr3])
-    : Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] =
+  def lazyZip[El3, Repr3, T3](t3: T3)(implicit
+  w3: T3 => IterableLike[El3, Repr3]): Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] =
     new Tuple3Zipped((self.colls._1, self.colls._2, t3))
 }
 

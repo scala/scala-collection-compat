@@ -35,14 +35,14 @@ class LazyListGCTest {
     val ref = WeakReference(LazyList.from(1).take(500))
 
     def gcAndThrowIfCollected(n: Int): Unit = {
-      System.gc()      // try to GC
-      Thread.sleep(10) // give it 10 ms
+      System.gc()                                                   // try to GC
+      Thread.sleep(10)                                              // give it 10 ms
       if (ref.get.isEmpty) throw new RuntimeException(msgSuccessGC) // we're done if head collected
       f(n)
     }
 
     val res = Try { op(ref(), gcAndThrowIfCollected) }.failed // success is indicated by an
-    val msg = res.map(_.getMessage).getOrElse(msgFailureGC) // exception with expected message
+    val msg = res.map(_.getMessage).getOrElse(msgFailureGC)   // exception with expected message
     // failure is indicated by no
     assertTrue(msg == msgSuccessGC) // exception, or one with different message
   }
@@ -86,8 +86,9 @@ class LazyListGCTest {
 
   @Test // scala/bug#11443
   def collectFirst_allowsGC(): Unit = {
-    assertLazyListOpAllowsGC((ll, check) => ll.collectFirst({ case i if { check(i); false } => i }),
-                             _ => ())
+    assertLazyListOpAllowsGC(
+      (ll, check) => ll.collectFirst({ case i if { check(i); false } => i }),
+      _ => ())
   }
 
   @Test
@@ -117,8 +118,9 @@ class LazyListGCTest {
 
   @Test
   def dropWhile_headOption_allowsGC(): Unit = {
-    assertLazyListOpAllowsGC((ll, check) => ll.dropWhile(i => { check(i); i < 1000000 }).headOption,
-                             _ => ())
+    assertLazyListOpAllowsGC(
+      (ll, check) => ll.dropWhile(i => { check(i); i < 1000000 }).headOption,
+      _ => ())
   }
 
   @Test

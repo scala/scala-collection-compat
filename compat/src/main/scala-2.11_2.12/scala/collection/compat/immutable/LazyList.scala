@@ -241,8 +241,9 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
         "self-referential LazyList or a derivation thereof has no more elements")
     }
     midEvaluation = true
-    val res = try lazyState()
-    finally midEvaluation = false
+    val res =
+      try lazyState()
+      finally midEvaluation = false
     // if we set it to `true` before evaluating, we may infinite loop
     // if something expects `state` to already be evaluated
     stateEvaluated = true
@@ -368,7 +369,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
       if (isEmpty) suffix match {
         case lazyList: LazyList[B] => lazyList.state // don't recompute the LazyList
         case coll                  => stateFromIterator(coll.toIterator)
-      } else sCons(head, tail lazyAppendedAll suffix)
+      }
+      else sCons(head, tail lazyAppendedAll suffix)
     }
 
   /** @inheritdoc
@@ -382,7 +384,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) LazyList.from(suffix)
       else lazyAppendedAll(suffix)
-    } else super.++(suffix)(bf)
+    }
+    else super.++(suffix)(bf)
 
   /** @inheritdoc
    *
@@ -394,7 +397,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) newLL(sCons(elem, LazyList.empty))
       else lazyAppendedAll(Iterator.single(elem))
-    } else super.:+(elem)(bf)
+    }
+    else super.:+(elem)(bf)
 
   /** @inheritdoc
    *
@@ -412,7 +416,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) newLL(sCons(z, LazyList.empty))
       else newLL(scanLeftState(z)(op))
-    } else super.scanLeft(z)(op)(bf)
+    }
+    else super.scanLeft(z)(op)(bf)
 
   private def scanLeftState[B](z: B)(op: (B, A) => B): State[B] =
     sCons(
@@ -492,7 +497,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
   override def +:[B >: A, That](elem: B)(implicit bf: CanBuildFrom[LazyList[A], B, That]): That =
     if (isLLBuilder(bf)) asThat {
       newLL(sCons(elem, this))
-    } else super.+:(elem)(bf)
+    }
+    else super.+:(elem)(bf)
 
   /** @inheritdoc
    *
@@ -503,7 +509,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) LazyList.from(prefix)
       else newLL(stateFromIteratorConcatSuffix(prefix.toIterator)(state))
-    } else super.++:(prefix)(bf)
+    }
+    else super.++:(prefix)(bf)
 
   /** @inheritdoc
    *
@@ -514,7 +521,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) LazyList.from(prefix)
       else newLL(stateFromIteratorConcatSuffix(prefix.toIterator)(state))
-    } else super.++:(prefix)(bf)
+    }
+    else super.++:(prefix)(bf)
 
   /** @inheritdoc
    *
@@ -551,7 +559,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) LazyList.empty
       else LazyList.collectImpl(this, pf)
-    } else super.collect(pf)(bf)
+    }
+    else super.collect(pf)(bf)
 
   /** @inheritdoc
    *
@@ -626,7 +635,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
       implicit bf: CanBuildFrom[LazyList[A], (A1, Int), That]): That =
     if (isLLBuilder(bf)) asThat {
       this zip LazyList.from(0)
-    } else super.zipWithIndex(bf)
+    }
+    else super.zipWithIndex(bf)
 
   /** @inheritdoc
    *
@@ -637,15 +647,18 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (this.knownIsEmpty) LazyList.continually(thisElem) zip that
       else newLL(zipAllState(that.toIterator, thisElem, thatElem))
-    } else super.zipAll(that, thisElem, thatElem)(bf)
+    }
+    else super.zipAll(that, thisElem, thatElem)(bf)
 
   private def zipAllState[A1 >: A, B](it: Iterator[B],
                                       thisElem: A1,
                                       thatElem: B): State[(A1, B)] = {
     if (it.hasNext) {
-      if (this.isEmpty) sCons((thisElem, it.next()), newLL {
-        LazyList.continually(thisElem) zipState it
-      })
+      if (this.isEmpty) sCons(
+        (thisElem, it.next()),
+        newLL {
+          LazyList.continually(thisElem) zipState it
+        })
       else sCons((this.head, it.next()), newLL { this.tail.zipAllState(it, thisElem, thatElem) })
     } else {
       if (this.isEmpty) State.Empty
@@ -870,7 +883,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (knownIsEmpty) LazyList from other
       else patchImpl(from, other, replaced)
-    } else super.patch(from, other, replaced)
+    }
+    else super.patch(from, other, replaced)
 
   private def patchImpl[B >: A](from: Int, other: GenSeq[B], replaced: Int): LazyList[B] =
     newLL {
@@ -889,7 +903,8 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
     if (isLLBuilder(bf)) asThat {
       if (index < 0) throw new IndexOutOfBoundsException(s"$index")
       else updatedImpl(index, elem, index)
-    } else super.updated(index, elem)
+    }
+    else super.updated(index, elem)
 
   private def updatedImpl[B >: A](index: Int, elem: B, startIndex: Int): LazyList[B] = {
     newLL {
@@ -1247,7 +1262,7 @@ object LazyList extends SeqFactory[LazyList] {
         scout = scout.tail
         scoutRef = scout // scoutRef.elem = scout
         rest = rest.tail // can't throw an exception as `scout` has already evaluated its tail
-        restRef = rest // restRef.elem  = rest
+        restRef = rest   // restRef.elem  = rest
       }
       // `rest` is the last `n` elements (or all of them)
       rest.state
@@ -1422,7 +1437,7 @@ object LazyList extends SeqFactory[LazyList] {
     def map[B, That](f: A => B)(implicit bf: CanBuildFrom[LazyList[A], B, That]): That =
       filtered.map(f)
     def flatMap[B, That](f: A => GenTraversableOnce[B])(
-        implicit bf: CanBuildFrom[LazyList[A], B, That]): That     = filtered.flatMap(f)
+        implicit bf: CanBuildFrom[LazyList[A], B, That]): That = filtered.flatMap(f)
     def foreach[U](f: A => U): Unit                                = filtered.foreach(f)
     def withFilter(q: A => Boolean): FilterMonadic[A, LazyList[A]] = new WithFilter(filtered, q)
   }

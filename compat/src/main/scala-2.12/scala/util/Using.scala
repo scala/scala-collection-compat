@@ -235,8 +235,8 @@ object Using {
       case _: LinkageError                          => 3
       case _: InterruptedException | _: ThreadDeath => 2
       case _: ControlThrowable                      => 0
-      case e if !NonFatal(e)                        => 1 // in case this method gets out of sync with NonFatal
-      case _                                        => -1
+      case e if !NonFatal(e) => 1 // in case this method gets out of sync with NonFatal
+      case _                 => -1
     }
     // special-case `ControlThrowable`, which incorrectly suppresses exceptions
     //   before 2.13

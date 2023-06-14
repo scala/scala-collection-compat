@@ -91,7 +91,8 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
   ) ++ functionsZipSymbols
   val functionsViewSymbols            = List(`SeqLike.updated`, `Vector.updated`)
   val functionsReverseIteratorSymbols = List(`SeqLike.reverseMap`)
-  val functionsSymbols                = functionsIteratorSymbols ++ functionsViewSymbols ++ functionsReverseIteratorSymbols
+  val functionsSymbols =
+    functionsIteratorSymbols ++ functionsViewSymbols ++ functionsReverseIteratorSymbols
 
   val functionsIterator        = SymbolMatcher.exact(functionsIteratorSymbols: _*)
   val functionsReverseIterator = SymbolMatcher.exact(functionsReverseIteratorSymbols: _*)
@@ -216,8 +217,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     val rewriteBreakout =
       ctx.tree.collect {
         // (xs ++ ys)(breakOut)
-        case ap0 @ Term.Apply(ap @ Term.ApplyInfix(lhs, operators(op), _, List(rhs)),
-                              List(breakOut(bo))) =>
+        case ap0 @ Term.Apply(
+              ap @ Term.ApplyInfix(lhs, operators(op), _, List(rhs)),
+              List(breakOut(bo))) =>
           val subject =
             if (isLeftAssociative(op)) lhs
             else rhs
@@ -233,8 +235,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           covertToCollection(intermediate, subject, ap, bo, ap0)
 
         // xs.map(f)(breakOut)
-        case ap0 @ Term.Apply(ap @ Term.Apply(Term.Select(lhs, functions(op)), rhs :: _),
-                              List(breakOut(bo))) =>
+        case ap0 @ Term.Apply(
+              ap @ Term.Apply(Term.Select(lhs, functions(op)), rhs :: _),
+              List(breakOut(bo))) =>
           val intermediateLhs =
             op match {
               case functionsIterator(_)        => "iterator"
@@ -259,7 +262,14 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
             if (isReversed) ctx.replaceTree(op, "map")
             else Patch.empty
 
-          covertToCollection(intermediateLhs, lhs, ap, bo, ap0, intermediateRhs, Some(rhs)) + replaceUnion + replaceReverseMap
+          covertToCollection(
+            intermediateLhs,
+            lhs,
+            ap,
+            bo,
+            ap0,
+            intermediateRhs,
+            Some(rhs)) + replaceUnion + replaceReverseMap
 
         // ts.scanLeft(d)(f)(breakOut)
         case ap0 @ Term.Apply(
@@ -272,8 +282,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           replaceBreakoutWithCollection(bo)
 
         // traverse(xs)(f)(breakOut, ec)
-        case Term.Apply(Term.Apply(Term.Apply(`Future.traverse`(_), _), _),
-                        List(breakOut(bo), _)) =>
+        case Term.Apply(
+              Term.Apply(Term.Apply(`Future.traverse`(_), _), _),
+              List(breakOut(bo), _)) =>
           replaceBreakoutWithCollection(bo)
 
         // import scala.collection.breakOut

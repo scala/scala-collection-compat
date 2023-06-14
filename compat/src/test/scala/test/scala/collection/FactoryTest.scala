@@ -40,7 +40,10 @@ class FactoryTest {
     var counter = 0
     val source  = Stream.continually { counter += 1; 1 }
     val result  = factory.fromSpecific(source)
-    Assert.assertEquals(1, counter) // One element has been evaluated because Stream is not lazy in its head
+    Assert.assertEquals(
+      1,
+      counter
+    ) // One element has been evaluated because Stream is not lazy in its head
   }
   @Test
   def factoriesAreReusable(): Unit = {

@@ -18,8 +18,9 @@ import scala.meta._
 import scalafix.internal.v0.LegacySemanticRule
 
 class Collection213Experimental
-    extends LegacySemanticRule("Collection213Experimental",
-                               index => new Collection213ExperimentalV0(index)) {
+    extends LegacySemanticRule(
+      "Collection213Experimental",
+      index => new Collection213ExperimentalV0(index)) {
   override def isExperimental: Boolean = true
 
   override def description: String =

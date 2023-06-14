@@ -3,7 +3,7 @@
 # set -x
 
 HERE="`dirname $0`"
-VERSION="1.5.1"
+VERSION="3.7.4"
 COURSIER="$HERE/.coursier"
 SCALAFMT="$HERE/.scalafmt-$VERSION"
 
@@ -15,7 +15,7 @@ if [ ! -f $COURSIER ]; then
 fi
 
 if [ ! -f $SCALAFMT ]; then
-  $COURSIER bootstrap com.geirsson:scalafmt-cli_2.11:$VERSION --main org.scalafmt.cli.Cli -o $SCALAFMT
+  $COURSIER bootstrap org.scalameta:scalafmt-cli_2.12:$VERSION --main org.scalafmt.cli.Cli -o $SCALAFMT
   chmod +x $SCALAFMT
 fi
 

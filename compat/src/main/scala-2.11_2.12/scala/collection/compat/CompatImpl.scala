@@ -24,7 +24,7 @@ private abstract class PreservingBuilder[A, C <: TraversableOnce[A]] extends m.B
   val that: m.Builder[A, C]
   val ct: ClassTag[C]
 
-  //invariant: ruined => (collection == null)
+  // invariant: ruined => (collection == null)
   var collection: C = null.asInstanceOf[C]
   var ruined        = false
 

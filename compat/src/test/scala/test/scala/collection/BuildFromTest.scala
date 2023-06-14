@@ -26,27 +26,27 @@ class BuildFromTest {
   def optionSequence2[CC[X] <: Iterable[X], A, To](xs: CC[Option[A]])(
       implicit bf: BuildFrom[CC[Option[A]], A, To]): Option[To] =
     xs.foldLeft[Option[Builder[A, To]]](Some(bf.newBuilder(xs))) {
-        case (Some(builder), Some(a)) => Some(builder += a)
-        case _                        => None
-      }
+      case (Some(builder), Some(a)) => Some(builder += a)
+      case _                        => None
+    }
       .map(_.result())
 
   // Using dependent types:
   def optionSequence3[A, To](xs: Iterable[Option[A]])(
       implicit bf: BuildFrom[xs.type, A, To]): Option[To] =
     xs.foldLeft[Option[Builder[A, To]]](Some(bf.newBuilder(xs))) {
-        case (Some(builder), Some(a)) => Some(builder += a)
-        case _                        => None
-      }
+      case (Some(builder), Some(a)) => Some(builder += a)
+      case _                        => None
+    }
       .map(_.result())
 
   def eitherSequence[A, B, To](xs: Iterable[Either[A, B]])(
       implicit bf: BuildFrom[xs.type, B, To]): Either[A, To] =
     xs.foldLeft[Either[A, Builder[B, To]]](Right(bf.newBuilder(xs))) {
-        case (Right(builder), Right(b)) => Right(builder += b)
-        case (Left(a), _)               => Left(a)
-        case (_, Left(a))               => Left(a)
-      }
+      case (Right(builder), Right(b)) => Right(builder += b)
+      case (Left(a), _)               => Left(a)
+      case (_, Left(a))               => Left(a)
+    }
       .right
       .map(_.result())
 
@@ -63,8 +63,8 @@ class BuildFromTest {
     val o2t: Option[SortedSet[String]] = o2
 
     // Breakout-like use case from https://github.com/scala/scala/pull/5233:
-    val xs4                               = List[Option[(Int, String)]](Some((1 -> "a")), Some((2 -> "b")))
-    val o4                                = optionSequence2(xs4)(TreeMap)
+    val xs4 = List[Option[(Int, String)]](Some((1 -> "a")), Some((2 -> "b")))
+    val o4  = optionSequence2(xs4)(TreeMap)
     val o4t: Option[TreeMap[Int, String]] = o4
   }
 
@@ -81,8 +81,8 @@ class BuildFromTest {
     val o2t: Option[SortedSet[String]] = o2
 
     // Breakout-like use case from https://github.com/scala/scala/pull/5233:
-    val xs4                               = List[Option[(Int, String)]](Some((1 -> "a")), Some((2 -> "b")))
-    val o4                                = optionSequence3(xs4)(TreeMap) // same syntax as in `.to`
+    val xs4 = List[Option[(Int, String)]](Some((1 -> "a")), Some((2 -> "b")))
+    val o4  = optionSequence3(xs4)(TreeMap) // same syntax as in `.to`
     val o4t: Option[TreeMap[Int, String]] = o4
   }
 

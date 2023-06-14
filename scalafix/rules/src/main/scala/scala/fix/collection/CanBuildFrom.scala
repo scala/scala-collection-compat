@@ -40,15 +40,15 @@ object CanBuildFrom {
     paramss.flatten
       .collect {
         case Term.Param(
-            List(Mod.Implicit()),
-            param,
-            Some(
-              Type.Apply(
-                cbf @ collectionCanBuildFrom(_),
-                List(p1, _, _)
-              )
-            ),
-            _
+              List(Mod.Implicit()),
+              param,
+              Some(
+                Type.Apply(
+                  cbf @ collectionCanBuildFrom(_),
+                  List(p1, _, _)
+                )
+              ),
+              _
             ) if !nothing.matches(p1) && !emptyApply(param) =>
           new CanBuildFrom(param, cbf)
       }
@@ -105,19 +105,19 @@ object CanBuildFromNothing {
     paramss.flatten
       .collect {
         case Term.Param(
-            List(Mod.Implicit()),
-            param,
-            Some(
-              tpe @ Type.Apply(
-                collectionCanBuildFrom(_),
-                List(
-                  not @ nothing(_),
-                  t,
-                  toT
+              List(Mod.Implicit()),
+              param,
+              Some(
+                tpe @ Type.Apply(
+                  collectionCanBuildFrom(_),
+                  List(
+                    not @ nothing(_),
+                    t,
+                    toT
+                  )
                 )
-              )
-            ),
-            _
+              ),
+              _
             ) =>
           new CanBuildFromNothing(param, tpe, not, t, toT, stats, ctx, toTpe, handledTo)
       }

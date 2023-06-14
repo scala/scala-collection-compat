@@ -55,10 +55,12 @@ class LazyListTest {
     val s = LazyList.from(0)
     assert(s == s, "Referentially identical LazyLists should be equal (==)")
     assert(s equals s, "Referentially identical LazyLists should be equal (equals)")
-    assert((0 #:: 1 #:: s) == (0 #:: 1 #:: s),
-           "Cons of referentially identical LazyLists should be equal (==)")
-    assert((0 #:: 1 #:: s) equals (0 #:: 1 #:: s),
-           "Cons of referentially identical LazyLists should be equal (equals)")
+    assert(
+      (0 #:: 1 #:: s) == (0 #:: 1 #:: s),
+      "Cons of referentially identical LazyLists should be equal (==)")
+    assert(
+      (0 #:: 1 #:: s) equals (0 #:: 1 #:: s),
+      "Cons of referentially identical LazyLists should be equal (equals)")
   }
 
   @Test

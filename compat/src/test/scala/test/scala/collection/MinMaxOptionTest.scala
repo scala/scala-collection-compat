@@ -37,11 +37,13 @@ class MinByMaxByTest extends AssertThrown {
   def testCorrectness() = {
     def f(x: Int) = -1 * x
     val max       = list.maxBy(f)
-    assertTrue("f(list.maxBy(f)) should ≥ f(x) where x is any element of list.",
-               list.forall(f(_) <= f(max)))
+    assertTrue(
+      "f(list.maxBy(f)) should ≥ f(x) where x is any element of list.",
+      list.forall(f(_) <= f(max)))
     val min = list.minBy(f)
-    assertTrue("f(list.minBy(f)) should ≤ f(x) where x is any element of list.",
-               list.forall(f(_) >= f(min)))
+    assertTrue(
+      "f(list.minBy(f)) should ≤ f(x) where x is any element of list.",
+      list.forall(f(_) >= f(min)))
   }
 
   // Ensure that it always returns the first match if more than one element have the same largest/smallest f(x).
@@ -106,6 +108,6 @@ class MinByMaxByTest extends AssertThrown {
     assert(seq.min.isNaN)
     assert(seq.max.isNaN)
   }
- */
+   */
 
 }

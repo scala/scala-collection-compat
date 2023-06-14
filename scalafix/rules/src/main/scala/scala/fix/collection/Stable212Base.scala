@@ -253,22 +253,24 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     val useSites =
       ctx.tree.collect {
         case Defn.Def(_, _, _, paramss, _, body) =>
-          CanBuildFromNothing(paramss,
-                              List(body),
-                              ctx,
-                              collectionCanBuildFrom,
-                              nothing,
-                              toTpe,
-                              handledTo) +
+          CanBuildFromNothing(
+            paramss,
+            List(body),
+            ctx,
+            collectionCanBuildFrom,
+            nothing,
+            toTpe,
+            handledTo) +
             CanBuildFrom(paramss, List(body), ctx, collectionCanBuildFrom, nothing)
         case Defn.Class(_, _, _, Ctor.Primary(_, _, paramss), Template(_, _, _, stats)) =>
-          CanBuildFromNothing(paramss,
-                              stats,
-                              ctx,
-                              collectionCanBuildFrom,
-                              nothing,
-                              toTpe,
-                              handledTo) +
+          CanBuildFromNothing(
+            paramss,
+            stats,
+            ctx,
+            collectionCanBuildFrom,
+            nothing,
+            toTpe,
+            handledTo) +
             CanBuildFrom(paramss, stats, ctx, collectionCanBuildFrom, nothing)
       }.asPatch
 
@@ -328,12 +330,14 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val toOnCompelete =
       ctx.tree.collect {
-        case Term.Apply(Term.Select(_, f @ `Future.onFailure`(_)),
-                        List(Term.PartialFunction(cases))) =>
+        case Term.Apply(
+              Term.Select(_, f @ `Future.onFailure`(_)),
+              List(Term.PartialFunction(cases))) =>
           toOnCompletePF(f, cases, "scala.util.Failure")
 
-        case Term.Apply(Term.Select(_, f @ `Future.onSuccess`(_)),
-                        List(Term.PartialFunction(cases))) =>
+        case Term.Apply(
+              Term.Select(_, f @ `Future.onSuccess`(_)),
+              List(Term.PartialFunction(cases))) =>
           toOnCompletePF(f, cases, "scala.util.Success")
       }.asPatch
 
@@ -540,12 +544,11 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     def unapply(tree: Tree): Option[String] = {
       ctx.index
         .symbol(tree)
-        .flatMap(
-          symbol =>
-            deprecatedAsJavaConversions
-              .get(symbol)
-              .orElse(
-                deprecatedAsScalaConversions.get(symbol)
+        .flatMap(symbol =>
+          deprecatedAsJavaConversions
+            .get(symbol)
+            .orElse(
+              deprecatedAsScalaConversions.get(symbol)
             ))
     }
   }

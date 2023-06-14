@@ -17,7 +17,7 @@ lazy val root = project
   .in(file("."))
   .settings(commonSettings)
   .settings(
-    name := "scala-collection-compat",
+    name           := "scala-collection-compat",
     publish / skip := true
   )
   .aggregate(
@@ -60,8 +60,8 @@ lazy val compat = new MultiScalaCrossProject(
   _.settings(ScalaModulePlugin.scalaModuleSettings)
     .settings(commonSettings)
     .settings(
-      name := "scala-collection-compat",
-      moduleName := "scala-collection-compat",
+      name                           := "scala-collection-compat",
+      moduleName                     := "scala-collection-compat",
       scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
@@ -87,7 +87,9 @@ lazy val compat = new MultiScalaCrossProject(
         import com.typesafe.tools.mima.core._
         import com.typesafe.tools.mima.core.ProblemFilters._
         Seq(
-          exclude[ReversedMissingMethodProblem]("scala.collection.compat.PackageShared.*"), // it's package-private
+          exclude[ReversedMissingMethodProblem](
+            "scala.collection.compat.PackageShared.*"
+          ), // it's package-private
           exclude[Problem]("scala.collection.compat.*PreservingBuilder*")
         )
       }
@@ -147,8 +149,8 @@ lazy val compat = new MultiScalaCrossProject(
       }
     },
     versionPolicyIntention := Compatibility.None,
-    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
-    Test / fork := false // Scala Native cannot run forked tests
+    versionCheck           := {},   // I don't understand why this fails otherwise?! oh well
+    Test / fork            := false // Scala Native cannot run forked tests
   ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
 
@@ -187,7 +189,7 @@ lazy val binaryCompat = project
   .in(file("binary-compat/test"))
   .settings(commonSettings)
   .settings(
-    scalaVersion := scala212,
+    scalaVersion                          := scala212,
     libraryDependencies += "com.typesafe" %% "mima-core" % "0.8.0" % Test,
     junit,
     buildInfoPackage := "build",
@@ -211,10 +213,10 @@ lazy val scalafixRules = project
   .settings(commonSettings)
   .settings(
     scalaModuleAutomaticModuleName := None,
-    versionPolicyIntention := Compatibility.None,
-    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
-    name := "scala-collection-migrations",
-    scalaVersion := scalafixScala212,
+    versionPolicyIntention         := Compatibility.None,
+    versionCheck                   := {}, // I don't understand why this fails otherwise?! oh well
+    name                           := "scala-collection-migrations",
+    scalaVersion                   := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
   )
 
@@ -247,9 +249,9 @@ lazy val scalafixInput = project
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(
-    scalaVersion := scalafixScala212,
+    scalaVersion   := scalafixScala212,
     publish / skip := true,
-    headerCheck := Nil,
+    headerCheck    := Nil,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
@@ -265,7 +267,7 @@ val scalafixOutput = MultiScalaProject(
     .settings(commonSettings)
     .settings(
       publish / skip := true,
-      headerCheck := Nil,
+      headerCheck    := Nil,
     )
     .disablePlugins(ScalafixPlugin)
 )
@@ -315,7 +317,7 @@ lazy val scalafixTests = project
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(
-    scalaVersion := scalafixScala212,
+    scalaVersion   := scalafixScala212,
     publish / skip := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     scalafixTestkitOutputSourceDirectories := Seq(
@@ -325,7 +327,7 @@ lazy val scalafixTests = project
       output213.value
     ),
     scalafixTestkitInputSourceDirectories := (scalafixInput / Compile / sourceDirectories).value,
-    scalafixTestkitInputClasspath := (scalafixInput / Compile / fullClasspath).value,
+    scalafixTestkitInputClasspath         := (scalafixInput / Compile / fullClasspath).value,
   )
   .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)

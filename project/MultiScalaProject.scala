@@ -111,7 +111,7 @@ class MultiScalaProject(name: String, base: String, configure: Project => Projec
     val resultingProject =
       Project(id = projectId, base = file(s".cross/$projectId"))
         .settings(
-          moduleName := fullName,
+          moduleName   := fullName,
           scalaVersion := scalaV
         )
         .settings(srcFull(base))

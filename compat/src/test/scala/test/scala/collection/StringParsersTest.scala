@@ -30,29 +30,33 @@ class StringParsersTest extends AssertThrown {
     )
 
   def byteOK(str: String): Unit =
-    assertTrue(s"str.toByte <> str.toByteOption for $str",
-               str.toByteOption == Try(str.toByte).toOption)
+    assertTrue(
+      s"str.toByte <> str.toByteOption for $str",
+      str.toByteOption == Try(str.toByte).toOption)
 
   def shortOK(str: String): Unit =
-    assertTrue(s"str.toShort <> str.toShortOption for $str",
-               str.toShortOption == Try(str.toShort).toOption)
+    assertTrue(
+      s"str.toShort <> str.toShortOption for $str",
+      str.toShortOption == Try(str.toShort).toOption)
 
   def intOK(str: String): Unit =
     assertTrue(s"str.toInt <> str.toIntOption for $str", str.toIntOption == Try(str.toInt).toOption)
 
   def longOK(str: String): Unit =
-    assertTrue(s"str.toLong <> str.toLongOption for $str",
-               str.toLongOption == Try(str.toLong).toOption)
+    assertTrue(
+      s"str.toLong <> str.toLongOption for $str",
+      str.toLongOption == Try(str.toLong).toOption)
 
   val forAllExamples = List("", "+", "-", "0", "-0", "+0", "1", "-1", "+1")
 
   val nearOverflow = for {
-    b <- List[Int](Byte.MinValue,
-                   Byte.MaxValue,
-                   Short.MinValue,
-                   Short.MaxValue,
-                   Int.MinValue,
-                   Int.MaxValue)
+    b <- List[Int](
+      Byte.MinValue,
+      Byte.MaxValue,
+      Short.MinValue,
+      Short.MaxValue,
+      Int.MinValue,
+      Int.MaxValue)
     l = b.toLong
     d  <- (-10 to 10)
     ii <- List(l + d)
@@ -66,7 +70,7 @@ class StringParsersTest extends AssertThrown {
 
   val nullstring: String = null
 
-  //test cases taken from Apache Harmony: https://android.googlesource.com/platform/libcore/+/master/harmony-tests/src/test/java/org/apache/harmony/tests/java/lang/DoubleTest.java
+  // test cases taken from Apache Harmony: https://android.googlesource.com/platform/libcore/+/master/harmony-tests/src/test/java/org/apache/harmony/tests/java/lang/DoubleTest.java
   val doubleExamples = List(
     "-1.233999999999999965116738099630936817275852021384209929081813042837802886790127428328465579708849276001782791006814286802871737087810957327493372866733334925806221045495205250590286471187577636646208155890426896101636282423463443661040209738873506655844025580428394216030152374941053494694642722606658935546875E-112",
     "2.4703282292062327208828439643411e-324",

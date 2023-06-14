@@ -43,7 +43,7 @@ class CollectionTest {
     val ys = List(1 -> "a", 2 -> "b")
     val m  = ys.to(Map)
     // Not possible - `to` returns a Col[A] so this is only typed as an Iterable[(Int, String)]
-    //val mT: Map[Int, String] = m
+    // val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
     assertTrue(m.isInstanceOf[Map[_, _]])
 
