@@ -564,6 +564,19 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
     }
     map.toMap
   }
+
+  def distinctBy[B, That](f: A => B)(implicit cbf: CanBuildFrom[Repr, A, That]): That = {
+    val builder = cbf()
+    val keys    = collection.mutable.Set.empty[B]
+    for (element <- self) {
+      val key = f(element)
+      if (!keys.contains(key)) {
+        builder += element
+        keys += key
+      }
+    }
+    builder.result()
+  }
 }
 
 class TrulyTraversableLikeExtensionMethods[El1, Repr1](
