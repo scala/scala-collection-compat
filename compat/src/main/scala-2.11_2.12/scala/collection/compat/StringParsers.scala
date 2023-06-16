@@ -24,10 +24,10 @@ private[scala] object StringParsers {
 
   // Int.MinValue == -2147483648
   private final val intOverflowBoundary = -214748364
-  private final val intOverflowDigit    = 9
+  private final val intOverflowDigit = 9
   // Long.MinValue == -9223372036854775808L
   private final val longOverflowBoundary = -922337203685477580L
-  private final val longOverflowDigit    = 9
+  private final val longOverflowDigit = 9
 
   @inline
   private[this] final def decValue(ch: Char): Int = java.lang.Character.digit(ch, 10)
@@ -70,7 +70,7 @@ private[scala] object StringParsers {
     if (len == 0) None
     else {
       val first = from.charAt(0)
-      val v     = decValue(first)
+      val v = decValue(first)
       if (len == 1) {
         // "+" and "-" parse to None
         if (v > -1) Some(v.toByte)
@@ -88,7 +88,7 @@ private[scala] object StringParsers {
     if (len == 0) None
     else {
       val first = from.charAt(0)
-      val v     = decValue(first)
+      val v = decValue(first)
       if (len == 1) {
         // "+" and "-" parse to None
         if (v > -1) Some(v.toShort)
@@ -120,7 +120,7 @@ private[scala] object StringParsers {
     if (len == 0) None
     else {
       val first = from.charAt(0)
-      val v     = decValue(first)
+      val v = decValue(first)
       if (len == 1) {
         // "+" and "-" parse to None
         if (v > -1) Some(v)
@@ -153,7 +153,7 @@ private[scala] object StringParsers {
     if (len == 0) None
     else {
       val first = from.charAt(0)
-      val v     = decValue(first).toLong
+      val v = decValue(first).toLong
       if (len == 1) {
         // "+" and "-" parse to None
         if (v > -1) Some(v)
@@ -276,7 +276,7 @@ private[scala] object StringParsers {
 
     // count 0x00 to 0x20 as "whitespace", and nothing else
     val unspacedStart = format.indexWhere(ch => ch.toInt > 0x20)
-    val unspacedEnd   = format.lastIndexWhere(ch => ch.toInt > 0x20) + 1
+    val unspacedEnd = format.lastIndexWhere(ch => ch.toInt > 0x20) + 1
 
     if (unspacedStart == -1 || unspacedStart >= unspacedEnd || unspacedEnd <= 0) false
     else {

@@ -40,7 +40,7 @@ object BuildFrom {
       implicit cbf: CanBuildFrom[From, A, C]): BuildFrom[From, A, C] =
     new BuildFrom[From, A, C] {
       def fromSpecific(from: From)(it: IterableOnce[A]): C = (cbf(from) ++= it).result()
-      def newBuilder(from: From): mutable.Builder[A, C]    = cbf(from)
+      def newBuilder(from: From): mutable.Builder[A, C] = cbf(from)
     }
 
   // Implicit conversion derived from an implicit conversion to CanBuildFrom

@@ -71,9 +71,9 @@ class LazyListTest {
 
   @Test
   def testLazyListDoesNotForceHead: Unit = {
-    var i      = 0
+    var i = 0
     def f: Int = { i += 1; i }
-    val s      = LazyList.empty.#::(f).#::(f).#::(f)
+    val s = LazyList.empty.#::(f).#::(f).#::(f)
     assertEquals(0, i)
   }
 
@@ -193,9 +193,9 @@ class LazyListTest {
 
   @Test
   def testForceReturnsEvaluatedLazyList(): Unit = {
-    var i      = 0
+    var i = 0
     def f: Int = { i += 1; i }
-    val xs     = LazyList.from(Iterator.fill(3)(f))
+    val xs = LazyList.from(Iterator.fill(3)(f))
     assertEquals(0, i)
     xs.force
     assertEquals(3, i)
@@ -233,7 +233,7 @@ class LazyListTest {
     }
     assert(List(0, 1, 1, 2) == fibs.take(4).to(List))
 
-    var lazeCount     = 0
+    var lazeCount = 0
     def lazeL(i: Int) = { lazeCount += 1; i }
     // val xs21 = lazeL(1) #:: lazeL(2) #:: lazeL(3) #:: LazyList.empty
     val xs21 = LazyList.empty #::: lazeL(1) #:: lazeL(2) #:: lazeL(3) #:: LazyList.empty
@@ -244,7 +244,7 @@ class LazyListTest {
   @Test // Strawman issue #529
   def testLazyListMustComputeHeadOnlyOnce(): Unit = {
     var seedCounter = 0
-    var fCounter    = 0
+    var fCounter = 0
     def seed(): Int = {
       seedCounter += 1
       1
@@ -325,7 +325,7 @@ class LazyListTest {
   @Test(expected = classOf[IndexOutOfBoundsException])
   def updated(): Unit = {
     val lazyList = LazyList from 0 take 4
-    val list     = lazyList.toList
+    val list = lazyList.toList
     for (i <- lazyList.indices) {
       assertEquals(list.updated(i, -1), lazyList.updated(i, -1))
     }

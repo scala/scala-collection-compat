@@ -26,7 +26,7 @@ private abstract class PreservingBuilder[A, C <: TraversableOnce[A]] extends m.B
 
   // invariant: ruined => (collection == null)
   var collection: C = null.asInstanceOf[C]
-  var ruined        = false
+  var ruined = false
 
   private[this] def ruin(): Unit = {
     if (collection != null) that ++= collection
@@ -80,9 +80,9 @@ private[compat] object CompatImpl {
   def simpleCBF[A, C](f: => m.Builder[A, C]): CanBuildFrom[Any, A, C] =
     new CanBuildFrom[Any, A, C] {
       def apply(from: Any): m.Builder[A, C] = apply()
-      def apply(): m.Builder[A, C]          = f
+      def apply(): m.Builder[A, C] = f
     }
 
   type ImmutableBitSetCC[X] = ({ type L[_] = i.BitSet })#L[X]
-  type MutableBitSetCC[X]   = ({ type L[_] = m.BitSet })#L[X]
+  type MutableBitSetCC[X] = ({ type L[_] = m.BitSet })#L[X]
 }

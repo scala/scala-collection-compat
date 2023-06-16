@@ -31,8 +31,8 @@ object CanBuildFrom {
       stats.exists(
         _.exists {
           case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
-          case Term.Apply(matchCbf(_), Nil)                 => true
-          case _                                            => false
+          case Term.Apply(matchCbf(_), Nil) => true
+          case _ => false
         }
       )
     }
@@ -211,7 +211,7 @@ case class CanBuildFromNothing(param: Name,
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
     // implicit cbf: Factory[Int, CC[Int]]
     val parameterType = {
-      val comma    = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
+      val comma = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
       val spaceOpt = ctx.tokenList.trailing(comma).find(_.is[Token.Space])
 
       ctx.removeTokens(not.tokens) +

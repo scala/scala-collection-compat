@@ -15,8 +15,8 @@ import scala.jdk.OptionConverters._
 class OptionConvertersTest {
   @Test
   def scalaToEverything(): Unit = {
-    val o  = Option("fish")
-    val n  = None: Option[String]
+    val o = Option("fish")
+    val n = None: Option[String]
     val od = Option(2.7)
     val nd = None: Option[Double]
     val oi = Option(4)
@@ -35,8 +35,8 @@ class OptionConvertersTest {
 
   @Test
   def javaGenericToEverything(): Unit = {
-    val o  = Optional.of("fish")
-    val n  = Optional.empty[String]
+    val o = Optional.of("fish")
+    val n = Optional.empty[String]
     val od = Optional.of(2.7)
     val nd = Optional.empty[Double]
     val oi = Optional.of(4)

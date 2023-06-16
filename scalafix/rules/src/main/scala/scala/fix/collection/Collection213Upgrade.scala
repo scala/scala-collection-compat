@@ -48,7 +48,7 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
 
   def replaceSymbols(ctx: RuleCtx): Patch = {
     ctx.replaceSymbols(
-      "scala.TraversableOnce"            -> "scala.IterableOnce",
+      "scala.TraversableOnce" -> "scala.IterableOnce",
       "scala.collection.TraversableOnce" -> "scala.collection.IterableOnce"
     )
   }
@@ -80,9 +80,9 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
       case tupleZipped(Term.Select(Term.Tuple(args), name)) =>
         val removeTokensPatch =
           (for {
-            zipped     <- name.tokens.headOption
+            zipped <- name.tokens.headOption
             closeTuple <- ctx.tokenList.leading(zipped).find(_.is[Token.RightParen])
-            openTuple  <- ctx.matchingParens.open(closeTuple.asInstanceOf[Token.RightParen])
+            openTuple <- ctx.matchingParens.open(closeTuple.asInstanceOf[Token.RightParen])
             maybeDot = ctx.tokenList.slice(closeTuple, zipped).find(_.is[Token.Dot])
           } yield {
             ctx.removeToken(openTuple) +

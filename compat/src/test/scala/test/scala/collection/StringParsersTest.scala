@@ -16,7 +16,7 @@ class StringParsersTest extends AssertThrown {
       s"str.toDouble <> str.toDoubleOption for $str",
       (str.toDoubleOption, Try(str.toDouble).toOption) match {
         case (Some(d1), Some(d2)) => d1.isNaN && d2.isNaN || d1 == d2
-        case (o1, o2)             => o1 == o2
+        case (o1, o2) => o1 == o2
       }
     )
 
@@ -25,7 +25,7 @@ class StringParsersTest extends AssertThrown {
       s"str.toFloat <> str.toFloatOption for $str",
       (str.toFloatOption, Try(str.toFloat).toOption) match {
         case (Some(f1), Some(f2)) if f1.isNaN && f2.isNaN => true
-        case (o1, o2)                                     => o1 == o2
+        case (o1, o2) => o1 == o2
       }
     )
 
@@ -58,7 +58,7 @@ class StringParsersTest extends AssertThrown {
       Int.MinValue,
       Int.MaxValue)
     l = b.toLong
-    d  <- (-10 to 10)
+    d <- (-10 to 10)
     ii <- List(l + d)
   } yield ii.toString
 

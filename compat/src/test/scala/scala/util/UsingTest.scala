@@ -333,7 +333,7 @@ class UsingTest {
     assertThrowableClass[UsingException](usingException)
     val suppressed = usingException.getSuppressed
     assertEquals(suppressed.length, 2)
-    val closingError     = suppressed(0)
+    val closingError = suppressed(0)
     val closingException = suppressed(1)
     assertThrowableClass[ClosingError](closingError)
     assertThrowableClass[ClosingException](closingException)
@@ -349,7 +349,7 @@ class UsingTest {
     assertThrowableClass[ClosingVMError](vmError)
     val firstLevelSuppressed = vmError.getSuppressed
     assertEquals(firstLevelSuppressed.length, 2)
-    val usingException   = firstLevelSuppressed(0)
+    val usingException = firstLevelSuppressed(0)
     val closingException = firstLevelSuppressed(1)
     assertThrowableClass[UsingException](usingException)
     assertThrowableClass[ClosingException](closingException)
@@ -372,7 +372,7 @@ class UsingTest {
 
     val firstLevelSuppressed = vmError.getSuppressed
     assertEquals(firstLevelSuppressed.length, 2)
-    val closingLinkage    = firstLevelSuppressed(0)
+    val closingLinkage = firstLevelSuppressed(0)
     val closingException1 = firstLevelSuppressed(1)
     assertThrowableClass[ClosingLinkageError](closingLinkage)
     assertThrowableClass[ClosingException](closingException1)
@@ -381,14 +381,14 @@ class UsingTest {
     val secondLevelSuppressed = closingLinkage.getSuppressed
     assertEquals(secondLevelSuppressed.length, 3)
     val closingInterruption = secondLevelSuppressed(0)
-    val closingError2       = secondLevelSuppressed(1)
-    val closingControl      = secondLevelSuppressed(2)
+    val closingError2 = secondLevelSuppressed(1)
+    val closingControl = secondLevelSuppressed(2)
     assertNoSuppressed(closingError2)
     assertNoSuppressed(closingControl)
 
     val thirdLevelSuppressed = closingInterruption.getSuppressed
     assertEquals(thirdLevelSuppressed.length, 2)
-    val usingException    = thirdLevelSuppressed(0)
+    val usingException = thirdLevelSuppressed(0)
     val closingException2 = thirdLevelSuppressed(1)
     assertSingleSuppressed[ClosingError](usingException)
     assertNoSuppressed(closingException2)
@@ -791,20 +791,20 @@ class UsingTest {
 }
 
 object UsingTest {
-  final class ClosingVMError(message: String)      extends VirtualMachineError(message)
-  final class UsingVMError(message: String)        extends VirtualMachineError(message)
+  final class ClosingVMError(message: String) extends VirtualMachineError(message)
+  final class UsingVMError(message: String) extends VirtualMachineError(message)
   final class ClosingLinkageError(message: String) extends LinkageError(message)
-  final class UsingLinkageError(message: String)   extends LinkageError(message)
+  final class UsingLinkageError(message: String) extends LinkageError(message)
   type ClosingInterruption = InterruptedException
-  type UsingInterruption   = ThreadDeath
+  type UsingInterruption = ThreadDeath
   // `NonLocalReturnControl` incorrectly suppresses exceptions, so this tests that
   //   `Using` special-cases it.
-  final class ClosingControl(message: String)   extends NonLocalReturnControl(message, message)
-  final class UsingControl(message: String)     extends NonLocalReturnControl(message, message)
-  final class ClosingError(message: String)     extends Error(message)
-  final class UsingError(message: String)       extends Error(message)
+  final class ClosingControl(message: String) extends NonLocalReturnControl(message, message)
+  final class UsingControl(message: String) extends NonLocalReturnControl(message, message)
+  final class ClosingError(message: String) extends Error(message)
+  final class UsingError(message: String) extends Error(message)
   final class ClosingException(message: String) extends Exception(message)
-  final class UsingException(message: String)   extends Exception(message)
+  final class UsingException(message: String) extends Exception(message)
 
   abstract class BaseResource extends AutoCloseable {
     final def identity[A](a: A): A = a
@@ -818,12 +818,12 @@ object UsingTest {
     override final def close(): Unit = throw t("closing " + getClass.getSimpleName)
   }
 
-  final class VMErrorResource      extends CustomResource(new ClosingVMError(_))
-  final class LinkageResource      extends CustomResource(new ClosingLinkageError(_))
+  final class VMErrorResource extends CustomResource(new ClosingVMError(_))
+  final class LinkageResource extends CustomResource(new ClosingLinkageError(_))
   final class InterruptionResource extends CustomResource(new ClosingInterruption(_))
-  final class ControlResource      extends CustomResource(new ClosingControl(_))
-  final class ErrorResource        extends CustomResource(new ClosingError(_))
-  final class ExceptionResource    extends CustomResource(new ClosingException(_))
+  final class ControlResource extends CustomResource(new ClosingControl(_))
+  final class ErrorResource extends CustomResource(new ClosingError(_))
+  final class ExceptionResource extends CustomResource(new ClosingException(_))
 
   sealed trait SuppressionBehavior
 

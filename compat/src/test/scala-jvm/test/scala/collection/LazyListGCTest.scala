@@ -35,14 +35,14 @@ class LazyListGCTest {
     val ref = WeakReference(LazyList.from(1).take(500))
 
     def gcAndThrowIfCollected(n: Int): Unit = {
-      System.gc()                                                   // try to GC
-      Thread.sleep(10)                                              // give it 10 ms
+      System.gc() // try to GC
+      Thread.sleep(10) // give it 10 ms
       if (ref.get.isEmpty) throw new RuntimeException(msgSuccessGC) // we're done if head collected
       f(n)
     }
 
     val res = Try { op(ref(), gcAndThrowIfCollected) }.failed // success is indicated by an
-    val msg = res.map(_.getMessage).getOrElse(msgFailureGC)   // exception with expected message
+    val msg = res.map(_.getMessage).getOrElse(msgFailureGC) // exception with expected message
     // failure is indicated by no
     assertTrue(msg == msgSuccessGC) // exception, or one with different message
   }
@@ -135,7 +135,7 @@ class LazyListGCTest {
 
       def serialize(obj: AnyRef): Array[Byte] = {
         val buffer = new ByteArrayOutputStream
-        val out    = new ObjectOutputStream(buffer)
+        val out = new ObjectOutputStream(buffer)
         out.writeObject(obj)
         buffer.toByteArray
       }
@@ -189,7 +189,7 @@ class LazyListGCTest {
       assertEquals(LazyListGCTest.serializationForceCount, 1)
 
       val data = serialize(u)
-      var i    = data.indexOfSlice(from)
+      var i = data.indexOfSlice(from)
       to.foreach(x => {
         data(i) = x; i += 1
       })

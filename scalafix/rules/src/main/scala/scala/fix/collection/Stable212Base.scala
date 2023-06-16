@@ -61,7 +61,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     normalized(s"scala/collection/TraversableOnce.`$op`.")
   }
 
-  val foldLeftSymbol  = foldSymbol(isLeft = true)
+  val foldLeftSymbol = foldSymbol(isLeft = true)
   val foldRightSymbol = foldSymbol(isLeft = false)
 
   val toTpe = normalized(
@@ -70,16 +70,16 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     "scala/collection/GenTraversableOnce#to.",
     "scala/collection/parallel/ParIterableLike#to."
   )
-  val copyToBuffer           = normalized("scala/collection/TraversableOnce/copyToBuffer().")
-  val arrayBuilderMake       = normalized("scala/collection/mutable/ArrayBuilder.make().")
-  val iterableSameElement    = exact("scala/collection/IterableLike#sameElements().")
+  val copyToBuffer = normalized("scala/collection/TraversableOnce/copyToBuffer().")
+  val arrayBuilderMake = normalized("scala/collection/mutable/ArrayBuilder.make().")
+  val iterableSameElement = exact("scala/collection/IterableLike#sameElements().")
   val collectionCanBuildFrom = exact("scala/collection/generic/CanBuildFrom#")
 
-  val nothing      = exact("scala/Nothing#")
-  val setPlus2     = exact("scala/collection/SetLike#`+`(+1).")
-  val mapPlus2     = exact("scala/collection/immutable/MapLike#`+`(+1).")
-  val mutSetPlus   = exact("scala/collection/mutable/SetLike#`+`().")
-  val mutMapPlus   = exact("scala/collection/mutable/MapLike#`+`().")
+  val nothing = exact("scala/Nothing#")
+  val setPlus2 = exact("scala/collection/SetLike#`+`(+1).")
+  val mapPlus2 = exact("scala/collection/immutable/MapLike#`+`(+1).")
+  val mutSetPlus = exact("scala/collection/mutable/SetLike#`+`().")
+  val mutMapPlus = exact("scala/collection/mutable/MapLike#`+`().")
   val mutMapUpdate = exact("scala/collection/mutable/MapLike#updated().")
 
   val `Future.onFailure` = exact("scala/concurrent/Future#onFailure().")
@@ -108,7 +108,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
   // == Rules ==
 
-  val breakoutRewrite                      = new BreakoutRewrite(addCompatImport)
+  val breakoutRewrite = new BreakoutRewrite(addCompatImport)
   def replaceBreakout(ctx: RuleCtx): Patch = breakoutRewrite(ctx)
 
   def replaceIterableSameElements(ctx: RuleCtx): Patch = {
@@ -135,10 +135,10 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     val traversableToIterable =
       ctx.replaceSymbols(
-        "scala.Traversable"                      -> "scala.Iterable",
-        "scala.collection.Traversable"           -> "scala.collection.Iterable",
+        "scala.Traversable" -> "scala.Iterable",
+        "scala.collection.Traversable" -> "scala.collection.Iterable",
         "scala.collection.immutable.Traversable" -> "scala.collection.immutable.Iterable",
-        "scala.collection.mutable.Traversable"   -> "scala.collection.mutable.Iterable",
+        "scala.collection.mutable.Traversable" -> "scala.collection.mutable.Iterable",
       )
 
     val traversableOnceToIterableOnce =
@@ -351,8 +351,8 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   private def replaceSorted(ctx: RuleCtx): Patch = {
     val replaced =
       ctx.tree.collect {
-        case Term.Apply(Term.Select(_, op @ sortedFrom(_)), _)  => ctx.replaceTree(op, "rangeFrom")
-        case Term.Apply(Term.Select(_, op @ sortedTo(_)), _)    => ctx.replaceTree(op, "rangeTo")
+        case Term.Apply(Term.Select(_, op @ sortedFrom(_)), _) => ctx.replaceTree(op, "rangeFrom")
+        case Term.Apply(Term.Select(_, op @ sortedTo(_)), _) => ctx.replaceTree(op, "rangeTo")
         case Term.Apply(Term.Select(_, op @ sortedUntil(_)), _) => ctx.replaceTree(op, "rangeUntil")
       }.asPatch
 
@@ -528,7 +528,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
     }
 
     val asScalaConvertions = collect(deprecatedAsScalaConversions)
-    val asJavaConvertions  = collect(deprecatedAsJavaConversions)
+    val asJavaConvertions = collect(deprecatedAsJavaConversions)
 
     def unapply(tree: Tree): Option[String] = {
       val pos = tree.pos
@@ -561,7 +561,7 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
 
     def explicitToAsX(ap: Term.Apply, rhs: Term, asX: String): Patch = {
       // ap: f(x), rhs: x, left: f(, right: )
-      val left  = ap.tokens.slice(0, rhs.tokens.start - ap.tokens.start)
+      val left = ap.tokens.slice(0, rhs.tokens.start - ap.tokens.start)
       val right = ap.tokens.slice(rhs.tokens.end - ap.tokens.start, ap.tokens.size)
       ctx.removeTokens(left) +
         ctx.addRight(rhs, "." + asX) +

@@ -17,7 +17,7 @@ lazy val root = project
   .in(file("."))
   .settings(commonSettings)
   .settings(
-    name           := "scala-collection-compat",
+    name := "scala-collection-compat",
     publish / skip := true
   )
   .aggregate(
@@ -53,15 +53,15 @@ lazy val junit = libraryDependencies += "com.github.sbt" % "junit-interface" % "
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.17"
 lazy val scala213 = "2.13.11"
-lazy val scala3   = "3.2.2"
+lazy val scala3 = "3.2.2"
 
 lazy val compat = new MultiScalaCrossProject(
   "compat",
   _.settings(ScalaModulePlugin.scalaModuleSettings)
     .settings(commonSettings)
     .settings(
-      name                           := "scala-collection-compat",
-      moduleName                     := "scala-collection-compat",
+      name := "scala-collection-compat",
+      moduleName := "scala-collection-compat",
       scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
       Compile / unmanagedSourceDirectories += {
@@ -117,7 +117,7 @@ lazy val compat = new MultiScalaCrossProject(
         .head
       val opt = CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) => "-scalajs-mapSourceURI"
-        case _            => "-P:scalajs:mapSourceURI"
+        case _ => "-P:scalajs:mapSourceURI"
       }
       Seq(s"$opt:$x->$y/")
     },
@@ -137,7 +137,7 @@ lazy val compat = new MultiScalaCrossProject(
     nativeLinkStubs := true,
     mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
-      case _            => mimaPreviousArtifacts.value
+      case _ => mimaPreviousArtifacts.value
     }),
     Compile / unmanagedSourceDirectories += {
       val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
@@ -149,28 +149,28 @@ lazy val compat = new MultiScalaCrossProject(
       }
     },
     versionPolicyIntention := Compatibility.None,
-    versionCheck           := {},   // I don't understand why this fails otherwise?! oh well
-    Test / fork            := false // Scala Native cannot run forked tests
+    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
+    Test / fork := false // Scala Native cannot run forked tests
   ).nativeEnablePlugins(ScalaNativeJUnitPlugin)
 )
 
 val compat211 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala211)
 val compat212 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala212)
 val compat213 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala213)
-val compat3   = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala3)
+val compat3 = compat(Seq(JSPlatform, JVMPlatform, NativePlatform), scala3)
 
-lazy val compat211JVM    = compat211.jvm
-lazy val compat211JS     = compat211.js
+lazy val compat211JVM = compat211.jvm
+lazy val compat211JS = compat211.js
 lazy val compat211Native = compat211.native
-lazy val compat212JVM    = compat212.jvm
-lazy val compat212JS     = compat212.js
+lazy val compat212JVM = compat212.jvm
+lazy val compat212JS = compat212.js
 lazy val compat212Native = compat212.native
-lazy val compat213JVM    = compat213.jvm
-lazy val compat213JS     = compat213.js
+lazy val compat213JVM = compat213.jvm
+lazy val compat213JS = compat213.js
 lazy val compat213Native = compat213.native
-lazy val compat3JVM      = compat3.jvm
-lazy val compat3JS       = compat3.js
-lazy val compat3Native   = compat3.native
+lazy val compat3JVM = compat3.jvm
+lazy val compat3JS = compat3.js
+lazy val compat3Native = compat3.native
 
 lazy val binaryCompatOld = project
   .in(file("binary-compat/old"))
@@ -189,7 +189,7 @@ lazy val binaryCompat = project
   .in(file("binary-compat/test"))
   .settings(commonSettings)
   .settings(
-    scalaVersion                          := scala212,
+    scalaVersion := scala212,
     libraryDependencies += "com.typesafe" %% "mima-core" % "0.8.0" % Test,
     junit,
     buildInfoPackage := "build",
@@ -213,10 +213,10 @@ lazy val scalafixRules = project
   .settings(commonSettings)
   .settings(
     scalaModuleAutomaticModuleName := None,
-    versionPolicyIntention         := Compatibility.None,
-    versionCheck                   := {}, // I don't understand why this fails otherwise?! oh well
-    name                           := "scala-collection-migrations",
-    scalaVersion                   := scalafixScala212,
+    versionPolicyIntention := Compatibility.None,
+    versionCheck := {}, // I don't understand why this fails otherwise?! oh well
+    name := "scala-collection-migrations",
+    scalaVersion := scalafixScala212,
     libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
   )
 
@@ -249,9 +249,9 @@ lazy val scalafixInput = project
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(
-    scalaVersion   := scalafixScala212,
+    scalaVersion := scalafixScala212,
     publish / skip := true,
-    headerCheck    := Nil,
+    headerCheck := Nil,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= Seq(
       "-Yrangepos",
@@ -267,7 +267,7 @@ val scalafixOutput = MultiScalaProject(
     .settings(commonSettings)
     .settings(
       publish / skip := true,
-      headerCheck    := Nil,
+      headerCheck := Nil,
     )
     .disablePlugins(ScalafixPlugin)
 )
@@ -317,7 +317,7 @@ lazy val scalafixTests = project
   .settings(commonSettings)
   .settings(sharedScalafixSettings)
   .settings(
-    scalaVersion   := scalafixScala212,
+    scalaVersion := scalafixScala212,
     publish / skip := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
     scalafixTestkitOutputSourceDirectories := Seq(
@@ -327,18 +327,18 @@ lazy val scalafixTests = project
       output213.value
     ),
     scalafixTestkitInputSourceDirectories := (scalafixInput / Compile / sourceDirectories).value,
-    scalafixTestkitInputClasspath         := (scalafixInput / Compile / fullClasspath).value,
+    scalafixTestkitInputClasspath := (scalafixInput / Compile / fullClasspath).value,
   )
   .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
 
 val ciScalaVersion = sys.env.get("CI_SCALA_VERSION").flatMap(Version.parse)
-val ciPlatform     = sys.env.get("CI_PLATFORM").map(p => if (p == "JVM") "" else p)
-val isScalafix     = sys.env.get("CI_MODE") == Some("testScalafix")
-val isScalafmt     = sys.env.get("CI_MODE") == Some("testScalafmt")
+val ciPlatform = sys.env.get("CI_PLATFORM").map(p => if (p == "JVM") "" else p)
+val isScalafix = sys.env.get("CI_MODE") == Some("testScalafix")
+val isScalafmt = sys.env.get("CI_MODE") == Some("testScalafmt")
 val isBinaryCompat = sys.env.get("CI_MODE") == Some("testBinaryCompat")
-val isHeaderCheck  = sys.env.get("CI_MODE") == Some("headerCheck")
-val jdkVersion     = sys.env.get("CI_JDK").map(_.toInt)
+val isHeaderCheck = sys.env.get("CI_MODE") == Some("headerCheck")
+val jdkVersion = sys.env.get("CI_JDK").map(_.toInt)
 
 // required by sbt-scala-module
 inThisBuild {
@@ -367,7 +367,7 @@ inThisBuild {
           ).foreach(k =>
             println(k.padTo(20, " ").mkString("") + " -> " + sys.env.getOrElse(k, "None")))
 
-          val compatProject       = s"compat${ciScalaVersion.get}${ciPlatform.get}"
+          val compatProject = s"compat${ciScalaVersion.get}${ciPlatform.get}"
           val binaryCompatProject = "binaryCompat"
 
           val testProjectPrefix =
