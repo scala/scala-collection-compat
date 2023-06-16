@@ -186,4 +186,11 @@ class CollectionTest {
     assertTrue(List(1, 2, 3).lengthIs >= 2)
     assertTrue(List(1, 2, 3).lengthIs > 2)
   }
+
+  @Test
+  def testDistinctBy(): Unit = {
+    assertEquals(List(1, 2, 3).distinctBy(_ % 2 == 0), List(1, 2))
+    assertEquals(List(3, 1, 2).distinctBy(_ % 2 == 0), List(3, 2))
+    assertEquals(List.empty[Int].distinctBy(_ % 2 == 0), List.empty)
+  }
 }
