@@ -48,8 +48,8 @@ trait MultiScala {
         val sourceDir = (ThisBuild / baseDirectory).value / base / "src" / "main"
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n >= 12 => List(sourceDir / "scala-2.12+")
-          case Some((3, _))            => List(sourceDir / "scala-2.13")
-          case _                       => Nil
+          case Some((3, _)) => List(sourceDir / "scala-2.13")
+          case _ => Nil
         }
       },
       Test / unmanagedSourceDirectories +=
@@ -71,7 +71,7 @@ class MultiScalaCrossProject(name: String,
       platforms: Seq[Platform],
       scalaV: String
   ): CrossProject = {
-    val hasJs     = platforms.contains(JSPlatform)
+    val hasJs = platforms.contains(JSPlatform)
     val hasNative = platforms.contains(NativePlatform)
     val projectId = projectIdPerScala(name, scalaV)
     val res =
@@ -106,7 +106,7 @@ class MultiScalaProject(name: String, base: String, configure: Project => Projec
   def srcMain: String = s"$base/src/main"
 
   def apply(scalaV: String, configurePerScala: Project => Project = x => x): Project = {
-    val fullName  = s"scalafix-$name"
+    val fullName = s"scalafix-$name"
     val projectId = projectIdPerScala(name, scalaV)
     val resultingProject =
       Project(id = projectId, base = file(s".cross/$projectId"))

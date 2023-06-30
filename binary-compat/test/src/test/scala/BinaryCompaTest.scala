@@ -21,7 +21,7 @@ import com.typesafe.tools.mima.lib.MiMaLib
 class BinaryCompaTest {
   @Test
   def compat(): Unit = {
-    val mima        = new MiMaLib(Seq())
+    val mima = new MiMaLib(Seq())
     val allProblems = mima.collectProblems(new File(oldClasses), new File(newClasses))
     val unexpectedDescriptions =
       allProblems.iterator

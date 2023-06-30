@@ -75,7 +75,7 @@ final case class Collection213RoughlyV0(index: SemanticdbIndex, config: RoughlyC
   def replaceSymbols(ctx: RuleCtx): Patch = {
     if (config.withLazyList) {
       ctx.replaceSymbols(
-        "scala.Stream"                      -> "scala.LazyList",
+        "scala.Stream" -> "scala.LazyList",
         "scala.collection.immutable.Stream" -> "scala.collection.immutable.LazyList"
       )
     } else Patch.empty
@@ -127,7 +127,7 @@ case class RoughlyConfig(
 )
 
 object RoughlyConfig {
-  val default: RoughlyConfig                       = RoughlyConfig()
-  implicit val surface: Surface[RoughlyConfig]     = generic.deriveSurface[RoughlyConfig]
+  val default: RoughlyConfig = RoughlyConfig()
+  implicit val surface: Surface[RoughlyConfig] = generic.deriveSurface[RoughlyConfig]
   implicit val decoder: ConfDecoder[RoughlyConfig] = generic.deriveDecoder[RoughlyConfig](default)
 }

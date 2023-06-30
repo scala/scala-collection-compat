@@ -18,8 +18,9 @@ import scala.meta._
 import scalafix.internal.v0.LegacySemanticRule
 
 class Collection213Experimental
-    extends LegacySemanticRule("Collection213Experimental",
-                               index => new Collection213ExperimentalV0(index)) {
+    extends LegacySemanticRule(
+      "Collection213Experimental",
+      index => new Collection213ExperimentalV0(index)) {
   override def isExperimental: Boolean = true
 
   override def description: String =
@@ -40,9 +41,9 @@ case class Collection213ExperimentalV0(index: SemanticdbIndex)
   )
 
   // == Symbols ==
-  val mapZip   = exact("scala/collection/IterableLike#zip().")
-  val mapPlus  = exact("scala/collection/MapLike#`+`().")
-  val setPlus  = exact("scala/collection/SetLike#`+`().")
+  val mapZip = exact("scala/collection/IterableLike#zip().")
+  val mapPlus = exact("scala/collection/MapLike#`+`().")
+  val setPlus = exact("scala/collection/SetLike#`+`().")
   val setMinus = exact("scala/collection/SetLike#`-`().")
 
   def replaceMapZip(ctx: RuleCtx): Patch = {

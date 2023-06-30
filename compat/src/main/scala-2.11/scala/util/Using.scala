@@ -145,7 +145,7 @@ object Using {
   final class Manager private {
     import Manager._
 
-    private var closed                             = false
+    private var closed = false
     private[this] var resources: List[Resource[_]] = Nil
 
     /** Registers the specified resource with this manager, so that
@@ -232,12 +232,12 @@ object Using {
 
   private def preferentiallySuppress(primary: Throwable, secondary: Throwable): Throwable = {
     def score(t: Throwable): Int = t match {
-      case _: VirtualMachineError                   => 4
-      case _: LinkageError                          => 3
+      case _: VirtualMachineError => 4
+      case _: LinkageError => 3
       case _: InterruptedException | _: ThreadDeath => 2
-      case _: ControlThrowable                      => 0
-      case e if !NonFatal(e)                        => 1 // in case this method gets out of sync with NonFatal
-      case _                                        => -1
+      case _: ControlThrowable => 0
+      case e if !NonFatal(e) => 1 // in case this method gets out of sync with NonFatal
+      case _ => -1
     }
     // special-case `ControlThrowable`, which incorrectly suppresses exceptions
     //   before 2.13

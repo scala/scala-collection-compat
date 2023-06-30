@@ -31,8 +31,8 @@ object CanBuildFrom {
       stats.exists(
         _.exists {
           case Term.Apply(Term.Select(matchCbf(_), _), Nil) => true
-          case Term.Apply(matchCbf(_), Nil)                 => true
-          case _                                            => false
+          case Term.Apply(matchCbf(_), Nil) => true
+          case _ => false
         }
       )
     }
@@ -40,15 +40,15 @@ object CanBuildFrom {
     paramss.flatten
       .collect {
         case Term.Param(
-            List(Mod.Implicit()),
-            param,
-            Some(
-              Type.Apply(
-                cbf @ collectionCanBuildFrom(_),
-                List(p1, _, _)
-              )
-            ),
-            _
+              List(Mod.Implicit()),
+              param,
+              Some(
+                Type.Apply(
+                  cbf @ collectionCanBuildFrom(_),
+                  List(p1, _, _)
+                )
+              ),
+              _
             ) if !nothing.matches(p1) && !emptyApply(param) =>
           new CanBuildFrom(param, cbf)
       }
@@ -105,19 +105,19 @@ object CanBuildFromNothing {
     paramss.flatten
       .collect {
         case Term.Param(
-            List(Mod.Implicit()),
-            param,
-            Some(
-              tpe @ Type.Apply(
-                collectionCanBuildFrom(_),
-                List(
-                  not @ nothing(_),
-                  t,
-                  toT
+              List(Mod.Implicit()),
+              param,
+              Some(
+                tpe @ Type.Apply(
+                  collectionCanBuildFrom(_),
+                  List(
+                    not @ nothing(_),
+                    t,
+                    toT
+                  )
                 )
-              )
-            ),
-            _
+              ),
+              _
             ) =>
           new CanBuildFromNothing(param, tpe, not, t, toT, stats, ctx, toTpe, handledTo)
       }
@@ -211,7 +211,7 @@ case class CanBuildFromNothing(param: Name,
     // implicit cbf: collection.generic.CanBuildFrom[Nothing, Int, CC[Int]] =>
     // implicit cbf: Factory[Int, CC[Int]]
     val parameterType = {
-      val comma    = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
+      val comma = ctx.tokenList.trailing(not.tokens.last).find(_.is[Token.Comma]).get
       val spaceOpt = ctx.tokenList.trailing(comma).find(_.is[Token.Space])
 
       ctx.removeTokens(not.tokens) +

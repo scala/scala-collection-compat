@@ -24,21 +24,21 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
   def isLeftAssociative(tree: Tree): Boolean =
     tree match {
       case Term.Name(value) => value.last != ':'
-      case _                => false
+      case _ => false
     }
 
   val breakOut = exact("scala/collection/package.breakOut().")
 
   // == infix operators ==
 
-  val `TraversableLike ++`  = Symbol("scala/collection/TraversableLike#`++`().")
-  val `Vector ++`           = Symbol("scala/collection/immutable/Vector#`++`().")
-  val `List ++`             = Symbol("scala/collection/immutable/List#`++`().")
-  val `SeqLike +:`          = Symbol("scala/collection/SeqLike#`+:`().")
-  val `Vector +:`           = Symbol("scala/collection/immutable/Vector#`+:`().")
-  val `List +:`             = Symbol("scala/collection/immutable/List#`+:`().")
-  val `SeqLike :+`          = Symbol("scala/collection/SeqLike#`:+`().")
-  val `Vector :+`           = Symbol("scala/collection/immutable/Vector#`:+`().")
+  val `TraversableLike ++` = Symbol("scala/collection/TraversableLike#`++`().")
+  val `Vector ++` = Symbol("scala/collection/immutable/Vector#`++`().")
+  val `List ++` = Symbol("scala/collection/immutable/List#`++`().")
+  val `SeqLike +:` = Symbol("scala/collection/SeqLike#`+:`().")
+  val `Vector +:` = Symbol("scala/collection/immutable/Vector#`+:`().")
+  val `List +:` = Symbol("scala/collection/immutable/List#`+:`().")
+  val `SeqLike :+` = Symbol("scala/collection/SeqLike#`:+`().")
+  val `Vector :+` = Symbol("scala/collection/immutable/Vector#`:+`().")
   val `TraversableLike ++:` = Symbol("scala/collection/TraversableLike#`++:`().")
 
   val operatorsIteratorSymbols = List(`TraversableLike ++`, `List ++`, `Vector ++`)
@@ -54,25 +54,25 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
   val operatorsSymbols = operatorsViewSymbols ++ operatorsIteratorSymbols
 
   val operatorsIterator = SymbolMatcher.exact(operatorsIteratorSymbols: _*)
-  val operatorsView     = SymbolMatcher.exact(operatorsViewSymbols: _*)
-  val operators         = SymbolMatcher.exact(operatorsSymbols: _*)
+  val operatorsView = SymbolMatcher.exact(operatorsViewSymbols: _*)
+  val operators = SymbolMatcher.exact(operatorsSymbols: _*)
 
   // == select ==
 
-  val `List.collect`            = Symbol("scala/collection/immutable/List#collect().")
+  val `List.collect` = Symbol("scala/collection/immutable/List#collect().")
   val `TraversableLike.collect` = Symbol("scala/collection/TraversableLike#collect().")
-  val `List.flatMap`            = Symbol("scala/collection/immutable/List#flatMap().")
+  val `List.flatMap` = Symbol("scala/collection/immutable/List#flatMap().")
   val `TraversableLike.flatMap` = Symbol("scala/collection/TraversableLike#flatMap().")
-  val `List.map`                = Symbol("scala/collection/immutable/List#map().")
-  val `SetLike.map`             = Symbol("scala/collection/SetLike#map().")
-  val `TraversableLike.map`     = Symbol("scala/collection/TraversableLike#map().")
-  val `IterableLike.zip`        = Symbol("scala/collection/IterableLike#zip().")
+  val `List.map` = Symbol("scala/collection/immutable/List#map().")
+  val `SetLike.map` = Symbol("scala/collection/SetLike#map().")
+  val `TraversableLike.map` = Symbol("scala/collection/TraversableLike#map().")
+  val `IterableLike.zip` = Symbol("scala/collection/IterableLike#zip().")
   val `IndexedSeqOptimized.zip` = Symbol("scala/collection/IndexedSeqOptimized#zip().")
-  val `IterableLike.zipAll`     = Symbol("scala/collection/IterableLike#zipAll().")
-  val `SeqLike.union`           = Symbol("scala/collection/SeqLike#union().")
-  val `SeqLike.updated`         = Symbol("scala/collection/SeqLike#updated().")
-  val `Vector.updated`          = Symbol("scala/collection/immutable/Vector#updated().")
-  val `SeqLike.reverseMap`      = Symbol("scala/collection/SeqLike#reverseMap().")
+  val `IterableLike.zipAll` = Symbol("scala/collection/IterableLike#zipAll().")
+  val `SeqLike.union` = Symbol("scala/collection/SeqLike#union().")
+  val `SeqLike.updated` = Symbol("scala/collection/SeqLike#updated().")
+  val `Vector.updated` = Symbol("scala/collection/immutable/Vector#updated().")
+  val `SeqLike.reverseMap` = Symbol("scala/collection/SeqLike#reverseMap().")
 
   val functionsZipSymbols = List(
     `IterableLike.zip`,
@@ -89,22 +89,23 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     `TraversableLike.map`,
     `SeqLike.union`
   ) ++ functionsZipSymbols
-  val functionsViewSymbols            = List(`SeqLike.updated`, `Vector.updated`)
+  val functionsViewSymbols = List(`SeqLike.updated`, `Vector.updated`)
   val functionsReverseIteratorSymbols = List(`SeqLike.reverseMap`)
-  val functionsSymbols                = functionsIteratorSymbols ++ functionsViewSymbols ++ functionsReverseIteratorSymbols
+  val functionsSymbols =
+    functionsIteratorSymbols ++ functionsViewSymbols ++ functionsReverseIteratorSymbols
 
-  val functionsIterator        = SymbolMatcher.exact(functionsIteratorSymbols: _*)
+  val functionsIterator = SymbolMatcher.exact(functionsIteratorSymbols: _*)
   val functionsReverseIterator = SymbolMatcher.exact(functionsReverseIteratorSymbols: _*)
-  val functionsView            = SymbolMatcher.exact(functionsViewSymbols: _*)
-  val functions                = SymbolMatcher.exact(functionsSymbols: _*)
+  val functionsView = SymbolMatcher.exact(functionsViewSymbols: _*)
+  val functions = SymbolMatcher.exact(functionsSymbols: _*)
 
   val functionsZip = SymbolMatcher.exact(functionsZipSymbols: _*)
 
   // == special select ==
 
   val `TraversableLike.scanLeft` = exact("scala/collection/TraversableLike#scanLeft().")
-  val `Future.sequence`          = exact("scala/concurrent/Future.sequence().")
-  val `Future.traverse`          = exact("scala/concurrent/Future.traverse().")
+  val `Future.sequence` = exact("scala/concurrent/Future.sequence().")
+  val `Future.traverse` = exact("scala/concurrent/Future.traverse().")
 
   val toSpecificCollectionBuiltIn = Map(
     "scala.collection.immutable.Map" -> "toMap"
@@ -150,7 +151,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
       val patchRhs =
         (intermediateRhs, rhs) match {
           case (Some(i), Some(r)) => ctx.addRight(r, "." + i)
-          case _                  => Patch.empty
+          case _ => Patch.empty
         }
 
       val patchSpecificCollection =
@@ -216,8 +217,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
     val rewriteBreakout =
       ctx.tree.collect {
         // (xs ++ ys)(breakOut)
-        case ap0 @ Term.Apply(ap @ Term.ApplyInfix(lhs, operators(op), _, List(rhs)),
-                              List(breakOut(bo))) =>
+        case ap0 @ Term.Apply(
+              ap @ Term.ApplyInfix(lhs, operators(op), _, List(rhs)),
+              List(breakOut(bo))) =>
           val subject =
             if (isLeftAssociative(op)) lhs
             else rhs
@@ -225,7 +227,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           val intermediate =
             op match {
               case operatorsIterator(_) => "iterator"
-              case operatorsView(_)     => "view"
+              case operatorsView(_) => "view"
               // since operators(op) matches iterator and view
               case _ => throw new Exception("impossible")
             }
@@ -233,12 +235,13 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           covertToCollection(intermediate, subject, ap, bo, ap0)
 
         // xs.map(f)(breakOut)
-        case ap0 @ Term.Apply(ap @ Term.Apply(Term.Select(lhs, functions(op)), rhs :: _),
-                              List(breakOut(bo))) =>
+        case ap0 @ Term.Apply(
+              ap @ Term.Apply(Term.Select(lhs, functions(op)), rhs :: _),
+              List(breakOut(bo))) =>
           val intermediateLhs =
             op match {
-              case functionsIterator(_)        => "iterator"
-              case functionsView(_)            => "view"
+              case functionsIterator(_) => "iterator"
+              case functionsView(_) => "view"
               case functionsReverseIterator(_) => "reverseIterator"
               // since functions(op) matches iterator, view and reverseIterator
               case _ => throw new Exception("impossible")
@@ -247,7 +250,7 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           val intermediateRhs =
             op match {
               case functionsZip(_) => Some("iterator")
-              case _               => None
+              case _ => None
             }
 
           val replaceUnion =
@@ -259,7 +262,14 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
             if (isReversed) ctx.replaceTree(op, "map")
             else Patch.empty
 
-          covertToCollection(intermediateLhs, lhs, ap, bo, ap0, intermediateRhs, Some(rhs)) + replaceUnion + replaceReverseMap
+          covertToCollection(
+            intermediateLhs,
+            lhs,
+            ap,
+            bo,
+            ap0,
+            intermediateRhs,
+            Some(rhs)) + replaceUnion + replaceReverseMap
 
         // ts.scanLeft(d)(f)(breakOut)
         case ap0 @ Term.Apply(
@@ -272,8 +282,9 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
           replaceBreakoutWithCollection(bo)
 
         // traverse(xs)(f)(breakOut, ec)
-        case Term.Apply(Term.Apply(Term.Apply(`Future.traverse`(_), _), _),
-                        List(breakOut(bo), _)) =>
+        case Term.Apply(
+              Term.Apply(Term.Apply(`Future.traverse`(_), _), _),
+              List(breakOut(bo), _)) =>
           replaceBreakoutWithCollection(bo)
 
         // import scala.collection.breakOut

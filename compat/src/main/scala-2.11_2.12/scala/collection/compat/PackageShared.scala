@@ -396,8 +396,8 @@ class StreamExtensionMethods[A](private val stream: Stream[A]) extends AnyVal {
 }
 
 class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T]) {
-  def rangeFrom(from: K): T   = fact.from(from)
-  def rangeTo(to: K): T       = fact.to(to)
+  def rangeFrom(from: K): T = fact.from(from)
+  def rangeTo(to: K): T = fact.to(to)
   def rangeUntil(until: K): T = fact.until(until)
 }
 
@@ -409,7 +409,7 @@ class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVa
     if (self.hasNext) Some(self.next()) else None
   }
   def concat[B >: A](that: c.TraversableOnce[B]): c.TraversableOnce[B] = self ++ that
-  def tapEach[U](f: A => U): c.Iterator[A]                             = self.map(a => { f(a); a })
+  def tapEach[U](f: A => U): c.Iterator[A] = self.map(a => { f(a); a })
 }
 
 class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A]) extends AnyVal {
@@ -447,8 +447,8 @@ class TraversableOnceExtensionMethods[A](private val self: c.TraversableOnce[A])
 class TraversableExtensionMethods[A](private val self: c.Traversable[A]) extends AnyVal {
   def iterableFactory: GenericCompanion[Traversable] = self.companion
 
-  def sizeCompare(otherSize: Int): Int         = SizeCompareImpl.sizeCompareInt(self)(otherSize)
-  def sizeIs: SizeCompareOps                   = new SizeCompareOps(self)
+  def sizeCompare(otherSize: Int): Int = SizeCompareImpl.sizeCompareInt(self)(otherSize)
+  def sizeIs: SizeCompareOps = new SizeCompareOps(self)
   def sizeCompare(that: c.Traversable[_]): Int = SizeCompareImpl.sizeCompareColl(self)(that)
 
 }
@@ -486,7 +486,7 @@ private object SizeCompareImpl {
       case _ =>
         if (otherSize < 0) 1
         else {
-          var i  = 0
+          var i = 0
           val it = self.toIterator
           while (it.hasNext) {
             if (i == otherSize) return 1
@@ -532,7 +532,7 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
     val r = bf2()
     self.foreach { x =>
       f(x) match {
-        case Left(x1)  => l += x1
+        case Left(x1) => l += x1
         case Right(x2) => r += x2
       }
     }
@@ -543,7 +543,7 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
       implicit bf: CanBuildFrom[Repr, B, That]): Map[K, That] = {
     val map = m.Map.empty[K, m.Builder[B, That]]
     for (elem <- self) {
-      val k    = key(elem)
+      val k = key(elem)
       val bldr = map.getOrElseUpdate(k, bf(self.repr))
       bldr += f(elem)
     }
@@ -558,11 +558,24 @@ class TraversableLikeExtensionMethods[A, Repr](private val self: c.GenTraversabl
       val k = key(elem)
       val v = map.get(k) match {
         case Some(b) => reduce(b, f(elem))
-        case None    => f(elem)
+        case None => f(elem)
       }
       map.put(k, v)
     }
     map.toMap
+  }
+
+  def distinctBy[B, That](f: A => B)(implicit cbf: CanBuildFrom[Repr, A, That]): That = {
+    val builder = cbf()
+    val keys = collection.mutable.Set.empty[B]
+    for (element <- self) {
+      val key = f(element)
+      if (!keys.contains(key)) {
+        builder += element
+        keys += key
+      }
+    }
+    builder.result()
   }
 }
 
@@ -578,8 +591,8 @@ class TrulyTraversableLikeExtensionMethods[El1, Repr1](
 class Tuple2ZippedExtensionMethods[El1, Repr1, El2, Repr2](
     private val self: Tuple2Zipped[El1, Repr1, El2, Repr2]) {
 
-  def lazyZip[El3, Repr3, T3](t3: T3)(implicit w3: T3 => IterableLike[El3, Repr3])
-    : Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] =
+  def lazyZip[El3, Repr3, T3](t3: T3)(implicit
+  w3: T3 => IterableLike[El3, Repr3]): Tuple3Zipped[El1, Repr1, El2, Repr2, El3, Repr3] =
     new Tuple3Zipped((self.colls._1, self.colls._2, t3))
 }
 
@@ -597,7 +610,7 @@ class ImmutableMapExtensionMethods[K, V](private val self: scala.collection.immu
   def updatedWith[V1 >: V](key: K)(remappingFunction: (Option[V]) => Option[V1]): Map[K, V1] =
     remappingFunction(self.get(key)) match {
       case Some(v) => self.updated(key, v)
-      case None    => self - key
+      case None => self - key
     }
 }
 
@@ -608,7 +621,7 @@ class MutableMapExtensionMethods[K, V](private val self: scala.collection.mutabl
     val updatedEntry = remappingFunction(self.get(key))
     updatedEntry match {
       case Some(v) => self.update(key, v)
-      case None    => self.remove(key)
+      case None => self.remove(key)
     }
     updatedEntry
   }
