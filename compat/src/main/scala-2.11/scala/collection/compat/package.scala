@@ -28,17 +28,17 @@ package object compat extends compat.PackageShared {
   // the strict type of the view to be `Map` instead of `Iterable`
   // Instances produced by this method are used to chain `filterKeys` after `mapValues`
   implicit def canBuildFromIterableViewMapLike[K, V, L, W, CC[X, Y] <: Map[X, Y]]
-    : CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] =
+      : CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] =
     new CanBuildFrom[IterableView[(K, V), CC[K, V]], (L, W), IterableView[(L, W), CC[L, W]]] {
       // `CanBuildFrom` parameters are used as type constraints, they are not used
       // at run-time, hence the dummy builder implementations
       def apply(from: IterableView[(K, V), CC[K, V]]) = new TraversableView.NoBuilder
-      def apply()                                     = new TraversableView.NoBuilder
+      def apply() = new TraversableView.NoBuilder
     }
 
   implicit def toTraversableLikeExtensionMethods[Repr](self: Repr)(
-      implicit traversable: IsTraversableLike[Repr])
-    : TraversableLikeExtensionMethods[traversable.A, Repr] =
+      implicit
+      traversable: IsTraversableLike[Repr]): TraversableLikeExtensionMethods[traversable.A, Repr] =
     new TraversableLikeExtensionMethods[traversable.A, Repr](traversable.conversion(self))
 
   implicit def toSeqExtensionMethods[A](self: c.Seq[A]): SeqExtensionMethods[A] =

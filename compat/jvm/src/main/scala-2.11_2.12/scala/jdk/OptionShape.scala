@@ -41,7 +41,7 @@ object OptionShape {
 
       def fromScala(o: Option[Double]): OptionalDouble = o match {
         case Some(d) => OptionalDouble.of(d)
-        case _       => OptionalDouble.empty
+        case _ => OptionalDouble.empty
       }
     }
   implicit val jDoubleOptionShape: OptionShape[jl.Double, OptionalDouble] =
@@ -53,7 +53,7 @@ object OptionShape {
 
     def fromScala(o: Option[Int]): OptionalInt = o match {
       case Some(d) => OptionalInt.of(d)
-      case _       => OptionalInt.empty
+      case _ => OptionalInt.empty
     }
   }
   implicit val jIntegerOptionShape: OptionShape[jl.Integer, OptionalInt] =
@@ -66,7 +66,7 @@ object OptionShape {
 
       def fromScala(o: Option[Long]): OptionalLong = o match {
         case Some(d) => OptionalLong.of(d)
-        case _       => OptionalLong.empty
+        case _ => OptionalLong.empty
       }
     }
   implicit val jLongOptionShape: OptionShape[jl.Long, OptionalLong] =

@@ -62,6 +62,6 @@ class SortedTest {
       val m3 = mp.rangeUntil(x)
       assertEquals(m3: m.SortedMap[String, Int], mp.until(x))
     }
-   */
+     */
   }
 }

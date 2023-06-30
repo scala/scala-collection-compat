@@ -23,49 +23,49 @@ import scala.collection.LinearSeq
 class CollectionTest {
   @Test
   def testTo: Unit = {
-    val xs              = List(1, 2, 3)
-    val v               = xs.to(Vector)
+    val xs = List(1, 2, 3)
+    val v = xs.to(Vector)
     val vT: Vector[Int] = v
     assertEquals(Vector(1, 2, 3), v)
 
-    val a              = xs.to(Array)
+    val a = xs.to(Array)
     val aT: Array[Int] = a
     assertEquals(Vector(1, 2, 3), a.toVector)
 
-    val b          = xs.to(BitSet) // we can fake a type constructor for the 2 standard BitSet types
+    val b = xs.to(BitSet) // we can fake a type constructor for the 2 standard BitSet types
     val bT: BitSet = b
     assertEquals(BitSet(1, 2, 3), b)
 
-    val c                      = xs.to(PriorityQueue)
+    val c = xs.to(PriorityQueue)
     val cT: PriorityQueue[Int] = c
     assert(PriorityQueue(1, 2, 3) sameElements c)
 
     val ys = List(1 -> "a", 2 -> "b")
-    val m  = ys.to(Map)
+    val m = ys.to(Map)
     // Not possible - `to` returns a Col[A] so this is only typed as an Iterable[(Int, String)]
-    //val mT: Map[Int, String] = m
+    // val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
     assertTrue(m.isInstanceOf[Map[_, _]])
 
     // Stream.to(Seq) doesn't evaluate the stream
-    val strm                   = 1 #:: { throw new Exception("not lazy") } #:: Stream.empty[Int]
-    val strmsq: Seq[Int]       = strm.to(Seq)
+    val strm = 1 #:: { throw new Exception("not lazy") } #:: Stream.empty[Int]
+    val strmsq: Seq[Int] = strm.to(Seq)
     var strmln: LinearSeq[Int] = strm.to(LinearSeq)
   }
 
   @Test
   def testFrom: Unit = {
-    val xs              = List(1, 2, 3)
-    val v               = Vector.from(xs)
+    val xs = List(1, 2, 3)
+    val v = Vector.from(xs)
     val vT: Vector[Int] = v
     assertEquals(Vector(1, 2, 3), v)
 
-    val b          = BitSet.fromSpecific(xs)
+    val b = BitSet.fromSpecific(xs)
     val bT: BitSet = b
     assertEquals(BitSet(1, 2, 3), b)
 
-    val ys                   = List(1 -> "a", 2 -> "b")
-    val m                    = Map.from(ys)
+    val ys = List(1 -> "a", 2 -> "b")
+    val m = Map.from(ys)
     val mT: Map[Int, String] = m
     assertEquals(Map(1 -> "a", 2 -> "b"), m)
   }
@@ -109,7 +109,7 @@ class CollectionTest {
     val res = Seq("foo", "test", "bar", "baz")
       .partitionMap {
         case s if s.contains("a") => Left(s)
-        case s                    => Right(s.length)
+        case s => Right(s.length)
       }
     assertEquals((Seq("bar", "baz"), Seq("foo".length, "test".length)), res)
   }
@@ -125,7 +125,7 @@ class CollectionTest {
   @Test
   def tapEach(): Unit = {
     var count = 0
-    val it    = Iterator(1, 2, 3).tapEach(count += _)
+    val it = Iterator(1, 2, 3).tapEach(count += _)
     assertEquals(0, count)
     it.foreach(_ => ())
     assertEquals(6, count)
@@ -189,8 +189,8 @@ class CollectionTest {
 
   @Test
   def testDistinctBy(): Unit = {
-    assertEquals(List(1, 2, 3).distinctBy(_   % 2 == 0), List(1, 2))
-    assertEquals(List(3, 1, 2).distinctBy(_   % 2 == 0), List(3, 2))
+    assertEquals(List(1, 2, 3).distinctBy(_ % 2 == 0), List(1, 2))
+    assertEquals(List(3, 1, 2).distinctBy(_ % 2 == 0), List(3, 2))
     assertEquals(List.empty[Int].distinctBy(_ % 2 == 0), List.empty)
   }
 }

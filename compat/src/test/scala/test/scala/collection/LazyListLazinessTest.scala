@@ -28,7 +28,7 @@ class LazyListLazinessTest {
   // if this fails, all the rest will fail
   @Test
   def opLazinessChecker_correctness(): Unit = {
-    val checker      = new OpLazinessChecker
+    val checker = new OpLazinessChecker
     val illegalState = (s: String) => new IllegalStateException("sanity check failed: " + s)
 
     // check that none start evaluated
@@ -91,8 +91,9 @@ class LazyListLazinessTest {
   private def genericFilter_properlyLazy(filter: (LazyList[Int], Int => Boolean) => LazyList[Int],
                                          isFlipped: Boolean): Unit = {
     genericLazyOp_properlyLazy(filter(_, _ => !isFlipped))
-    genericLazyOp_properlyLazy(filter(_, i => (i % 2 != 0) == isFlipped),
-                               DropProfile(dropCount = 1, repeatedDrops = true))
+    genericLazyOp_properlyLazy(
+      filter(_, i => (i % 2 != 0) == isFlipped),
+      DropProfile(dropCount = 1, repeatedDrops = true))
   }
 
   @Test
@@ -117,7 +118,7 @@ class LazyListLazinessTest {
       partition: LazyList[Int] => (LazyList[Int], LazyList[Int])): Unit = {
     val op1 = partition.andThen(_._1)
     val op2 = partition.andThen(_._2)
-    val d   = DropProfile(dropCount = 1, repeatedDrops = true)
+    val d = DropProfile(dropCount = 1, repeatedDrops = true)
     for (op <- op1 :: op2 :: Nil) genericLazyOp_properlyLazy(op, d)
   }
 
@@ -144,8 +145,9 @@ class LazyListLazinessTest {
   @Test
   def collect_properlyLazy(): Unit = {
     genericLazyOp_properlyLazy(_ collect { case i => i })
-    genericLazyOp_properlyLazy(_ collect { case i if i % 2 != 0 => i },
-                               DropProfile(dropCount = 1, repeatedDrops = true))
+    genericLazyOp_properlyLazy(
+      _ collect { case i if i % 2 != 0 => i },
+      DropProfile(dropCount = 1, repeatedDrops = true))
   }
 
   @Test
@@ -157,8 +159,9 @@ class LazyListLazinessTest {
   @Test // scala/scala#6960
   def withFilter_withFilter_properlyLazy(): Unit = {
     assertLazyAll(_.withFilter(_ => true).withFilter(_ => true))
-    genericFilter_properlyLazy(_.withFilter(_).withFilter(_ => true).map(identity),
-                               isFlipped = false)
+    genericFilter_properlyLazy(
+      _.withFilter(_).withFilter(_ => true).map(identity),
+      isFlipped = false)
   }
 
   @Test // scala/bug#9134
@@ -215,7 +218,7 @@ class LazyListLazinessTest {
 
     // Check that appending a `LazyList` leaves it fully lazy
     val checker = new OpLazinessChecker
-    val ll      = append(LazyList.from(0).take(4), checker.lazyList)
+    val ll = append(LazyList.from(0).take(4), checker.lazyList)
     checker.assertAll(evaluated = false)
     ll.tail.tail.tail.tail // should be the appended LazyList
     checker.assertAll(evaluated = false)
@@ -263,7 +266,7 @@ class LazyListLazinessTest {
     def check(prefix: Seq[Int]): Unit = {
       val op = lazyListOp { ll =>
         var prepended = prefix ++: ll
-        var toDrop    = prefix.length
+        var toDrop = prefix.length
         while (toDrop > 0) {
           prepended = prepended.tail
           toDrop -= 1
@@ -289,8 +292,9 @@ class LazyListLazinessTest {
 
   @Test
   def dropWhile_properlyLazy(): Unit = {
-    genericLazyOp_properlyLazy(_.dropWhile(_ < 2),
-                               DropProfile(dropCount = 2, repeatedDrops = false))
+    genericLazyOp_properlyLazy(
+      _.dropWhile(_ < 2),
+      DropProfile(dropCount = 2, repeatedDrops = false))
   }
 
   @Test
@@ -333,8 +337,9 @@ class LazyListLazinessTest {
   def splitAt_properlyLazy(): Unit = {
     val split = lazyListOp(_ splitAt 4)
     genericLazyOp_properlyLazy(split.andThen(_._1))
-    genericLazyOp_properlyLazy(split.andThen(_._2),
-                               DropProfile(dropCount = 4, repeatedDrops = false))
+    genericLazyOp_properlyLazy(
+      split.andThen(_._2),
+      DropProfile(dropCount = 4, repeatedDrops = false))
   }
 
   @Test
@@ -508,8 +513,9 @@ class LazyListLazinessTest {
 
     // check laziness of slice when it is a `LazyList`
     val checker = new OpLazinessChecker
-    assertEquals(-1,
-                 LazyList.from(3).take(LazinessChecker.doubleCount).indexOfSlice(checker.lazyList))
+    assertEquals(
+      -1,
+      LazyList.from(3).take(LazinessChecker.doubleCount).indexOfSlice(checker.lazyList))
     assertNotEvaluatedSkipping(checker, 1)
   }
 
@@ -542,8 +548,9 @@ class LazyListLazinessTest {
     import LazinessChecker.halfCount
     def check(op: LazyListToLazyListOp, skip: Int): Unit = {
       assertLazyAllSkipping(op, skip)
-      assertLazyNextStateWhenStateEvaluated(op,
-                                            DropProfile(dropCount = skip, repeatedDrops = false))
+      assertLazyNextStateWhenStateEvaluated(
+        op,
+        DropProfile(dropCount = skip, repeatedDrops = false))
     }
 
     val tails = lazyListOp(_.tails)
@@ -570,11 +577,11 @@ class LazyListLazinessTest {
     import LazinessChecker._
     val values = halfCount :: 0 :: Nil
     for {
-      from     <- count :: values
+      from <- count :: values
       replaced <- values
     } {
       val op = lazyListOp(_.patch(from, Nil, replaced))
-      val d  = DropProfile(dropCount = replaced, repeatedDrops = false)
+      val d = DropProfile(dropCount = replaced, repeatedDrops = false)
       // genericLazyOp_properlyLazy(op, d)
       assertLazyAll(op)
       assertRepeatedlyLazy(op, d)
@@ -619,15 +626,16 @@ class LazyListLazinessTest {
   @Test
   def span_properlyLazy(): Unit = {
     val span = lazyListOp(_.span(_ < 4))
-    val op1  = span.andThen(_._1)
-    val op2  = span.andThen(_._2)
+    val op1 = span.andThen(_._1)
+    val op2 = span.andThen(_._2)
 
     genericLazyOp_properlyLazy(op1)
     genericLazyOp_properlyLazy(op2, DropProfile(dropCount = 4, repeatedDrops = false))
 
     assertLazyAllSkipping(op1.thenForce, 5)
-    genericLazyOp_properlyLazy(op2.andThen(_.drop(1)),
-                               DropProfile(dropCount = 5, repeatedDrops = false))
+    genericLazyOp_properlyLazy(
+      op2.andThen(_.drop(1)),
+      DropProfile(dropCount = 5, repeatedDrops = false))
   }
 
   @Test
@@ -639,8 +647,9 @@ class LazyListLazinessTest {
   def updated_properlyLazy(): Unit = {
     val op = lazyListOp(_.updated(1, 2))
     assertLazyAllSkipping(op, 2)
-    assertLazyNextStateWhenStateEvaluated(op.andThen(_.drop(2)),
-                                          DropProfile(dropCount = 2, repeatedDrops = false))
+    assertLazyNextStateWhenStateEvaluated(
+      op.andThen(_.drop(2)),
+      DropProfile(dropCount = 2, repeatedDrops = false))
   }
 
   @Test
@@ -688,8 +697,8 @@ class LazyListLazinessTest {
   @Test
   def unzip_properlyLazy(): Unit = {
     val tuple = lazyListOp(_.map(i => (i, i)).unzip)
-    val op1   = tuple.andThen(_._1)
-    val op2   = tuple.andThen(_._2)
+    val op1 = tuple.andThen(_._1)
+    val op2 = tuple.andThen(_._2)
 
     for (op <- op1 :: op2 :: Nil) {
       genericLazyOp_properlyLazy(op)
@@ -699,9 +708,9 @@ class LazyListLazinessTest {
   @Test
   def unzip3_properlyLazy(): Unit = {
     val tuple = lazyListOp(_.map(i => (i, i, i)).unzip3)
-    val op1   = tuple.andThen(_._1)
-    val op2   = tuple.andThen(_._2)
-    val op3   = tuple.andThen(_._3)
+    val op1 = tuple.andThen(_._1)
+    val op2 = tuple.andThen(_._2)
+    val op3 = tuple.andThen(_._3)
 
     for (op <- op1 :: op2 :: op3 :: Nil) {
       genericLazyOp_properlyLazy(op)
@@ -926,31 +935,31 @@ class LazyListLazinessTest {
 
       override def equals(obj: Any): Boolean = obj match {
         case that: CustomLong => this.value == that.value
-        case _                => false
+        case _ => false
       }
       override def hashCode(): Int = value.##
     }
     object CustomLong {
       import scala.language.implicitConversions
-      def apply(value: Long): CustomLong                   = new CustomLong(value)
+      def apply(value: Long): CustomLong = new CustomLong(value)
       implicit def long2CustomLong(long: Long): CustomLong = apply(long)
 
       implicit val customIntegralIsIntegral: Integral[CustomLong] = new Integral[CustomLong] {
         private val I = implicitly[Integral[Long]]
 
-        override def quot(x: CustomLong, y: CustomLong)  = I.quot(x.value, y.value)
-        override def rem(x: CustomLong, y: CustomLong)   = I.rem(x.value, y.value)
-        override def plus(x: CustomLong, y: CustomLong)  = I.plus(x.value, y.value)
+        override def quot(x: CustomLong, y: CustomLong) = I.quot(x.value, y.value)
+        override def rem(x: CustomLong, y: CustomLong) = I.rem(x.value, y.value)
+        override def plus(x: CustomLong, y: CustomLong) = I.plus(x.value, y.value)
         override def minus(x: CustomLong, y: CustomLong) = I.minus(x.value, y.value)
         override def times(x: CustomLong, y: CustomLong) = I.times(x.value, y.value)
-        override def negate(x: CustomLong)               = I.negate(x.value)
-        override def fromInt(x: Int)                     = I.fromInt(x)
+        override def negate(x: CustomLong) = I.negate(x.value)
+        override def fromInt(x: Int) = I.fromInt(x)
         def parseString(str: String): Option[CustomLong] =
           scala.util.Try(str.toLong).toOption.map(CustomLong.apply)
-        override def toInt(x: CustomLong)                  = I.toInt(x.value)
-        override def toLong(x: CustomLong)                 = I.toLong(x.value)
-        override def toFloat(x: CustomLong)                = I.toFloat(x.value)
-        override def toDouble(x: CustomLong)               = I.toDouble(x.value)
+        override def toInt(x: CustomLong) = I.toInt(x.value)
+        override def toLong(x: CustomLong) = I.toLong(x.value)
+        override def toFloat(x: CustomLong) = I.toFloat(x.value)
+        override def toDouble(x: CustomLong) = I.toDouble(x.value)
         override def compare(x: CustomLong, y: CustomLong) = I.compare(x.value, y.value)
       }
     }
@@ -1024,8 +1033,9 @@ private object LazyListLazinessTest {
 
     private[this] def assertAllImpl(evaluated: Boolean, ex: ExceptionProvider, skip: Int): Unit = {
       require(skip >= 0, "`skip` cannot be negative")
-      require(skip < count,
-              s"`skip` ($skip) >= size of lazy list ($count) - will not assert anything")
+      require(
+        skip < count,
+        s"`skip` ($skip) >= size of lazy list ($count) - will not assert anything")
       for (i <- skip until count) assertCheckedInternal(evaluated, i, ex)
     }
 
@@ -1058,9 +1068,9 @@ private object LazyListLazinessTest {
   object LazinessChecker {
     type ExceptionProvider = String => Throwable
 
-    final val count          = 16
-    final val halfCount      = count / 2
-    final val doubleCount    = count * 2
+    final val count = 16
+    final val halfCount = count / 2
+    final val doubleCount = count * 2
     final val indices: Range = 0 until count
 
     private val defaultException: ExceptionProvider = new AssertionError(_)
@@ -1082,8 +1092,9 @@ private object LazyListLazinessTest {
   }
 
   final case class DropProfile(dropCount: Int, repeatedDrops: Boolean) {
-    require(dropCount < LazinessChecker.count,
-            s"dropCount=$dropCount >= size of lazy list (${LazinessChecker.count})")
+    require(
+      dropCount < LazinessChecker.count,
+      s"dropCount=$dropCount >= size of lazy list (${LazinessChecker.count})")
     def apply(iteration: Int): Int =
       if (iteration <= 0) 0
       else if (repeatedDrops) dropCount * iteration
@@ -1092,7 +1103,7 @@ private object LazyListLazinessTest {
 
   final val NoDrops = DropProfile(dropCount = 0, repeatedDrops = false)
 
-  type LazyListOp[U]        = LazyList[Int] => U
+  type LazyListOp[U] = LazyList[Int] => U
   type LazyListToLazyListOp = LazyListOp[LazyList[Int]]
 
   implicit final class RichLazyListToLazyListOp(private val self: LazyListToLazyListOp)
@@ -1108,7 +1119,7 @@ private object LazyListLazinessTest {
    */
   def assertRepeatedlyLazy(op: LazyListToLazyListOp, d: DropProfile = NoDrops): Unit = {
     val checker = new OpLazinessChecker
-    val result  = op(checker.lazyList)
+    val result = op(checker.lazyList)
     checker.assert(evaluated = false, 0)
     result.tail
     checker.assert(evaluated = false, 1 + d(1))
@@ -1124,7 +1135,7 @@ private object LazyListLazinessTest {
   def assertLazyNextStateWhenStateEvaluated(op: LazyListToLazyListOp,
                                             d: DropProfile = NoDrops): Unit = {
     val checker = new OpLazinessChecker
-    val result  = op(checker.lazyList)
+    val result = op(checker.lazyList)
     result.isEmpty
     checker.assert(evaluated = false, 1 + d(1))
     result.tail.isEmpty

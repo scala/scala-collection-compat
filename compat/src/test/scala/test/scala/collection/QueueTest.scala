@@ -22,15 +22,15 @@ class QueueTest {
 
   @Test
   def testImmutableEnqueueAll: Unit = {
-    val q                   = i.Queue(1, 2)
+    val q = i.Queue(1, 2)
     val iter: Iterable[Int] = List(3, 4)
-    val eq                  = q.enqueueAll(iter)
+    val eq = q.enqueueAll(iter)
     assertEquals(i.Queue(1, 2, 3, 4), eq)
   }
 
   @Test
   def testMutableEnqueueAll: Unit = {
-    val q   = m.Queue(1, 2)
+    val q = m.Queue(1, 2)
     val lst = i.List(3, 4)
     q.enqueueAll(lst)
     assertEquals(i.Queue(1, 2, 3, 4), q)

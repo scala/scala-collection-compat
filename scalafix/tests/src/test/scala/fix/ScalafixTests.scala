@@ -31,6 +31,6 @@ class ScalafixTests extends scalafix.testkit.AbstractSemanticRuleSuite with FunS
 
   only match {
     case Some(file) => testOnly(file)
-    case None       => runAllTests()
+    case None => runAllTests()
   }
 }

@@ -22,7 +22,7 @@ class MapTest {
 
   @Test
   def foreachEntry: Unit = {
-    val map  = Map("a" -> 1, "b" -> 2, "c" -> 3)
+    val map = Map("a" -> 1, "b" -> 2, "c" -> 3)
     var copy = Map.empty[String, Int]
     map.foreachEntry((k, v) => copy += k -> v)
     assertEquals(map, copy)
@@ -32,11 +32,11 @@ class MapTest {
   def mutableUpdateWith: Unit = {
     val map = m.Map("a" -> 1, "c" -> 3)
     map.updateWith("b") {
-      case None    => Some(2)
+      case None => Some(2)
       case Some(_) => Some(-1)
     }
     map.updateWith("c") {
-      case None    => Some(-1)
+      case None => Some(-1)
       case Some(_) => None
     }
     // unmodified entries are preserved
@@ -51,11 +51,11 @@ class MapTest {
   def immutableUpdatedWith: Unit = {
     val map = i.Map("a" -> 1, "c" -> 3)
     val bAdded = map.updatedWith("b") {
-      case None    => Some(2)
+      case None => Some(2)
       case Some(_) => Some(-1)
     }
     val cRemoved = map.updatedWith("c") {
-      case None    => Some(-1)
+      case None => Some(-1)
       case Some(_) => None
     }
     // unmodified entries are preserved

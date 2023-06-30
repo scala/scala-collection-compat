@@ -45,8 +45,9 @@ package scala.util.control.compat
  *        and stack trace writability semantics across versions.
  */
 abstract class ControlThrowable(message: String)
-    extends Throwable(message, /*cause=*/ null, /*enableSuppression=*/ false,
-                      /*writableStackTrace=*/ false)
+    extends Throwable(
+      message, /*cause=*/ null, /*enableSuppression=*/ false,
+      /*writableStackTrace=*/ false)
     with scala.util.control.ControlThrowable {
 
   override def fillInStackTrace(): Throwable = super[Throwable].fillInStackTrace()

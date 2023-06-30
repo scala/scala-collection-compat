@@ -19,14 +19,14 @@ import scala.collection.compat._
 
 class LazyZipTest {
 
-  private val ws      = List(1, 2, 3)
-  private val xs      = List(1, 2, 3, 4, 5, 6)
-  private val ys      = List("a", "b", "c", "d", "e", "f")
-  private val zs      = List(true, false, true, false, true, false)
+  private val ws = List(1, 2, 3)
+  private val xs = List(1, 2, 3, 4, 5, 6)
+  private val ys = List("a", "b", "c", "d", "e", "f")
+  private val zs = List(true, false, true, false, true, false)
   private val zipped2 = ws lazyZip xs
   private val zipped3 = ws lazyZip xs lazyZip ys
   private val zipped4 = ws lazyZip xs lazyZip ys lazyZip zs
-  private val map     = Map(1 -> "foo", 2 -> "bar")
+  private val map = Map(1 -> "foo", 2 -> "bar")
 
   @Test
   def lazyZipTest(): Unit = {
