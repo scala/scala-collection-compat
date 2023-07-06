@@ -12,7 +12,7 @@
 
 package scala.collection.compat
 
-import scala.annotation.nowarn
+import scala.annotation.{nowarn, tailrec}
 import scala.collection.generic._
 import scala.reflect.ClassTag
 import scala.collection.{
@@ -248,6 +248,10 @@ private[compat] trait PackageShared {
     def from[A](source: TraversableOnce[A]): CC[A] =
       fact.apply(source.toSeq: _*)
   }
+
+  implicit def toGenericCompanionExtensionMethods[CC[X] <: GenTraversable[X]](
+      companion: GenericCompanion[CC]
+  ): GenericCompanionExtensionMethods[CC] = new GenericCompanionExtensionMethods[CC](companion)
 
   implicit class MapFactoryExtensionMethods[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](
       private val fact: MapFactory[CC]) {
@@ -662,4 +666,26 @@ class OptionCompanionExtensionMethods(private val fact: Option.type) extends Any
   def when[A](cond: Boolean)(a: => A): Option[A] = if (cond) Some(a) else None
 
   @inline def unless[A](cond: Boolean)(a: => A): Option[A] = when(!cond)(a)
+}
+
+class GenericCompanionExtensionMethods[CC[X] <: GenTraversable[X]](
+    private val companion: GenericCompanion[CC]) extends AnyVal {
+  def unfold[A, S](init: S)(f: S => Option[(A, S)])(
+      implicit cbf: CanBuildFrom[CC[A], A, CC[A]]
+  ): CC[A] = {
+    val builder = cbf()
+
+    @tailrec
+    def loop(s1: S): Unit = {
+      f(s1) match {
+        case Some((a, s2)) =>
+          builder += a
+          loop(s2)
+        case None =>
+      }
+    }
+
+    loop(init)
+    builder.result()
+  }
 }
