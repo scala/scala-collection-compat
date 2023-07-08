@@ -305,6 +305,14 @@ private[compat] trait PackageShared {
       fact: Sorted[K, V]): SortedExtensionMethods[K, V] =
     new SortedExtensionMethods[K, V](fact)
 
+  implicit def toSortedMapExtensionMethods[K, V](
+      fact: collection.SortedMap[K, V]): SortedMapExtensionMethods[K, V] =
+    new SortedMapExtensionMethods[K, V](fact)
+
+  implicit def toSortedSetExtensionMethods[A](
+      fact: collection.SortedSet[A]): SortedSetExtensionMethods[A] =
+    new SortedSetExtensionMethods[A](fact)
+
   implicit def toIteratorExtensionMethods[A](self: Iterator[A]): IteratorExtensionMethods[A] =
     new IteratorExtensionMethods[A](self)
 
@@ -399,6 +407,24 @@ class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T
   def rangeFrom(from: K): T = fact.from(from)
   def rangeTo(to: K): T = fact.to(to)
   def rangeUntil(until: K): T = fact.until(until)
+}
+
+class SortedMapExtensionMethods[K, V](
+    private val self: collection.SortedMap[K, V]
+) extends AnyVal {
+
+  def minAfter(key: K): Option[(K, V)] = self.from(key).headOption
+
+  def maxBefore(key: K): Option[(K, V)] = self.until(key).lastOption
+}
+
+class SortedSetExtensionMethods[A](
+    private val self: collection.SortedSet[A]
+) extends AnyVal {
+
+  def minAfter(key: A): Option[A] = self.from(key).headOption
+
+  def maxBefore(key: A): Option[A] = self.until(key).lastOption
 }
 
 class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVal {
