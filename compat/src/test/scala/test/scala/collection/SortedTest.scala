@@ -64,4 +64,48 @@ class SortedTest {
     }
      */
   }
+
+  @Test
+  def sortedSetMinAfter(): Unit = {
+    val values = 1 to 10
+    assertEquals(values.to(collection.SortedSet).minAfter(8), Some(8))
+    assertEquals(values.to(collection.immutable.SortedSet).minAfter(9), Some(9))
+    assertEquals(values.to(collection.mutable.SortedSet).minAfter(10), Some(10))
+
+    assertEquals(values.to(collection.SortedSet).minAfter(11), None)
+    assertEquals(values.to(collection.immutable.SortedSet).minAfter(12), None)
+    assertEquals(values.to(collection.mutable.SortedSet).minAfter(13), None)
+  }
+
+  @Test
+  def sortedSetMaxBefore(): Unit = {
+    val values = 1 to 10
+    assertEquals(values.to(collection.SortedSet).maxBefore(4), Some(3))
+    assertEquals(values.to(collection.immutable.SortedSet).maxBefore(3), Some(2))
+    assertEquals(values.to(collection.mutable.SortedSet).maxBefore(2), Some(1))
+
+    assertEquals(values.to(collection.SortedSet).maxBefore(1), None)
+    assertEquals(values.to(collection.immutable.SortedSet).maxBefore(0), None)
+    assertEquals(values.to(collection.mutable.SortedSet).maxBefore(-1), None)
+  }
+
+  @Test
+  def sortedMapMinAfter(): Unit = {
+    val values = (1 to 10).map(x => x -> x.toString)
+    assertEquals(collection.SortedMap(values: _*).minAfter(9), Some(9 -> "9"))
+    assertEquals(collection.immutable.SortedMap(values: _*).minAfter(10), Some(10 -> "10"))
+
+    assertEquals(collection.SortedMap(values: _*).minAfter(11), None)
+    assertEquals(collection.immutable.SortedMap(values: _*).minAfter(12), None)
+  }
+
+  @Test
+  def sortedMapMaxBefore(): Unit = {
+    val values = (1 to 10).map(x => x -> x.toString)
+    assertEquals(collection.SortedMap(values: _*).maxBefore(3), Some(2 -> "2"))
+    assertEquals(collection.immutable.SortedMap(values: _*).maxBefore(2), Some(1 -> "1"))
+
+    assertEquals(collection.SortedMap(values: _*).maxBefore(1), None)
+    assertEquals(collection.immutable.SortedMap(values: _*).maxBefore(0), None)
+  }
 }

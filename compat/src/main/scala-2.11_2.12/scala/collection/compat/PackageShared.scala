@@ -12,7 +12,7 @@
 
 package scala.collection.compat
 
-import scala.annotation.nowarn
+import scala.annotation.{nowarn, tailrec}
 import scala.collection.generic._
 import scala.reflect.ClassTag
 import scala.collection.{
@@ -249,6 +249,10 @@ private[compat] trait PackageShared {
       fact.apply(source.toSeq: _*)
   }
 
+  implicit def toGenericCompanionExtensionMethods[CC[X] <: GenTraversable[X]](
+      companion: GenericCompanion[CC]
+  ): GenericCompanionExtensionMethods[CC] = new GenericCompanionExtensionMethods[CC](companion)
+
   implicit class MapFactoryExtensionMethods[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](
       private val fact: MapFactory[CC]) {
     def from[K, V](source: TraversableOnce[(K, V)]): CC[K, V] =
@@ -304,6 +308,14 @@ private[compat] trait PackageShared {
   implicit def toSortedExtensionMethods[K, V <: Sorted[K, V]](
       fact: Sorted[K, V]): SortedExtensionMethods[K, V] =
     new SortedExtensionMethods[K, V](fact)
+
+  implicit def toSortedMapExtensionMethods[K, V](
+      fact: collection.SortedMap[K, V]): SortedMapExtensionMethods[K, V] =
+    new SortedMapExtensionMethods[K, V](fact)
+
+  implicit def toSortedSetExtensionMethods[A](
+      fact: collection.SortedSet[A]): SortedSetExtensionMethods[A] =
+    new SortedSetExtensionMethods[A](fact)
 
   implicit def toIteratorExtensionMethods[A](self: Iterator[A]): IteratorExtensionMethods[A] =
     new IteratorExtensionMethods[A](self)
@@ -399,6 +411,24 @@ class SortedExtensionMethods[K, T <: Sorted[K, T]](private val fact: Sorted[K, T
   def rangeFrom(from: K): T = fact.from(from)
   def rangeTo(to: K): T = fact.to(to)
   def rangeUntil(until: K): T = fact.until(until)
+}
+
+class SortedMapExtensionMethods[K, V](
+    private val self: collection.SortedMap[K, V]
+) extends AnyVal {
+
+  def minAfter(key: K): Option[(K, V)] = self.from(key).headOption
+
+  def maxBefore(key: K): Option[(K, V)] = self.until(key).lastOption
+}
+
+class SortedSetExtensionMethods[A](
+    private val self: collection.SortedSet[A]
+) extends AnyVal {
+
+  def minAfter(key: A): Option[A] = self.from(key).headOption
+
+  def maxBefore(key: A): Option[A] = self.until(key).lastOption
 }
 
 class IteratorExtensionMethods[A](private val self: c.Iterator[A]) extends AnyVal {
@@ -662,4 +692,26 @@ class OptionCompanionExtensionMethods(private val fact: Option.type) extends Any
   def when[A](cond: Boolean)(a: => A): Option[A] = if (cond) Some(a) else None
 
   @inline def unless[A](cond: Boolean)(a: => A): Option[A] = when(!cond)(a)
+}
+
+class GenericCompanionExtensionMethods[CC[X] <: GenTraversable[X]](
+    private val companion: GenericCompanion[CC]) extends AnyVal {
+  def unfold[A, S](init: S)(f: S => Option[(A, S)])(
+      implicit cbf: CanBuildFrom[CC[A], A, CC[A]]
+  ): CC[A] = {
+    val builder = cbf()
+
+    @tailrec
+    def loop(s1: S): Unit = {
+      f(s1) match {
+        case Some((a, s2)) =>
+          builder += a
+          loop(s2)
+        case None =>
+      }
+    }
+
+    loop(init)
+    builder.result()
+  }
 }
