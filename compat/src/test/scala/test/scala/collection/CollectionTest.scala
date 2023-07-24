@@ -193,4 +193,30 @@ class CollectionTest {
     assertEquals(List(3, 1, 2).distinctBy(_ % 2 == 0), List(3, 2))
     assertEquals(List.empty[Int].distinctBy(_ % 2 == 0), List.empty)
   }
+
+  @Test
+  def testUnfold(): Unit = {
+    def typed[A](x: A): Unit = ()
+
+    val list = List.unfold(1)(x => if (x <= 5) Some((x.toString, x + 1)) else None)
+    typed[List[String]](list)
+    assertEquals(list, List("1", "2", "3", "4", "5"))
+
+    val vector = Vector.unfold(1)(x => if (x <= 100) Some((x, x * 3)) else None)
+    typed[Vector[Int]](vector)
+    assertEquals(vector, Vector(1, 3, 9, 27, 81))
+
+    val seq = collection.Seq.unfold(1L)(x => if (x <= 10L) Some(x, x + 2L) else None)
+    typed[collection.Seq[Long]](seq)
+    assertEquals(seq, collection.Seq(1L, 3L, 5L, 7L, 9L))
+
+    val iterable = Iterable.unfold(4)(x => if (x > 0) Some(("a" * x, x - 1)) else None)
+    typed[Iterable[String]](iterable)
+    assertEquals(iterable, Iterable("aaaa", "aaa", "aa", "a"))
+
+    val arrayBuffer =
+      collection.mutable.ArrayBuffer.unfold(1)(x => if (x < 3) Some((x, x + 1)) else None)
+    typed[collection.mutable.ArrayBuffer[Int]](arrayBuffer)
+    assertEquals(arrayBuffer, collection.mutable.ArrayBuffer(1, 2))
+  }
 }
