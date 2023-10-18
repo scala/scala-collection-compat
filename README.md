@@ -1,3 +1,5 @@
+[![scala-collection-compat Scala version support](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat)
+
 ## Purpose and scope
 
 This library makes some Scala 2.13 APIs available on Scala 2.11 and 2.12.
