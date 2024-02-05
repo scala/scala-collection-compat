@@ -25,6 +25,7 @@ import scala.collection.{
   mutable => m
 }
 import scala.runtime.{Tuple2Zipped, Tuple3Zipped}
+import scala.util.Random
 import scala.{collection => c}
 
 /** The collection compatibility API */
@@ -351,6 +352,9 @@ private[compat] trait PackageShared {
 
   implicit def toOptionCompanionExtension(fact: Option.type): OptionCompanionExtensionMethods =
     new OptionCompanionExtensionMethods(fact)
+
+  implicit def toRandomExtensions(self: Random): RandomExtensions =
+    new RandomExtensions(self)
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
