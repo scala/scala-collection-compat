@@ -23,6 +23,8 @@ jobs:
             platform: JS
           - java: 17
             platform: Native
+          - scala: 2.11.x
+            platform: Native
         include:
           - java: 8
             scala: 2.12.x
