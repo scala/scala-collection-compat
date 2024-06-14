@@ -43,7 +43,8 @@ trait MultiScala {
       Compile / unmanagedSourceDirectories +=
         (ThisBuild / baseDirectory).value / base / "src" / "main" / "scala",
       Compile / unmanagedSourceDirectories +=
-        (ThisBuild / baseDirectory).value / base / "src" / "main" / ("scala-" + scalaBinaryVersion.value),
+        (ThisBuild / baseDirectory)
+          .value / base / "src" / "main" / ("scala-" + scalaBinaryVersion.value),
       Compile / unmanagedSourceDirectories ++= {
         val sourceDir = (ThisBuild / baseDirectory).value / base / "src" / "main"
         CrossVersion.partialVersion(scalaVersion.value) match {
