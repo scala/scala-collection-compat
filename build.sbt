@@ -316,7 +316,8 @@ lazy val scalafixTests = project
   .settings(
     scalaVersion := scalafixScala212,
     publish / skip := true,
-    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
+    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion
+      .full,
     scalafixTestkitOutputSourceDirectories := Seq(
       outputCross.value,
       output212.value,
