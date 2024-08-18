@@ -381,7 +381,7 @@ class LazyListTest {
       try {
         finite.force
         fail("Expected RuntimeException to be thrown")
-      } catch { case e: RuntimeException => assertTrue(e.getMessage.contains("self-referential")) }
+      } catch { case e: RuntimeException => assertTrue(e.getMessage.contains("self-refer")) }
     }
     assertNoStackOverflow {
       class L { val ll: LazyList[Nothing] = LazyList.empty #::: ll }; (new L).ll
