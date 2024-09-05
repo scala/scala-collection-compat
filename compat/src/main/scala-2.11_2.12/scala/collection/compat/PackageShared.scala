@@ -360,7 +360,7 @@ private[compat] trait PackageShared {
     new RandomExtensions(self)
 }
 
-class ArrayExtensions(private val fact: Array.type) extends AnyVal {
+final class ArrayExtensions(private val fact: Array.type) extends AnyVal {
   def from[A: ClassTag](source: TraversableOnce[A]): Array[A] =
     source match {
       case it: Iterable[A] => it.toArray[A]
