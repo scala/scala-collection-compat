@@ -362,7 +362,10 @@ private[compat] trait PackageShared {
 
 class ArrayExtensions(private val fact: Array.type) extends AnyVal {
   def from[A: ClassTag](source: TraversableOnce[A]): Array[A] =
-    fact.apply(source.toSeq: _*)
+    source match {
+      case it: Iterable[A] => it.toArray[A]
+      case _ => source.toIterator.toArray[A]
+    }
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
