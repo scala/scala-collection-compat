@@ -56,6 +56,9 @@ class CollectionTest {
   @Test
   def testFrom: Unit = {
     val xs = List(1, 2, 3)
+    val a = Array.from(xs)
+    val aT: Array[Int] = a
+    assertTrue(Array(1, 2, 3).sameElements(a))
     val v = Vector.from(xs)
     val vT: Vector[Int] = v
     assertEquals(Vector(1, 2, 3), v)

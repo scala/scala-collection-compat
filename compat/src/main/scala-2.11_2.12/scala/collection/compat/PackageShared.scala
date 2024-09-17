@@ -272,6 +272,9 @@ private[compat] trait PackageShared {
     builder.result()
   }
 
+  implicit def toArrayExtensions(fact: Array.type): ArrayExtensions =
+    new ArrayExtensions(fact)
+
   implicit def toImmutableSortedMapExtensions(
       fact: i.SortedMap.type): ImmutableSortedMapExtensions =
     new ImmutableSortedMapExtensions(fact)
@@ -355,6 +358,14 @@ private[compat] trait PackageShared {
 
   implicit def toRandomExtensions(self: Random): RandomExtensions =
     new RandomExtensions(self)
+}
+
+final class ArrayExtensions(private val fact: Array.type) extends AnyVal {
+  def from[A: ClassTag](source: TraversableOnce[A]): Array[A] =
+    source match {
+      case it: Iterable[A] => it.toArray[A]
+      case _ => source.toIterator.toArray[A]
+    }
 }
 
 class ImmutableSortedMapExtensions(private val fact: i.SortedMap.type) extends AnyVal {
