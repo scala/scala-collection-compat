@@ -1,4 +1,5 @@
 [![scala-collection-compat Scala version support](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat)
+[![scala-collection-compat Scala version support](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat/latest-by-scala-version.svg?platform=sjs1)](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat)
 
 ## Purpose and scope
 
