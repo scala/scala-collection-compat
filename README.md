@@ -1,30 +1,29 @@
-[![scala-collection-compat Scala version support](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/scala/scala-collection-compat/scala-collection-compat)
-
 ## Purpose and scope
 
 This library makes some Scala 2.13 APIs available on Scala 2.11 and 2.12.
 
 The idea is to facilitate
 [cross-building](https://github.com/scala/collection-strawman/wiki/FAQ#how-do-i-cross-build-my-project-against-scala-212-and-scala-213)
-Scala 2.13 and 3.0 code on the older versions.
+Scala 2.13 code on the older versions.
 
-Although the name of the library is scala-"collection"-compat, we have now widened the scope to include other parts of the Scala 2.13/3.0 standard library besides just collections.
+Although the name of the library is scala-"collection"-compat, we have now widened the scope to include other parts of the Scala 2.13 standard library besides just collections.
 
 Only the most commonly used APIs are supported; many are missing. Contributions are welcome.
 
 ## Usage
 
-To use this library, add the following to your `build.sbt`:
+This library is available on the JVM, Scala.js, and Scala Native.
 
-```
-libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "<version>"
-```
+| tool            | coordinates  |
+|:---------------:|:------------:|
+| sbt             | `"org.scala-lang.modules" %% "scala-collection-compat" % "<version>"` |
+| scala-cli, mill | `org.scala-lang.modules::scala-collection-compat:<version>`           |
 
 All future versions will remain backwards binary compatible with 2.0.0. (The 1.0.0 release was withdrawn and should not be used.)
 
 ## How it works
 
-The 2.13 and 3.0 versions consist only of an empty `scala.collection.compat` package object, so `import scala.collection.compat._` won't cause an error in cross-compiled code.
+The Scala 2.13 and Scala 3 versions consist only of an empty `scala.collection.compat` package object, so `import scala.collection.compat._` won't cause an error in cross-compiled code.
 
 The 2.11 and 2.12 versions have the needed compatibility code in this package.
 
@@ -109,9 +108,10 @@ scalacOptions += "-P:semanticdb:synthetics:on"
 ```
 
 ### Fixing unused import warnings
+
 In Scala 2.13 the `import scala.collection.compat._` sometimes is not needed (e.g. `.to(SeqType)` is natively available).
 This leads to a `unused import` warning under Scala 2.13 even though the import is required for Scala 2.12.
-In order to work around this, you can pass a compiler option to ignore this specific issue, e.g. in SBT:
+In order to work around this, you can pass a compiler option to ignore this specific issue, e.g. in sbt:
 ```scala
 scalacOptions += "-Wconf:origin=scala.collection.compat.*:s"
 ```
