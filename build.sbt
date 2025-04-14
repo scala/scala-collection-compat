@@ -50,8 +50,8 @@ lazy val root = project
 lazy val junit = libraryDependencies += "com.github.sbt" % "junit-interface" % "0.13.3" % Test
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.19"
-lazy val scala213 = "2.13.13"
+lazy val scala212 = "2.12.20"
+lazy val scala213 = "2.13.17"
 lazy val scala3 = "3.3.6"
 
 lazy val compat = new MultiScalaCrossProject(
@@ -63,6 +63,16 @@ lazy val compat = new MultiScalaCrossProject(
       moduleName := "scala-collection-compat",
       scalaModuleAutomaticModuleName := Some("scala.collection.compat"),
       scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions"),
+      // we need to force Scala 3 to use the latest Scala 2 stdlib, otherwise
+      // we might get test failures if there are behavior changes in latest Scala 2 stdlib
+      dependencyOverrides ++= {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _)) =>
+            Seq("org.scala-lang" % "scala-library" % scala213)
+          case _ =>
+            Seq()
+        }
+      },
       Compile / unmanagedSourceDirectories += {
         val sharedSourceDir = (ThisBuild / baseDirectory).value / "compat/src/main"
         CrossVersion.partialVersion(scalaVersion.value) match {
