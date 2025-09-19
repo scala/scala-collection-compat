@@ -57,7 +57,7 @@ jobs:
       CI_MODE: ${{matrix.mode}}
       CI_PLATFORM: ${{matrix.platform}}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - uses: coursier/cache-action@v6
