@@ -10,19 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [8, 11, 17]
+        java: [8, 25]
         scala: [2.11.x, 2.12.x, 2.13.x, 3.x]
         platform: [JVM, JS, Native]
         mode: [normal]
         exclude:
-          - java: 11
-            platform: JS
-          - java: 11
-            platform: Native
-          - java: 17
-            platform: JS
-          - java: 17
-            platform: Native
           - scala: 2.11.x
             platform: Native
         include:
@@ -41,14 +33,6 @@ jobs:
           - java: 8
             scala: 2.12.x
             mode: headerCheck
-            platform: JVM
-          - java: 11
-            scala: 2.12.x
-            mode: normal
-            platform: JVM
-          - java: 17
-            scala: 2.12.x
-            mode: normal
             platform: JVM
     runs-on: ubuntu-latest
     env:
