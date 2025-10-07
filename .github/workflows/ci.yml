@@ -11,13 +11,18 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 25]
-        scala: [2.11.x, 2.12.x, 2.13.x, 3.x]
+        scala: [2.12.x, 2.13.x, 3.x]
+        scala-js: [""]
         platform: [JVM, JS, Native]
         mode: [normal]
-        exclude:
-          - scala: 2.11.x
-            platform: Native
         include:
+          - java: 8
+            scala: 2.11.x
+            platform: JVM
+          - java: 8
+            scala: 2.11.x
+            platform: JS
+            scala-js: 1.12.0
           - java: 8
             scala: 2.12.x
             mode: testScalafix
@@ -38,6 +43,7 @@ jobs:
     env:
       CI_JDK: ${{matrix.java}}
       CI_SCALA_VERSION: ${{matrix.scala}}
+      CI_SCALAJS_VERSION: ${{matrix.scala-js}}
       CI_MODE: ${{matrix.mode}}
       CI_PLATFORM: ${{matrix.platform}}
     steps:

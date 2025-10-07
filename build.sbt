@@ -369,6 +369,7 @@ inThisBuild {
         else {
           List(
             "CI_SCALA_VERSION",
+            "CI_SCALAJS_VERSION",
             "CI_PLATFORM",
             "CI_MODE",
             "CI_JDK",
