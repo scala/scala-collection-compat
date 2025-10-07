@@ -94,6 +94,7 @@ lazy val compat = new MultiScalaCrossProject(
       }
     )
     .jvmSettings(
+      publish / skip := sys.env.get("CI_SCALAJS_VERSION").isDefined,
       Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
       Compile / unmanagedSourceDirectories += {
         val jvmParent = (ThisBuild / baseDirectory).value / "compat/jvm/src/main"
@@ -108,6 +109,9 @@ lazy val compat = new MultiScalaCrossProject(
     )
     .disablePlugins(ScalafixPlugin),
   _.jsSettings(
+    publish / skip :=
+      (CrossVersion.partialVersion(scalaVersion.value) != Some((2, 11))) ==
+        sys.env.get("CI_SCALAJS_VERSION").isDefined,
     scalacOptions ++= {
       val x = (LocalRootProject / baseDirectory).value.toURI.toString
       val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
@@ -133,6 +137,7 @@ lazy val compat = new MultiScalaCrossProject(
     Test / fork := false // Scala.js cannot run forked tests
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
+    publish / skip := sys.env.get("CI_SCALAJS_VERSION").isDefined,
     mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
       case _ => mimaPreviousArtifacts.value
@@ -214,7 +219,8 @@ lazy val scalafixRules = project
     versionCheck := {}, // I don't understand why this fails otherwise?! oh well
     name := "scala-collection-migrations",
     scalaVersion := scalafixScala212,
-    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion
+    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion,
+    publish / skip := sys.env.get("CI_SCALAJS_VERSION").isDefined,
   )
 
 // == Scalafix Test Setup ==
