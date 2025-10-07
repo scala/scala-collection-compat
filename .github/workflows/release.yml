@@ -14,7 +14,9 @@ jobs:
           distribution: temurin
           java-version: 8
       - uses: sbt/setup-sbt@v1
-      - run: sbt versionCheck ci-release
+      - run: |
+          sbt versionCheck ci-release
+          CI_SCALAJS_VERSION=1.12.0 sbt ci-release
         env:
           PGP_PASSPHRASE: ${{secrets.PGP_PASSPHRASE}}
           PGP_SECRET: ${{secrets.PGP_SECRET}}
