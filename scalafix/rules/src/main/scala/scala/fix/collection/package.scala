@@ -50,7 +50,8 @@ package object collection {
     tree.tokens.headOption.map(_.is[Token.LeftParen]).getOrElse(false)
 
   val canBuildFroms = Map(
-    "scala/LowPriorityImplicits#fallbackStringCanBuildFrom()." -> "scala.collection.immutable.IndexedSeq",
+    "scala/LowPriorityImplicits#fallbackStringCanBuildFrom()." ->
+      "scala.collection.immutable.IndexedSeq",
     "scala/Array.canBuildFrom()." -> "scala.Array",
     "scala/collection/BitSet.canBuildFrom." -> "scala.collection.BitSet",
     "scala/collection/immutable/HashMap.canBuildFrom()." -> "scala.collection.immutable.HashMap",
@@ -60,8 +61,10 @@ package object collection {
     "scala/collection/immutable/LongMap.canBuildFrom()." -> "scala.collection.immutable.LongMap",
     "scala/collection/immutable/Map.canBuildFrom()." -> "scala.collection.immutable.Map",
     "scala/collection/immutable/Set.canBuildFrom()." -> "scala.collection.immutable.Set",
-    "scala/collection/immutable/SortedMap.canBuildFrom()." -> "scala.collection.immutable.SortedMap",
-    "scala/collection/immutable/SortedSet.newCanBuildFrom()." -> "scala.collection.immutable.SortedSet",
+    "scala/collection/immutable/SortedMap.canBuildFrom()." ->
+      "scala.collection.immutable.SortedMap",
+    "scala/collection/immutable/SortedSet.newCanBuildFrom()." ->
+      "scala.collection.immutable.SortedSet",
     "scala/collection/immutable/TreeMap.canBuildFrom()." -> "scala.collection.immutable.TreeMap",
     "scala/collection/immutable/Vector.canBuildFrom()." -> "scala.collection.immutable.Vector",
     "scala/collection/Iterator.IteratorCanBuildFrom()." -> "scala.collection.Iterator",

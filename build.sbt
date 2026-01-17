@@ -105,7 +105,8 @@ lazy val compat = new MultiScalaCrossProject(
     )
     .jvmSettings(
       publish / skip := sys.env.get("CI_SCALAJS_VERSION").isDefined,
-      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-jvm",
+      Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value /
+        "compat/src/test/scala-jvm",
       Compile / unmanagedSourceDirectories += {
         val jvmParent = (ThisBuild / baseDirectory).value / "compat/jvm/src/main"
         CrossVersion.partialVersion(scalaVersion.value) match {
@@ -124,17 +125,19 @@ lazy val compat = new MultiScalaCrossProject(
         sys.env.get("CI_SCALAJS_VERSION").isDefined,
     scalacOptions ++= {
       val x = (LocalRootProject / baseDirectory).value.toURI.toString
-      val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" + sys.process
-        .Process("git rev-parse HEAD")
-        .lineStream_!
-        .head
+      val y = "https://raw.githubusercontent.com/scala/scala-collection-compat/" +
+        sys.process
+          .Process("git rev-parse HEAD")
+          .lineStream_!
+          .head
       val opt = CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) => "-scalajs-mapSourceURI"
         case _ => "-P:scalajs:mapSourceURI"
       }
       Seq(s"$opt:$x->$y/")
     },
-    Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / "compat/src/test/scala-js",
+    Test / unmanagedSourceDirectories += (ThisBuild / baseDirectory).value /
+      "compat/src/test/scala-js",
     Compile / unmanagedSourceDirectories += {
       val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -148,10 +151,11 @@ lazy val compat = new MultiScalaCrossProject(
   ).jsEnablePlugins(ScalaJSJUnitPlugin),
   _.nativeSettings(
     publish / skip := sys.env.get("CI_SCALAJS_VERSION").isDefined,
-    mimaPreviousArtifacts := (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
-      case _ => mimaPreviousArtifacts.value
-    }),
+    mimaPreviousArtifacts :=
+      (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, 1)) => mimaPreviousArtifacts.value.filter(_.revision != "2.6.0")
+        case _ => mimaPreviousArtifacts.value
+      }),
     Compile / unmanagedSourceDirectories += {
       val jsAndNativeSourcesParent = (ThisBuild / baseDirectory).value / "compat/jsNative/src/main"
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -332,8 +336,9 @@ lazy val scalafixTests = project
   .settings(
     scalaVersion := scalafixScala212,
     publish / skip := true,
-    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion
-      .full,
+    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross
+      CrossVersion
+        .full,
     scalafixTestkitOutputSourceDirectories := Seq(
       outputCross.value,
       output212.value,
