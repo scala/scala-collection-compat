@@ -1053,13 +1053,12 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
   }
 
   @tailrec
-  private def eqLL[B >: A](that: LazyList[B]): Boolean =
-    (this eq that) ||
-      (this.state eq that.state) ||
-      (!this.isEmpty &&
-        !that.isEmpty &&
-        (this.head == that.head) &&
-        (this.tail eqLL that.tail))
+  private def eqLL[B >: A](that: LazyList[B]): Boolean = (this eq that) ||
+    (this.state eq that.state) ||
+    (!this.isEmpty &&
+      !that.isEmpty &&
+      (this.head == that.head) &&
+      (this.tail eqLL that.tail))
 
   override def splitAt(n: Int): (LazyList[A], LazyList[A]) = (take(n), drop(n))
 
@@ -1078,14 +1077,15 @@ final class LazyList[+A] private (private[this] var lazyState: () => LazyList.St
           private[this] var nextElement: A = _
 
           def hasNext: Boolean =
-            nextElementDefined || (outer.hasNext && {
-              val a = outer.next()
-              if (traversedValues.add(f(a))) {
-                nextElement = a
-                nextElementDefined = true
-                true
-              } else hasNext
-            })
+            nextElementDefined ||
+              (outer.hasNext && {
+                val a = outer.next()
+                if (traversedValues.add(f(a))) {
+                  nextElement = a
+                  nextElementDefined = true
+                  true
+                } else hasNext
+              })
 
           def next(): A =
             if (hasNext) {
