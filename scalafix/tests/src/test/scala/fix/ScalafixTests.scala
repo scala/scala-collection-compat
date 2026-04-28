@@ -12,12 +12,12 @@
 
 package fix
 
-import org.scalatest.FunSuiteLike
+import org.scalatest.funsuite.AnyFunSuiteLike
 import scala.meta._
 import scalafix.v0._
 import scalafix.testkit._
 
-class ScalafixTests extends scalafix.testkit.AbstractSemanticRuleSuite with FunSuiteLike {
+class ScalafixTests extends scalafix.testkit.AbstractSemanticRuleSuite with AnyFunSuiteLike {
 
   val only: Option[String] =
     // Some("Playground") // << to run only one test:

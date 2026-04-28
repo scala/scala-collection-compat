@@ -76,8 +76,18 @@ case class Collection213UpgradeV0(index: SemanticdbIndex)
   }
 
   def replaceTupleZipped(ctx: RuleCtx): Patch = {
+    // Term.SelectPostfix matches the postfix form `(xs, ys) zipped`; older scalameta
+    // parsed both forms as Term.Select but newer scalameta gives postfix calls their
+    // own node type.
+    object TupleZippedSelect {
+      def unapply(tree: Tree): Option[(List[Term], Name)] = tree match {
+        case Term.Select(Term.Tuple(args), n @ tupleZipped(_)) => Some((args, n))
+        case Term.SelectPostfix(Term.Tuple(args), n @ tupleZipped(_)) => Some((args, n))
+        case _ => None
+      }
+    }
     ctx.tree.collect {
-      case tupleZipped(Term.Select(Term.Tuple(args), name)) =>
+      case TupleZippedSelect(args, name) =>
         val removeTokensPatch =
           (for {
             zipped <- name.tokens.headOption

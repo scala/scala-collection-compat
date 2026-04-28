@@ -165,12 +165,17 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
   }
 
   def replaceSymbolicFold(ctx: RuleCtx): Patch = {
+    // Replace the outer Term.Apply rather than just the inner ApplyInfix so that
+    // any wrapping parens around the infix expression — which are tokens of the
+    // parent Apply, not of the ApplyInfix — get rewritten away too.
     ctx.tree.collect {
-      case Term.Apply(ap @ Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), _) =>
-        ctx.replaceTree(ap, s"$rhs.foldRight($lhs)")
+      case t @ Term.Apply(Term.ApplyInfix(rhs, foldRightSymbol(_), _, List(lhs)), args) =>
+        val argsPart = args.map(_.syntax).mkString("(", ", ", ")")
+        ctx.replaceTree(t, s"${rhs.syntax}.foldRight(${lhs.syntax})$argsPart")
 
-      case Term.Apply(ap @ Term.ApplyInfix(lhs, foldLeftSymbol(_), _, List(rhs)), _) =>
-        ctx.replaceTree(ap, s"$rhs.foldLeft($lhs)")
+      case t @ Term.Apply(Term.ApplyInfix(lhs, foldLeftSymbol(_), _, List(rhs)), args) =>
+        val argsPart = args.map(_.syntax).mkString("(", ", ", ")")
+        ctx.replaceTree(t, s"${rhs.syntax}.foldLeft(${lhs.syntax})$argsPart")
     }.asPatch
   }
 
@@ -341,9 +346,16 @@ trait Stable212Base extends CrossCompatibility { self: SemanticRule =>
           toOnCompletePF(f, cases, "scala.util.Success")
       }.asPatch
 
-    val toFuture = ctx.replaceSymbols(
-      "scala.concurrent.future" -> "scala.concurrent.Future"
-    )
+    // The deprecated `scala.concurrent.future` is replaced by `scala.concurrent.Future`.
+    // `ctx.replaceSymbols` would fully-qualify each call site even when `Future` is
+    // already in scope; rewrite call sites and imports manually so the short form is used.
+    val deprecatedFuture = exact("scala/concurrent/package.future().")
+    val toFuture = ctx.tree.collect {
+      case t: Term.Name if deprecatedFuture.matches(t) =>
+        ctx.replaceTree(t, "Future")
+      case i @ Importee.Name(_) if deprecatedFuture.matches(i) =>
+        ctx.removeImportee(i)
+    }.asPatch
 
     toOnCompelete + toFuture
   }

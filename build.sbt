@@ -347,7 +347,6 @@ lazy val scalafixTests = project
     ),
     scalafixTestkitInputSourceDirectories := (scalafixInput / Compile / sourceDirectories).value,
     scalafixTestkitInputClasspath := (scalafixInput / Compile / fullClasspath).value,
-    libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
   )
   .dependsOn(scalafixInput, scalafixRules)
   .enablePlugins(BuildInfoPlugin, ScalafixTestkitPlugin)
