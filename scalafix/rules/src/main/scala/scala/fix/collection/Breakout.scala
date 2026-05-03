@@ -188,12 +188,23 @@ class BreakoutRewrite(addCompatImport: RuleCtx => Patch)(implicit val index: Sem
         ctx.removeTokens(breakoutWithParens)
       }
 
+      // If `ap` is wrapped in parens (e.g. `(list ++ list)`), the `.to` insertion
+      // must go after the wrapping `)` — otherwise it lands inside the parens and
+      // produces broken code like `(list.iterator ++ list.to)(...)`.
+      val toInsertionPoint = ap0.tokens.collectFirst {
+        case t: Token.RightParen if t.start >= ap.pos.end && t.end <= breakout.pos.start => t
+      }
+      val addToPatch = toInsertionPoint match {
+        case Some(t) => ctx.addRight(t, ".to")
+        case None => ctx.addRight(ap, ".to")
+      }
+
       val toColl =
         if (patchSpecificCollection.isEmpty && !isIterator) {
           toCollection match {
             case Some(col) =>
               requiresCompatImport = true
-              ctx.addRight(ap, ".to") +
+              addToPatch +
                 ctx.replaceTree(breakout, col)
             case None => Patch.empty
           }
