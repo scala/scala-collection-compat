@@ -3,7 +3,7 @@ package fix
 import scala.{collection => c}
 import scala.collection.{immutable => i, mutable => m}
 import scala.collection
-import scala.collection.{ immutable, mutable }
+import scala.collection.{immutable, mutable}
 import scala.collection.compat._
 
 object CompanionSrc {
